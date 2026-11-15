@@ -241,6 +241,17 @@ namespace Video2Gif
                 Check("probe size", info.Width == 320 && info.Height == 240);
                 Check("probe duration", info.Duration > 1.5 && info.Duration < 3.0);
 
+                double durationValue;
+                Check("duration empty means whole clip",
+                    Fmt.TryDuration("", out durationValue) && durationValue == 0);
+                Check("duration zero means whole clip",
+                    Fmt.TryDuration("0", out durationValue) && durationValue == 0 &&
+                    Fmt.TryDuration("0,0", out durationValue) && durationValue == 0);
+                Check("duration normal value",
+                    Fmt.TryDuration("2,5", out durationValue) && Math.Abs(durationValue - 2.5) < 0.001);
+                Check("duration negative rejected", !Fmt.TryDuration("-1", out durationValue));
+                Check("duration text rejected", !Fmt.TryDuration("abc", out durationValue));
+
                 string fast = Path.Combine(work, "fast.gif");
                 int fastMax = RunConversion(info, sample, fast, true);
                 Check("fast gif", IsGif(fast) && new FileInfo(fast).Length > 1000);

@@ -25,6 +25,19 @@ namespace Video2Gif
             return double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
         }
 
+        /// <summary>
+        /// Длительность фрагмента в секундах. Пустое поле или 0 — весь клип
+        /// (значение 0 означает «до конца»). Отрицательные и нечисловые — ошибка.
+        /// </summary>
+        public static bool TryDuration(string text, out double value)
+        {
+            value = 0;
+            if (string.IsNullOrEmpty(text) || text.Trim().Length == 0) return true;
+            if (!TryNum(text, out value)) return false;
+            if (value < 0) return false;
+            return true;
+        }
+
         public static string Size(long bytes)
         {
             if (bytes < 1024) return bytes + " Б";
