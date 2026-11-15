@@ -31,6 +31,8 @@ namespace Video2Gif
         private int lastPercent = -1;
         private int lastTick;
         private MediaDownloader downloader;
+        private TikTokDownloader tiktok;
+        private string tiktokFolder = "";
 
         public readonly List<string> SavedFiles = new List<string>();
         public string SavedFolder = "";
@@ -50,7 +52,7 @@ namespace Video2Gif
             BackColor = Ui.Bg;
             Font = Ui.Base;
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(Ui.P(560), Ui.P(430));
+            ClientSize = new Size(Ui.P(560), Ui.P(382));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -68,11 +70,11 @@ namespace Video2Gif
             Controls.Add(MakeLabel(
                 spotify
                     ? "Трек, альбом или плейлист · находим на YouTube и сохраняем в MP3 или WAV"
-                    : "YouTube, SoundCloud, VK и другие сайты · нужен интернет",
+                    : "YouTube, TikTok, SoundCloud, VK и другие сайты · нужен интернет",
                 Ui.Small, Ui.Muted, 24, 52, 512, 18));
 
             urlInput = new FlatInput();
-            urlInput.SetBounds(Ui.P(24), Ui.P(88), Ui.P(400), Ui.P(40));
+            urlInput.SetBounds(Ui.P(24), Ui.P(84), Ui.P(400), Ui.P(40));
             urlInput.Placeholder = spotify
                 ? "https://open.spotify.com/track/…"
                 : "https://www.youtube.com/watch?v=…";
@@ -90,37 +92,34 @@ namespace Video2Gif
             pasteButton.Ghost = true;
             pasteButton.Text = "Вставить";
             pasteButton.Font = Ui.Small;
-            pasteButton.SetBounds(Ui.P(432), Ui.P(88), Ui.P(104), Ui.P(40));
+            pasteButton.SetBounds(Ui.P(432), Ui.P(84), Ui.P(104), Ui.P(40));
             pasteButton.Click += delegate { PasteLink(); };
             Controls.Add(pasteButton);
 
-            statusLabel = MakeLabel(
-                spotify
-                    ? "Вставьте ссылку Spotify на трек, альбом или плейлист"
-                    : "Вставьте ссылку на видео или музыку",
-                Ui.Small, Ui.Muted, 24, 138, 512, 36);
+            statusLabel = MakeLabel("", Ui.Small, Ui.Muted, 24, 126, 512, 18);
+            statusLabel.AutoEllipsis = true;
             Controls.Add(statusLabel);
 
-            Controls.Add(MakeLabel("Формат", Ui.Small, Ui.Muted, 24, 184, 200, 18));
+            Controls.Add(MakeLabel("Формат", Ui.Small, Ui.Muted, 24, 148, 200, 18));
 
             videoPill = new PillButton();
             videoPill.Text = "Видео MP4";
             videoPill.Font = Ui.Small;
-            videoPill.SetBounds(Ui.P(24), Ui.P(204), Ui.P(248), Ui.P(34));
+            videoPill.SetBounds(Ui.P(24), Ui.P(168), Ui.P(248), Ui.P(34));
             videoPill.Click += delegate { audio = false; audioFormat = "mp4"; UpdateFormat(); };
             Controls.Add(videoPill);
 
             audioPill = new PillButton();
             audioPill.Text = "Музыка MP3";
             audioPill.Font = Ui.Small;
-            audioPill.SetBounds(Ui.P(288), Ui.P(204), Ui.P(248), Ui.P(34));
+            audioPill.SetBounds(Ui.P(288), Ui.P(168), Ui.P(248), Ui.P(34));
             audioPill.Click += delegate { audio = true; audioFormat = "mp3"; UpdateFormat(); };
             Controls.Add(audioPill);
 
             wavPill = new PillButton();
             wavPill.Text = "WAV · 1411 кбит/с";
             wavPill.Font = Ui.Small;
-            wavPill.SetBounds(Ui.P(288), Ui.P(204), Ui.P(248), Ui.P(34));
+            wavPill.SetBounds(Ui.P(288), Ui.P(168), Ui.P(248), Ui.P(34));
             wavPill.Visible = false;
             wavPill.Click += delegate { audio = true; audioFormat = "wav"; UpdateFormat(); };
             Controls.Add(wavPill);
@@ -129,15 +128,15 @@ namespace Video2Gif
             {
                 videoPill.Visible = false;
                 audioPill.Text = "MP3 · 320 кбит/с";
-                audioPill.SetBounds(Ui.P(24), Ui.P(204), Ui.P(248), Ui.P(34));
-                wavPill.SetBounds(Ui.P(288), Ui.P(204), Ui.P(248), Ui.P(34));
+                audioPill.SetBounds(Ui.P(24), Ui.P(168), Ui.P(248), Ui.P(34));
+                wavPill.SetBounds(Ui.P(288), Ui.P(168), Ui.P(248), Ui.P(34));
                 wavPill.Visible = true;
             }
 
-            Controls.Add(MakeLabel("Куда сохранить", Ui.Small, Ui.Muted, 24, 250, 300, 18));
+            Controls.Add(MakeLabel("Куда сохранить", Ui.Small, Ui.Muted, 24, 210, 300, 18));
 
             folderInput = new FlatInput();
-            folderInput.SetBounds(Ui.P(24), Ui.P(270), Ui.P(400), Ui.P(40));
+            folderInput.SetBounds(Ui.P(24), Ui.P(230), Ui.P(400), Ui.P(40));
             folderInput.Box.ReadOnly = true;
             Controls.Add(folderInput);
 
@@ -145,21 +144,21 @@ namespace Video2Gif
             chooseButton.Ghost = true;
             chooseButton.Text = "Выбрать";
             chooseButton.Font = Ui.Small;
-            chooseButton.SetBounds(Ui.P(432), Ui.P(270), Ui.P(104), Ui.P(40));
+            chooseButton.SetBounds(Ui.P(432), Ui.P(230), Ui.P(104), Ui.P(40));
             chooseButton.Click += delegate { ChooseFolder(); };
             Controls.Add(chooseButton);
 
             progressBar = new SlimBar();
-            progressBar.SetBounds(Ui.P(24), Ui.P(330), Ui.P(420), Ui.P(6));
+            progressBar.SetBounds(Ui.P(24), Ui.P(282), Ui.P(420), Ui.P(6));
             progressBar.Visible = false;
             Controls.Add(progressBar);
 
-            percentLabel = MakeLabel("", Ui.Small, Ui.Accent, 452, 320, 84, 18);
+            percentLabel = MakeLabel("", Ui.Small, Ui.Accent, 452, 272, 84, 18);
             percentLabel.TextAlign = ContentAlignment.MiddleRight;
             percentLabel.Visible = false;
             Controls.Add(percentLabel);
 
-            stageLabel = MakeLabel("", Ui.Tiny, Ui.Muted, 24, 340, 512, 18);
+            stageLabel = MakeLabel("", Ui.Tiny, Ui.Muted, 24, 292, 512, 18);
             stageLabel.AutoEllipsis = true;
             stageLabel.Visible = false;
             Controls.Add(stageLabel);
@@ -168,19 +167,19 @@ namespace Video2Gif
             downloadButton.Accent = true;
             downloadButton.Text = "Скачать";
             downloadButton.Font = Ui.Bold;
-            downloadButton.SetBounds(Ui.P(24), Ui.P(362), Ui.P(248), Ui.P(44));
+            downloadButton.SetBounds(Ui.P(24), Ui.P(314), Ui.P(248), Ui.P(44));
             downloadButton.Click += delegate { StartDownload(); };
             Controls.Add(downloadButton);
 
             cancelButton = new PillButton();
             cancelButton.Ghost = true;
             cancelButton.Text = "Закрыть";
-            cancelButton.SetBounds(Ui.P(288), Ui.P(362), Ui.P(248), Ui.P(44));
+            cancelButton.SetBounds(Ui.P(288), Ui.P(314), Ui.P(248), Ui.P(44));
             cancelButton.Click += delegate
             {
                 if (working)
                 {
-                    if (downloader != null) downloader.Cancel();
+                    CancelWork();
                     SetStatus("Останавливаем…", false);
                     SetStage("Останавливаем…", -1);
                 }
@@ -240,8 +239,14 @@ namespace Video2Gif
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            if (downloader != null) downloader.Cancel();
+            CancelWork();
             base.OnFormClosing(e);
+        }
+
+        private void CancelWork()
+        {
+            if (downloader != null) downloader.Cancel();
+            if (tiktok != null) tiktok.Cancel();
         }
 
         private static bool LooksLikeWeb(string text)
@@ -327,6 +332,15 @@ namespace Video2Gif
             percentLabel.Visible = true;
             stageLabel.Visible = true;
             SetStatus("", false);
+            tiktokFolder = "";
+
+            // TikTok качаем своим способом: yt-dlp часто упирается в блокировку.
+            if (!spotify && TikTok.LooksLikeUrl(url))
+            {
+                StartTikTok(url);
+                return;
+            }
+
             SetStage(spotify ? "Получаем список треков…" : "Готовимся…", -1);
 
             downloader = new MediaDownloader();
@@ -349,6 +363,70 @@ namespace Video2Gif
                 }
                 catch { }
             });
+        }
+
+        /// <summary>TikTok качаем напрямую (или через зеркало), в выбранную папку.</summary>
+        private void StartTikTok(string url)
+        {
+            SetStage("Получаем ссылку TikTok…", -1);
+
+            tiktok = new TikTokDownloader();
+            TikTokDownloader active = tiktok;
+            string captured = url;
+            string folder = selectedFolder;
+
+            Task.Factory.StartNew(delegate
+            {
+                TikTokInfo info = TikTok.Resolve(captured);
+                string safe = MediaDownloader.SanitizeFolderName(info.SuggestedName);
+
+                if (info.IsPhotoPost)
+                {
+                    string target = UniqueFolder(Path.Combine(folder, safe));
+                    tiktokFolder = target;
+                    active.Download(info, target, ReportProgress);
+                    return new List<string> { Path.Combine(target, "photo_01.jpg") };
+                }
+
+                string file = UniqueFile(folder, safe);
+                tiktokFolder = folder;
+                active.Download(info, file, ReportProgress);
+                return new List<string> { file };
+            }).ContinueWith(delegate(Task<List<string>> task)
+            {
+                if (IsDisposed || !IsHandleCreated) return;
+                try
+                {
+                    BeginInvoke((MethodInvoker)delegate { OnDone(task, folder); });
+                }
+                catch { }
+            });
+        }
+
+        private static string UniqueFile(string folder, string name)
+        {
+            string path = Path.Combine(folder, name);
+            if (!File.Exists(path)) return path;
+
+            string baseName = Path.GetFileNameWithoutExtension(name);
+            string ext = Path.GetExtension(name);
+            for (int i = 2; i < 1000; i++)
+            {
+                path = Path.Combine(folder, baseName + " (" + i + ")" + ext);
+                if (!File.Exists(path)) return path;
+            }
+            return Path.Combine(folder, baseName + "_" + DateTime.Now.ToString("HHmmss") + ext);
+        }
+
+        private static string UniqueFolder(string folder)
+        {
+            if (!Directory.Exists(folder)) return folder;
+            for (int i = 2; i < 1000; i++)
+            {
+                string candidate = folder + " (" + i + ")";
+                if (!Directory.Exists(candidate)) return candidate;
+            }
+            return folder + "_" + DateTime.Now.ToString("HHmmss");
         }
 
         private void ReportProgress(int percent, string stage)
@@ -375,7 +453,9 @@ namespace Video2Gif
             if (task.IsFaulted)
             {
                 Exception inner = task.Exception != null ? task.Exception.InnerException : null;
-                if (inner is ConversionCancelledException)
+                if (inner is ConversionCancelledException ||
+                    (inner is TikTokException &&
+                     inner.Message.IndexOf("отмен", StringComparison.OrdinalIgnoreCase) >= 0))
                 {
                     Reset("Отменено.", false);
                     return;
@@ -396,9 +476,14 @@ namespace Video2Gif
             {
                 saved = downloader.LastFolder;
             }
+            else if (!string.IsNullOrEmpty(tiktokFolder))
+            {
+                saved = tiktokFolder;
+            }
 
             working = false;
             downloader = null;
+            tiktok = null;
             SavedFiles.Clear();
             SavedFiles.AddRange(result);
             SavedFolder = saved;
@@ -417,6 +502,8 @@ namespace Video2Gif
         {
             working = false;
             downloader = null;
+            tiktok = null;
+            tiktokFolder = "";
             SetBusy(false);
             progressBar.Visible = false;
             percentLabel.Visible = false;

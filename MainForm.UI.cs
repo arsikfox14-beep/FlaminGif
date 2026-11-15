@@ -308,7 +308,6 @@ namespace Video2Gif
             menu.ForeColor = Ui.Text;
             menu.Renderer = new MenuRenderer();
 
-            AddMenuItem(menu, "TikTok", delegate { OpenTikTok(); });
             AddMenuItem(menu, "YouTube и другие сайты",
                 delegate { OpenMediaDownload(false); });
             AddMenuItem(menu, "Музыка из Spotify",

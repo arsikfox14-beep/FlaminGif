@@ -646,6 +646,10 @@ namespace Video2Gif
                         SaveShot(dialog, progressShot);
                         Check("ui download progress screenshot",
                             File.Exists(progressShot) && new FileInfo(progressShot).Length > 2000);
+
+                        Label status = GetField(dialog, "statusLabel") as Label;
+                        Check("ui download no hint text",
+                            status != null && status.Text.Length == 0);
                         dialog.Close();
                     }
 
@@ -681,6 +685,33 @@ namespace Video2Gif
                 {
                     Check("ui download screenshot", false);
                     Line("  download ui error: " + ex.Message);
+                }
+
+                try
+                {
+                    string uniqueDir = Path.Combine(work, "unique-check");
+                    Directory.CreateDirectory(uniqueDir);
+                    File.WriteAllText(Path.Combine(uniqueDir, "clip.mp4"), "x");
+                    MethodInfo uniqueFile = typeof(MediaDownloadForm).GetMethod("UniqueFile",
+                        BindingFlags.Static | BindingFlags.NonPublic);
+                    MethodInfo uniqueFolder = typeof(MediaDownloadForm).GetMethod("UniqueFolder",
+                        BindingFlags.Static | BindingFlags.NonPublic);
+                    string fileNext = uniqueFile != null
+                        ? (string)uniqueFile.Invoke(null, new object[] { uniqueDir, "clip.mp4" })
+                        : null;
+                    string folderPath = Path.Combine(uniqueDir, "photos");
+                    Directory.CreateDirectory(folderPath);
+                    string folderNext = uniqueFolder != null
+                        ? (string)uniqueFolder.Invoke(null, new object[] { folderPath })
+                        : null;
+                    Check("tiktok unique names",
+                        fileNext != null && Path.GetFileName(fileNext) == "clip (2).mp4" &&
+                        folderNext != null && Path.GetFileName(folderNext) == "photos (2)");
+                }
+                catch (Exception ex)
+                {
+                    Check("tiktok unique names", false);
+                    Line("  unique name error: " + ex.Message);
                 }
             }
             catch (Exception ex)
