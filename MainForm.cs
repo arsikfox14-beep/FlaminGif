@@ -253,7 +253,7 @@ namespace Video2Gif
                 imageNote.Visible = false;
                 widthLabel.SetBounds(Ui.P(282), Ui.P(54), Ui.P(128), Ui.P(18));
                 widthInput.SetBounds(Ui.P(282), Ui.P(72), Ui.P(128), Ui.P(34));
-                durationInput.Placeholder = "весь клип";
+                durationInput.Placeholder = "0 — весь клип";
                 drop.FileMeta = "Не удалось прочитать файл";
                 drop.Invalidate();
                 UpdateActions();
@@ -280,7 +280,7 @@ namespace Video2Gif
             widthLabel.SetBounds(Ui.P(282), Ui.P(54), Ui.P(image ? 260 : 128), Ui.P(18));
             widthInput.SetBounds(Ui.P(282), Ui.P(72), Ui.P(image ? 260 : 128), Ui.P(34));
             startInput.Value = image ? "" : "0";
-            durationInput.Placeholder = image ? "не используется" : "весь клип";
+            durationInput.Placeholder = image ? "не используется" : "0 — весь клип";
             durationInput.Value = image ? "" : InputNumber(Math.Min(8.0, info.Duration > 0 ? info.Duration : 8.0));
             UpdateActions();
         }
@@ -353,9 +353,9 @@ namespace Video2Gif
                 }
 
                 string durationText = durationInput.Value.Trim();
-                if (durationText.Length > 0 && (!Fmt.TryNum(durationText, out duration) || duration <= 0))
+                if (!Fmt.TryDuration(durationText, out duration))
                 {
-                    ShowFieldError("Длительность должна быть больше нуля (или оставьте поле пустым).",
+                    ShowFieldError("Длительность — число секунд от 0. 0 или пусто — весь клип.",
                         durationInput);
                     return;
                 }
