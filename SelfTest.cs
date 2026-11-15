@@ -628,6 +628,24 @@ namespace Video2Gif
                         Application.DoEvents();
                         Check("ui download video selected", video != null && video.Active
                             && audio != null && !audio.Active);
+
+                        SlimBar bar = GetField(dialog, "progressBar") as SlimBar;
+                        Label stage = GetField(dialog, "stageLabel") as Label;
+                        Label percent = GetField(dialog, "percentLabel") as Label;
+                        if (bar != null) bar.Visible = true;
+                        if (stage != null) stage.Visible = true;
+                        if (percent != null) percent.Visible = true;
+                        Invoke(dialog, "ReportProgress", 42, "Скачиваем видео…");
+                        Application.DoEvents();
+                        Check("ui download progress text",
+                            bar != null && bar.Value == 42 &&
+                            stage != null && stage.Text.Contains("Скачиваем") &&
+                            percent != null && percent.Text == "42%");
+
+                        string progressShot = Path.Combine(work, "ui-download-progress.png");
+                        SaveShot(dialog, progressShot);
+                        Check("ui download progress screenshot",
+                            File.Exists(progressShot) && new FileInfo(progressShot).Length > 2000);
                         dialog.Close();
                     }
 

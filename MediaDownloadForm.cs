@@ -20,6 +20,8 @@ namespace Video2Gif
         private PillButton downloadButton;
         private PillButton cancelButton;
         private Label statusLabel;
+        private Label percentLabel;
+        private Label stageLabel;
         private SlimBar progressBar;
 
         private bool audio;
@@ -48,7 +50,7 @@ namespace Video2Gif
             BackColor = Ui.Bg;
             Font = Ui.Base;
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(Ui.P(560), Ui.P(412));
+            ClientSize = new Size(Ui.P(560), Ui.P(430));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -148,28 +150,39 @@ namespace Video2Gif
             Controls.Add(chooseButton);
 
             progressBar = new SlimBar();
-            progressBar.SetBounds(Ui.P(24), Ui.P(322), Ui.P(512), Ui.P(6));
+            progressBar.SetBounds(Ui.P(24), Ui.P(330), Ui.P(420), Ui.P(6));
             progressBar.Visible = false;
             Controls.Add(progressBar);
+
+            percentLabel = MakeLabel("", Ui.Small, Ui.Accent, 452, 320, 84, 18);
+            percentLabel.TextAlign = ContentAlignment.MiddleRight;
+            percentLabel.Visible = false;
+            Controls.Add(percentLabel);
+
+            stageLabel = MakeLabel("", Ui.Tiny, Ui.Muted, 24, 340, 512, 18);
+            stageLabel.AutoEllipsis = true;
+            stageLabel.Visible = false;
+            Controls.Add(stageLabel);
 
             downloadButton = new PillButton();
             downloadButton.Accent = true;
             downloadButton.Text = "Скачать";
             downloadButton.Font = Ui.Bold;
-            downloadButton.SetBounds(Ui.P(24), Ui.P(344), Ui.P(248), Ui.P(44));
+            downloadButton.SetBounds(Ui.P(24), Ui.P(362), Ui.P(248), Ui.P(44));
             downloadButton.Click += delegate { StartDownload(); };
             Controls.Add(downloadButton);
 
             cancelButton = new PillButton();
             cancelButton.Ghost = true;
             cancelButton.Text = "Закрыть";
-            cancelButton.SetBounds(Ui.P(288), Ui.P(344), Ui.P(248), Ui.P(44));
+            cancelButton.SetBounds(Ui.P(288), Ui.P(362), Ui.P(248), Ui.P(44));
             cancelButton.Click += delegate
             {
                 if (working)
                 {
                     if (downloader != null) downloader.Cancel();
                     SetStatus("Останавливаем…", false);
+                    SetStage("Останавливаем…", -1);
                 }
                 else
                 {
@@ -311,7 +324,10 @@ namespace Video2Gif
             lastTick = 0;
             progressBar.Value = 0;
             progressBar.Visible = true;
-            SetStatus(spotify ? "Получаем список треков…" : "Готовимся…", false);
+            percentLabel.Visible = true;
+            stageLabel.Visible = true;
+            SetStatus("", false);
+            SetStage(spotify ? "Получаем список треков…" : "Готовимся…", -1);
 
             downloader = new MediaDownloader();
             MediaDownloader active = downloader;
@@ -348,7 +364,7 @@ namespace Video2Gif
                 {
                     if (IsDisposed) return;
                     if (percent >= 0) progressBar.Value = Math.Max(0, Math.Min(100, percent));
-                    SetStatus(stage, false);
+                    SetStage(stage, percent);
                 });
             }
             catch { }
@@ -388,6 +404,8 @@ namespace Video2Gif
             SavedFolder = saved;
             progressBar.Value = 100;
             progressBar.Visible = false;
+            percentLabel.Visible = false;
+            stageLabel.Visible = false;
             SetBusy(false);
             SetStatus("Готово: " + result.Count + " файл(ов).", false);
 
@@ -401,6 +419,8 @@ namespace Video2Gif
             downloader = null;
             SetBusy(false);
             progressBar.Visible = false;
+            percentLabel.Visible = false;
+            stageLabel.Visible = false;
             SetStatus(message, error);
         }
 
@@ -422,6 +442,13 @@ namespace Video2Gif
             statusLabel.ForeColor = error ? Ui.Bad : Ui.Muted;
             statusLabel.Tag = Ui.RoleOf(statusLabel.ForeColor);
             statusLabel.Text = text;
+        }
+
+        /// <summary>Строка прогресса рядом с полосой загрузки: этап и процент.</summary>
+        private void SetStage(string text, int percent)
+        {
+            stageLabel.Text = text ?? "";
+            percentLabel.Text = percent >= 0 ? percent + "%" : "";
         }
     }
 }
