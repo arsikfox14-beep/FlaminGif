@@ -209,6 +209,20 @@ namespace Video2Gif
                 Ui.SetTheme("halloween");
                 Check("theme halloween",
                     Ui.Dark && Ui.Halloween && Ui.ThemeName == "halloween" && Ui.Accent != newYearAccent);
+
+                bool gridVisible = true;
+                string[] gridThemes = new string[] { "light", "dark", "newyear", "halloween" };
+                for (int i = 0; i < gridThemes.Length; i++)
+                {
+                    Ui.SetTheme(gridThemes[i]);
+                    Color checker = SnakeForm.CheckerColor;
+                    int delta = Math.Abs(checker.R - Ui.Card.R) +
+                        Math.Abs(checker.G - Ui.Card.G) +
+                        Math.Abs(checker.B - Ui.Card.B);
+                    if (delta < 40) gridVisible = false;
+                }
+                Check("snake grid visible", gridVisible);
+
                 Ui.SetTheme("unknown");
                 Check("theme unknown falls back to dark", Ui.ThemeName == "dark");
                 Check("theme title bar colorref",

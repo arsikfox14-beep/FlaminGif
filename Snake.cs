@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Video2Gif
@@ -166,15 +165,10 @@ namespace Video2Gif
             get { return Math.Max(70, 145 - game.Score * 3); }
         }
 
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
-
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            int value = Ui.Dark ? 1 : 0;
-            try { DwmSetWindowAttribute(Handle, 20, ref value, sizeof(int)); } catch { }
-            try { DwmSetWindowAttribute(Handle, 19, ref value, sizeof(int)); } catch { }
+            Ui.ApplyTitleBar(Handle);
         }
 
         private static string BestPath
@@ -328,6 +322,13 @@ namespace Video2Gif
 
         /* ---------------------------------------------------------------- Отрисовка */
 
+        /// <summary>Цвет «шахматных» клеток поля — заметно отличается от фона
+        /// во всех темах, включая новогоднюю.</summary>
+        internal static Color CheckerColor
+        {
+            get { return Blend(Ui.Card, Ui.Border, 0.9); }
+        }
+
         private static Color Blend(Color a, Color b, double t)
         {
             t = Math.Max(0, Math.Min(1, t));
@@ -361,15 +362,14 @@ namespace Video2Gif
                 using (SolidBrush brush = new SolidBrush(Ui.Card)) g.FillPath(brush, path);
 
                 g.SetClip(path);
-                for (int y = 0; y < Rows; y++)
+                using (SolidBrush wash = new SolidBrush(CheckerColor))
                 {
-                    for (int x = 0; x < Cols; x++)
+                    for (int y = 0; y < Rows; y++)
                     {
-                        if ((x + y) % 2 != 0) continue;
-                        Rectangle c = CellRect(x, y);
-                        using (SolidBrush wash = new SolidBrush(Ui.AccentWash))
+                        for (int x = 0; x < Cols; x++)
                         {
-                            g.FillRectangle(wash, c);
+                            if ((x + y) % 2 != 0) continue;
+                            g.FillRectangle(wash, CellRect(x, y));
                         }
                     }
                 }
@@ -477,7 +477,7 @@ namespace Video2Gif
             }
 
             using (GraphicsPath path = Ui.Round(board, Ui.P(12)))
-            using (SolidBrush veil = new SolidBrush(Color.FromArgb(218, Ui.Card)))
+            using (SolidBrush veil = new SolidBrush(Color.FromArgb(200, Ui.Card)))
             {
                 g.FillPath(veil, path);
             }

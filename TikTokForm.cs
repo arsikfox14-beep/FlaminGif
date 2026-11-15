@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -119,14 +118,8 @@ namespace Video2Gif
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            if (!IsHandleCreated) return;
-            int value = Ui.Dark ? 1 : 0;
-            try { DwmSetWindowAttribute(Handle, 20, ref value, sizeof(int)); } catch { }
-            try { DwmSetWindowAttribute(Handle, 19, ref value, sizeof(int)); } catch { }
+            Ui.ApplyTitleBar(Handle);
         }
-
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
 
         protected override void OnShown(EventArgs e)
         {
