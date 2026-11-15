@@ -184,24 +184,6 @@ namespace Video2Gif
             }
         }
 
-        private void OpenTikTok()
-        {
-            if (busy) return;
-            using (TikTokForm dialog = new TikTokForm())
-            {
-                if (dialog.ShowDialog(this) != DialogResult.OK) return;
-                if (string.IsNullOrEmpty(dialog.SavedPath) || !File.Exists(dialog.SavedPath)) return;
-
-                LoadVideo(dialog.SavedPath);
-                if (dialog.SavedCount > 1)
-                {
-                    MessageBox.Show(this,
-                        "Скачано фото: " + dialog.SavedCount + ".\nПервое открыто в программе, остальные лежат в той же папке.",
-                        Program.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-        }
-
         private void LoadVideo(string path)
         {
             if (busy) return;
