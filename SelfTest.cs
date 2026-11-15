@@ -400,6 +400,16 @@ namespace Video2Gif
                             game.Width <= Ui.P(34) && download.Width <= Ui.P(34) &&
                             settings.Width <= Ui.P(34));
 
+                        IconButton discord = GetField(form, "discordButton") as IconButton;
+                        IconButton donate = GetField(form, "donateButton") as IconButton;
+                        Check("ui social icon buttons",
+                            discord != null && discord.Kind == IconKind.Discord &&
+                            donate != null && donate.Kind == IconKind.Donate);
+                        Check("ui social buttons in header",
+                            discord != null && donate != null && settings != null &&
+                            discord.Left > settings.Left && donate.Left > discord.Left &&
+                            donate.Right <= form.ClientSize.Width - Ui.P(16));
+
                         Invoke(form, "FinishSuccess", fast);
                         Application.DoEvents();
                         string resultShot = Path.Combine(work, "ui-result.png");
@@ -648,8 +658,7 @@ namespace Video2Gif
                             File.Exists(progressShot) && new FileInfo(progressShot).Length > 2000);
 
                         Label status = GetField(dialog, "statusLabel") as Label;
-                        Check("ui download no hint text",
-                            status != null && status.Text.Length == 0);
+                        Check("ui download single status", status == null && stage != null);
                         dialog.Close();
                     }
 

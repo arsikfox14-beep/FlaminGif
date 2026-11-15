@@ -19,7 +19,6 @@ namespace Video2Gif
         private PillButton wavPill;
         private PillButton downloadButton;
         private PillButton cancelButton;
-        private Label statusLabel;
         private Label percentLabel;
         private Label stageLabel;
         private SlimBar progressBar;
@@ -52,7 +51,7 @@ namespace Video2Gif
             BackColor = Ui.Bg;
             Font = Ui.Base;
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(Ui.P(560), Ui.P(382));
+            ClientSize = new Size(Ui.P(560), Ui.P(368));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -96,30 +95,26 @@ namespace Video2Gif
             pasteButton.Click += delegate { PasteLink(); };
             Controls.Add(pasteButton);
 
-            statusLabel = MakeLabel("", Ui.Small, Ui.Muted, 24, 126, 512, 18);
-            statusLabel.AutoEllipsis = true;
-            Controls.Add(statusLabel);
-
-            Controls.Add(MakeLabel("Формат", Ui.Small, Ui.Muted, 24, 148, 200, 18));
+            Controls.Add(MakeLabel("Формат", Ui.Small, Ui.Muted, 24, 136, 200, 18));
 
             videoPill = new PillButton();
             videoPill.Text = "Видео MP4";
             videoPill.Font = Ui.Small;
-            videoPill.SetBounds(Ui.P(24), Ui.P(168), Ui.P(248), Ui.P(34));
+            videoPill.SetBounds(Ui.P(24), Ui.P(156), Ui.P(248), Ui.P(34));
             videoPill.Click += delegate { audio = false; audioFormat = "mp4"; UpdateFormat(); };
             Controls.Add(videoPill);
 
             audioPill = new PillButton();
             audioPill.Text = "Музыка MP3";
             audioPill.Font = Ui.Small;
-            audioPill.SetBounds(Ui.P(288), Ui.P(168), Ui.P(248), Ui.P(34));
+            audioPill.SetBounds(Ui.P(288), Ui.P(156), Ui.P(248), Ui.P(34));
             audioPill.Click += delegate { audio = true; audioFormat = "mp3"; UpdateFormat(); };
             Controls.Add(audioPill);
 
             wavPill = new PillButton();
             wavPill.Text = "WAV · 1411 кбит/с";
             wavPill.Font = Ui.Small;
-            wavPill.SetBounds(Ui.P(288), Ui.P(168), Ui.P(248), Ui.P(34));
+            wavPill.SetBounds(Ui.P(288), Ui.P(156), Ui.P(248), Ui.P(34));
             wavPill.Visible = false;
             wavPill.Click += delegate { audio = true; audioFormat = "wav"; UpdateFormat(); };
             Controls.Add(wavPill);
@@ -128,15 +123,15 @@ namespace Video2Gif
             {
                 videoPill.Visible = false;
                 audioPill.Text = "MP3 · 320 кбит/с";
-                audioPill.SetBounds(Ui.P(24), Ui.P(168), Ui.P(248), Ui.P(34));
-                wavPill.SetBounds(Ui.P(288), Ui.P(168), Ui.P(248), Ui.P(34));
+                audioPill.SetBounds(Ui.P(24), Ui.P(156), Ui.P(248), Ui.P(34));
+                wavPill.SetBounds(Ui.P(288), Ui.P(156), Ui.P(248), Ui.P(34));
                 wavPill.Visible = true;
             }
 
-            Controls.Add(MakeLabel("Куда сохранить", Ui.Small, Ui.Muted, 24, 210, 300, 18));
+            Controls.Add(MakeLabel("Куда сохранить", Ui.Small, Ui.Muted, 24, 198, 300, 18));
 
             folderInput = new FlatInput();
-            folderInput.SetBounds(Ui.P(24), Ui.P(230), Ui.P(400), Ui.P(40));
+            folderInput.SetBounds(Ui.P(24), Ui.P(218), Ui.P(400), Ui.P(40));
             folderInput.Box.ReadOnly = true;
             Controls.Add(folderInput);
 
@@ -144,21 +139,21 @@ namespace Video2Gif
             chooseButton.Ghost = true;
             chooseButton.Text = "Выбрать";
             chooseButton.Font = Ui.Small;
-            chooseButton.SetBounds(Ui.P(432), Ui.P(230), Ui.P(104), Ui.P(40));
+            chooseButton.SetBounds(Ui.P(432), Ui.P(218), Ui.P(104), Ui.P(40));
             chooseButton.Click += delegate { ChooseFolder(); };
             Controls.Add(chooseButton);
 
             progressBar = new SlimBar();
-            progressBar.SetBounds(Ui.P(24), Ui.P(282), Ui.P(420), Ui.P(6));
+            progressBar.SetBounds(Ui.P(24), Ui.P(268), Ui.P(420), Ui.P(6));
             progressBar.Visible = false;
             Controls.Add(progressBar);
 
-            percentLabel = MakeLabel("", Ui.Small, Ui.Accent, 452, 272, 84, 18);
+            percentLabel = MakeLabel("", Ui.Small, Ui.Accent, 452, 258, 84, 18);
             percentLabel.TextAlign = ContentAlignment.MiddleRight;
             percentLabel.Visible = false;
             Controls.Add(percentLabel);
 
-            stageLabel = MakeLabel("", Ui.Tiny, Ui.Muted, 24, 292, 512, 18);
+            stageLabel = MakeLabel("", Ui.Tiny, Ui.Muted, 24, 278, 512, 18);
             stageLabel.AutoEllipsis = true;
             stageLabel.Visible = false;
             Controls.Add(stageLabel);
@@ -167,21 +162,20 @@ namespace Video2Gif
             downloadButton.Accent = true;
             downloadButton.Text = "Скачать";
             downloadButton.Font = Ui.Bold;
-            downloadButton.SetBounds(Ui.P(24), Ui.P(314), Ui.P(248), Ui.P(44));
+            downloadButton.SetBounds(Ui.P(24), Ui.P(300), Ui.P(248), Ui.P(44));
             downloadButton.Click += delegate { StartDownload(); };
             Controls.Add(downloadButton);
 
             cancelButton = new PillButton();
             cancelButton.Ghost = true;
             cancelButton.Text = "Закрыть";
-            cancelButton.SetBounds(Ui.P(288), Ui.P(314), Ui.P(248), Ui.P(44));
+            cancelButton.SetBounds(Ui.P(288), Ui.P(300), Ui.P(248), Ui.P(44));
             cancelButton.Click += delegate
             {
                 if (working)
                 {
                     CancelWork();
                     SetStatus("Останавливаем…", false);
-                    SetStage("Останавливаем…", -1);
                 }
                 else
                 {
@@ -329,10 +323,9 @@ namespace Video2Gif
             lastTick = 0;
             progressBar.Value = 0;
             progressBar.Visible = true;
-            percentLabel.Visible = true;
-            stageLabel.Visible = true;
-            SetStatus("", false);
+            percentLabel.Visible = false;
             tiktokFolder = "";
+            SetStatus(spotify ? "Получаем список треков…" : "Готовимся…", false);
 
             // TikTok качаем своим способом: yt-dlp часто упирается в блокировку.
             if (!spotify && TikTok.LooksLikeUrl(url))
@@ -340,8 +333,6 @@ namespace Video2Gif
                 StartTikTok(url);
                 return;
             }
-
-            SetStage(spotify ? "Получаем список треков…" : "Готовимся…", -1);
 
             downloader = new MediaDownloader();
             MediaDownloader active = downloader;
@@ -507,7 +498,6 @@ namespace Video2Gif
             SetBusy(false);
             progressBar.Visible = false;
             percentLabel.Visible = false;
-            stageLabel.Visible = false;
             SetStatus(message, error);
         }
 
@@ -524,18 +514,21 @@ namespace Video2Gif
             cancelButton.Text = busy ? "Отменить" : "Закрыть";
         }
 
+        /// <summary>Сообщение показывается только внизу, рядом с полосой загрузки.</summary>
         private void SetStatus(string text, bool error)
         {
-            statusLabel.ForeColor = error ? Ui.Bad : Ui.Muted;
-            statusLabel.Tag = Ui.RoleOf(statusLabel.ForeColor);
-            statusLabel.Text = text;
+            stageLabel.ForeColor = error ? Ui.Bad : Ui.Muted;
+            stageLabel.Tag = Ui.RoleOf(stageLabel.ForeColor);
+            SetStage(text, -1);
         }
 
         /// <summary>Строка прогресса рядом с полосой загрузки: этап и процент.</summary>
         private void SetStage(string text, int percent)
         {
             stageLabel.Text = text ?? "";
+            stageLabel.Visible = stageLabel.Text.Length > 0;
             percentLabel.Text = percent >= 0 ? percent + "%" : "";
+            percentLabel.Visible = percent >= 0;
         }
     }
 }

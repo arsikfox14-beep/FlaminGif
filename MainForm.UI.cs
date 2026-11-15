@@ -28,6 +28,8 @@ namespace Video2Gif
         private IconButton downloadsButton;
         private IconButton settingsButton;
         private IconButton gameButton;
+        private IconButton discordButton;
+        private IconButton donateButton;
         private ToolTip headerTip;
 
         private Panel progressView;
@@ -93,27 +95,39 @@ namespace Video2Gif
             Controls.Add(Lbl("видео и картинки → GIF",
                 Ui.Small, Ui.Muted, 71, 36, 300, 18));
             Controls.Add(Lbl("v" + Program.Version + " · локально", Ui.Tiny, Ui.Faint,
-                520, 24, 296, 18, ContentAlignment.MiddleRight));
+                480, 24, 240, 18, ContentAlignment.MiddleRight));
 
             gameButton = new IconButton(IconKind.Mouse);
-            gameButton.SetBounds(Ui.P(824), Ui.P(16), Ui.P(32), Ui.P(32));
+            gameButton.SetBounds(Ui.P(744), Ui.P(16), Ui.P(32), Ui.P(32));
             gameButton.Click += delegate { OpenGame(); };
             Controls.Add(gameButton);
 
             downloadsButton = new IconButton(IconKind.Download);
-            downloadsButton.SetBounds(Ui.P(864), Ui.P(16), Ui.P(32), Ui.P(32));
+            downloadsButton.SetBounds(Ui.P(784), Ui.P(16), Ui.P(32), Ui.P(32));
             downloadsButton.Click += delegate { ShowDownloadMenu(); };
             Controls.Add(downloadsButton);
 
             settingsButton = new IconButton(IconKind.Settings);
-            settingsButton.SetBounds(Ui.P(904), Ui.P(16), Ui.P(32), Ui.P(32));
+            settingsButton.SetBounds(Ui.P(824), Ui.P(16), Ui.P(32), Ui.P(32));
             settingsButton.Click += delegate { OpenSettings(); };
             Controls.Add(settingsButton);
+
+            discordButton = new IconButton(IconKind.Discord);
+            discordButton.SetBounds(Ui.P(864), Ui.P(16), Ui.P(32), Ui.P(32));
+            discordButton.Click += delegate { OpenLink("https://discord.gg/yMaS9HbjHV"); };
+            Controls.Add(discordButton);
+
+            donateButton = new IconButton(IconKind.Donate);
+            donateButton.SetBounds(Ui.P(904), Ui.P(16), Ui.P(32), Ui.P(32));
+            donateButton.Click += delegate { OpenLink("https://www.donationalerts.com/r/arsikfox16"); };
+            Controls.Add(donateButton);
 
             headerTip = new ToolTip();
             headerTip.SetToolTip(gameButton, "Играть · Змейка");
             headerTip.SetToolTip(downloadsButton, "Скачать видео, музыку или TikTok");
             headerTip.SetToolTip(settingsButton, "Настройки · тема оформления");
+            headerTip.SetToolTip(discordButton, "Discord — чат сообщества");
+            headerTip.SetToolTip(donateButton, "Поддержать проект · Donate");
 
             Controls.Add(Lbl("by DeepSeek v4.1 flash & arsikfox14 & dismasdismavich", Ui.Tiny, Ui.Faint,
                 24, 560, 912, 14, ContentAlignment.MiddleRight));
@@ -332,6 +346,21 @@ namespace Video2Gif
             using (MediaDownloadForm dialog = new MediaDownloadForm(spotify))
             {
                 dialog.ShowDialog(this);
+            }
+        }
+
+        /// <summary>Открывает ссылку в браузере по умолчанию.</summary>
+        private void OpenLink(string url)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(
+                    new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "Не удалось открыть ссылку: " + ex.Message,
+                    Program.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
