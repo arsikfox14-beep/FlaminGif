@@ -31,6 +31,7 @@ namespace Video2Gif
         private IconButton editorButton;
         private IconButton discordButton;
         private IconButton donateButton;
+        private InfoBadge infoBadge;
         private ToolTip headerTip;
 
         private Panel progressView;
@@ -136,8 +137,20 @@ namespace Video2Gif
             headerTip.SetToolTip(discordButton, "Discord — чат сообщества");
             headerTip.SetToolTip(donateButton, "Поддержать проект · Donate");
 
-            Controls.Add(Lbl("by DeepSeek v4.1 flash & arsikfox14 & dismasdismavich", Ui.Tiny, Ui.Faint,
-                24, 560, 912, 14, ContentAlignment.MiddleRight));
+            const string credits =
+                "Coders - deepseek v4.1 flash 1017, arsikfox14\n" +
+                "beta-testers - dismasdismavich, sosiska_0, d.i.0\n" +
+                "donaters - none";
+            infoBadge = new InfoBadge();
+            infoBadge.InfoText = credits;
+            infoBadge.SetBounds(Ui.P(918), Ui.P(556), Ui.P(18), Ui.P(18));
+            Controls.Add(infoBadge);
+
+            headerTip.AutoPopDelay = 15000;
+            headerTip.InitialDelay = 250;
+            headerTip.ReshowDelay = 100;
+            headerTip.ShowAlways = true;
+            headerTip.SetToolTip(infoBadge, credits);
 
             drop = new DropCard();
             drop.SetBounds(Ui.P(24), Ui.P(68), Ui.P(912), Ui.P(92));
