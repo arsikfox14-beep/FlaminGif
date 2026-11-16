@@ -361,6 +361,12 @@ namespace Video2Gif
                     rangeBar.Start <= rangeBar.End &&
                     rangeBar.End - rangeBar.Start >= 0.05);
 
+                string previewDir = Path.Combine(work, "editor-preview");
+                EditorCore.ExtractPreviewFrames(sample, previewDir, 0.4, 1.0, 8);
+                Check("editor preview frames",
+                    Directory.Exists(previewDir) &&
+                    Directory.GetFiles(previewDir, "*.jpg").Length >= 5);
+
                 VideoInfo imageInfo = Ffmpeg.Probe(still);
                 Line("image probe: " + imageInfo.Describe());
                 Check("probe image", imageInfo.IsImage && imageInfo.Width == 400 && imageInfo.Height == 300);

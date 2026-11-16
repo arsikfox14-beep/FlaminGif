@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -93,6 +94,20 @@ namespace Video2Gif
                 " -vf scale=trunc(iw/2)*2:trunc(ih/2)*2" +
                 " -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p" +
                 " -c:a aac -b:a 192k -movflags +faststart " + Fmt.Quote(output));
+        }
+
+        /// <summary>Раскадровка выбранного фрагмента для проигрывания в окне.</summary>
+        public static void ExtractPreviewFrames(string input, string folder,
+            double start, double duration, int fps)
+        {
+            Directory.CreateDirectory(folder);
+            string pattern = Path.Combine(folder, "f%04d.jpg");
+            RunFfmpeg(
+                "-hide_banner -loglevel error -y -ss " + Fmt.Num(Math.Max(0, start)) +
+                " -i " + Fmt.Quote(input) +
+                " -t " + Fmt.Num(Math.Max(0.05, duration)) +
+                " -vf fps=" + fps + ",scale=480:-2" +
+                " -q:v 5 -start_number 0 " + Fmt.Quote(pattern));
         }
 
         private static void RunFfmpeg(string args)
@@ -490,6 +505,16 @@ namespace Video2Gif
         private PillButton resetButton;
         private PillButton saveButton;
         private PillButton closeButton;
+        private PillButton playButton;
+
+        private readonly List<string> playFrames = new List<string>();
+        private Timer playTimer;
+        private string playDir = "";
+        private int playIndex;
+        private int playFps;
+        private double playSeconds;
+        private bool playing;
+        private bool preparing;
 
         private string path = "";
         private VideoInfo info;
@@ -510,7 +535,7 @@ namespace Video2Gif
             BackColor = Ui.Bg;
             Font = Ui.Base;
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(Ui.P(720), Ui.P(620));
+            ClientSize = new Size(Ui.P(720), Ui.P(564));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -537,15 +562,15 @@ namespace Video2Gif
             Controls.Add(openButton);
 
             preview = new EditorPreview();
-            preview.SetBounds(Ui.P(24), Ui.P(80), Ui.P(672), Ui.P(304));
+            preview.SetBounds(Ui.P(24), Ui.P(72), Ui.P(672), Ui.P(300));
             Controls.Add(preview);
 
-            hintLabel = MakeLabel("Потяните ползунки: левый — начало, правый — конец обрезки.",
-                Ui.Tiny, Ui.Faint, 24, 390, 672, 18);
+            hintLabel = MakeLabel("Потяните бегунки, затем «Проверить» — фрагмент проиграется без звука.",
+                Ui.Tiny, Ui.Faint, 24, 376, 672, 18);
             Controls.Add(hintLabel);
 
             range = new RangeBar();
-            range.SetBounds(Ui.P(24), Ui.P(410), Ui.P(672), Ui.P(32));
+            range.SetBounds(Ui.P(24), Ui.P(398), Ui.P(672), Ui.P(32));
             range.Changed += delegate { UpdateRange(); };
             range.Committed += delegate
             {
@@ -554,24 +579,33 @@ namespace Video2Gif
             Controls.Add(range);
 
             rangeStartLabel = MakeLabel("Начало: 0,0 с", Ui.Small, Ui.Muted,
-                24, 448, 200, 18);
+                24, 436, 200, 18);
             Controls.Add(rangeStartLabel);
 
             rangeInfoLabel = MakeLabel("Выбрано: 0,0 с", Ui.Small, Ui.Muted,
-                248, 448, 200, 18);
+                248, 436, 200, 18);
             rangeInfoLabel.TextAlign = ContentAlignment.MiddleCenter;
             Controls.Add(rangeInfoLabel);
 
             rangeEndLabel = MakeLabel("Конец: 0,0 с", Ui.Small, Ui.Muted,
-                472, 448, 224, 18);
+                472, 436, 224, 18);
             rangeEndLabel.TextAlign = ContentAlignment.MiddleRight;
             Controls.Add(rangeEndLabel);
+
+            playButton = new PillButton();
+            playButton.Ghost = true;
+            playButton.Text = "▶ Проверить";
+            playButton.Font = Ui.Small;
+            playButton.SetBounds(Ui.P(24), Ui.P(460), Ui.P(150), Ui.P(34));
+            playButton.Visible = false;
+            playButton.Click += delegate { TogglePreview(); };
+            Controls.Add(playButton);
 
             resetButton = new PillButton();
             resetButton.Ghost = true;
             resetButton.Text = "Весь кадр";
             resetButton.Font = Ui.Small;
-            resetButton.SetBounds(Ui.P(24), Ui.P(484), Ui.P(160), Ui.P(34));
+            resetButton.SetBounds(Ui.P(24), Ui.P(398), Ui.P(160), Ui.P(34));
             resetButton.Visible = false;
             resetButton.Click += delegate
             {
@@ -581,11 +615,11 @@ namespace Video2Gif
             };
             Controls.Add(resetButton);
 
-            selectionLabel = MakeLabel("", Ui.Tiny, Ui.Faint, 548, 466, 148, 52);
+            selectionLabel = MakeLabel("", Ui.Tiny, Ui.Faint, 472, 398, 224, 50);
             selectionLabel.TextAlign = ContentAlignment.MiddleRight;
             Controls.Add(selectionLabel);
 
-            statusLabel = MakeLabel("", Ui.Tiny, Ui.Faint, 24, 530, 672, 18);
+            statusLabel = MakeLabel("", Ui.Tiny, Ui.Faint, 186, 460, 510, 34);
             statusLabel.AutoEllipsis = true;
             Controls.Add(statusLabel);
 
@@ -593,16 +627,19 @@ namespace Video2Gif
             saveButton.Accent = true;
             saveButton.Text = "Сохранить";
             saveButton.Font = Ui.Bold;
-            saveButton.SetBounds(Ui.P(24), Ui.P(554), Ui.P(332), Ui.P(44));
+            saveButton.SetBounds(Ui.P(24), Ui.P(500), Ui.P(332), Ui.P(44));
             saveButton.Click += delegate { Save(); };
             Controls.Add(saveButton);
 
             closeButton = new PillButton();
             closeButton.Ghost = true;
             closeButton.Text = "Закрыть";
-            closeButton.SetBounds(Ui.P(364), Ui.P(554), Ui.P(160), Ui.P(44));
+            closeButton.SetBounds(Ui.P(364), Ui.P(500), Ui.P(160), Ui.P(44));
             closeButton.Click += delegate { Close(); };
             Controls.Add(closeButton);
+
+            playTimer = new Timer();
+            playTimer.Tick += delegate { PlayTick(); };
 
             DragEnter += delegate(object sender, DragEventArgs e)
             {
@@ -641,12 +678,13 @@ namespace Video2Gif
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            if (working)
+            if (working || preparing)
             {
                 e.Cancel = true;
-                statusLabel.Text = "Подождите, идёт сохранение…";
+                statusLabel.Text = "Подождите, идёт подготовка…";
                 return;
             }
+            StopPlayback(false);
             if (preview.Image != null)
             {
                 preview.SetImage(null, false);
@@ -679,10 +717,11 @@ namespace Video2Gif
 
         private void LoadFile(string file)
         {
-            if (working) return;
+            if (working || preparing) return;
             try
             {
                 Cursor = Cursors.WaitCursor;
+                StopPlayback(false);
                 VideoInfo probe = Ffmpeg.Probe(file);
                 path = file;
                 info = probe;
@@ -707,6 +746,7 @@ namespace Video2Gif
                     RequestFrame(0);
                 }
 
+                FitPreview();
                 ApplyMode();
                 UpdateSelection();
             }
@@ -729,11 +769,50 @@ namespace Video2Gif
             rangeInfoLabel.Visible = !photo;
             selectionLabel.Visible = photo;
             resetButton.Visible = photo;
+            playButton.Visible = !photo && path.Length > 0;
+            if (photo)
+            {
+                statusLabel.SetBounds(Ui.P(24), Ui.P(460), Ui.P(672), Ui.P(34));
+            }
+            else
+            {
+                statusLabel.SetBounds(Ui.P(186), Ui.P(460), Ui.P(510), Ui.P(34));
+            }
             saveButton.Text = photo ? "Сохранить фото" : "Сохранить видео";
             hintLabel.Text = photo
                 ? "Выделите область мышью на фото. Двойной клик — весь кадр."
-                : "Потяните ползунки: левый — начало, правый — конец обрезки.";
+                : "Потяните бегунки, затем «Проверить» — фрагмент проиграется без звука.";
             saveButton.Enabled = !working && CanSave();
+            playButton.Enabled = !working && !preparing &&
+                !isImage && path.Length > 0 && Duration() > 0;
+        }
+
+        /// <summary>Подгоняет карточку предпросмотра под пропорции файла.</summary>
+        private void FitPreview()
+        {
+            int maxWidth = Ui.P(672);
+            int height = Ui.P(300);
+            int pad = Ui.P(12);
+            double aspect = 0;
+
+            if (isImage && preview.Image != null)
+            {
+                aspect = (double)preview.Image.Width / preview.Image.Height;
+            }
+            else if (info != null && info.Width > 0 && info.Height > 0)
+            {
+                aspect = (double)info.Width / info.Height;
+            }
+
+            int width = maxWidth;
+            if (aspect > 0.1 && aspect < 10)
+            {
+                width = (int)Math.Round((height - pad * 2) * aspect + pad * 2);
+                if (width < Ui.P(240)) width = Ui.P(240);
+                if (width > maxWidth) width = maxWidth;
+            }
+            int x = Ui.P(24) + (maxWidth - width) / 2;
+            preview.SetBounds(x, Ui.P(72), width, height);
         }
 
         private bool CanSave()
@@ -808,6 +887,166 @@ namespace Video2Gif
                 }
                 catch { }
             });
+        }
+
+        private void TogglePreview()
+        {
+            if (preparing) return;
+            if (playing)
+            {
+                StopPlayback(true);
+                return;
+            }
+            StartPreview();
+        }
+
+        private void StartPreview()
+        {
+            if (isImage || path.Length == 0) return;
+            double total = Duration();
+            if (total <= 0) return;
+
+            double start = range.Start * total;
+            double length = Math.Max(0, (range.End - range.Start) * total);
+            if (length < 0.05) return;
+
+            double previewLength = Math.Min(length, 240.0);
+            int fps = (int)Math.Round(Math.Max(1, Math.Min(12, 240.0 / previewLength)));
+            if (fps < 1) fps = 1;
+
+            playFps = fps;
+            playSeconds = previewLength;
+            playIndex = 0;
+            playFrames.Clear();
+            CleanupPlayFrames();
+            playDir = Path.Combine(Path.GetTempPath(), "Video2Gif", "preview",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(playDir);
+
+            string source = path;
+            string folder = playDir;
+            double from = start;
+            double len = previewLength;
+
+            preparing = true;
+            playButton.Enabled = false;
+            openButton.Enabled = false;
+            saveButton.Enabled = false;
+            range.Enabled = false;
+            UseWaitCursor = true;
+            statusLabel.Text = "Готовим предпросмотр…";
+
+            Task.Factory.StartNew(delegate
+            {
+                EditorCore.ExtractPreviewFrames(source, folder, from, len, fps);
+            }).ContinueWith(delegate(Task task)
+            {
+                if (IsDisposed) return;
+                try
+                {
+                    BeginInvoke((MethodInvoker)delegate
+                    {
+                        preparing = false;
+                        UseWaitCursor = false;
+                        openButton.Enabled = !working;
+                        range.Enabled = !working;
+                        saveButton.Enabled = !working && CanSave();
+                        playButton.Enabled = !working && Duration() > 0;
+
+                        if (task.IsFaulted)
+                        {
+                            statusLabel.Text = "Не удалось подготовить предпросмотр.";
+                            CleanupPlayFrames();
+                            return;
+                        }
+
+                        string[] files = Directory.GetFiles(playDir, "*.jpg");
+                        Array.Sort(files, StringComparer.Ordinal);
+                        if (files.Length == 0)
+                        {
+                            statusLabel.Text = "Не удалось подготовить предпросмотр.";
+                            CleanupPlayFrames();
+                            return;
+                        }
+
+                        playFrames.AddRange(files);
+                        playing = true;
+                        playButton.Text = "■ Стоп";
+                        openButton.Enabled = false;
+                        saveButton.Enabled = false;
+                        range.Enabled = false;
+                        ShowPlayFrame(0);
+                        playTimer.Interval = Math.Max(50, (int)Math.Round(1000.0 / fps));
+                        playTimer.Start();
+                    });
+                }
+                catch { }
+            });
+        }
+
+        private void PlayTick()
+        {
+            if (!playing) return;
+            playIndex++;
+            if (playIndex >= playFrames.Count)
+            {
+                StopPlayback(false);
+                statusLabel.Text = Path.GetFileName(path);
+                return;
+            }
+            ShowPlayFrame(playIndex);
+        }
+
+        private void ShowPlayFrame(int index)
+        {
+            if (index < 0 || index >= playFrames.Count) return;
+            try
+            {
+                Bitmap bitmap = EditorCore.LoadBitmap(playFrames[index]);
+                preview.SetImage(bitmap, false);
+            }
+            catch { }
+            double current = index / (double)Math.Max(1, playFps);
+            statusLabel.Text = "Проверка: " + Fmt.Time(current) +
+                " из " + Fmt.Time(playSeconds);
+        }
+
+        private void StopPlayback(bool restoreFrame)
+        {
+            if (playTimer != null) playTimer.Stop();
+            bool hadFrames = playFrames.Count > 0;
+            playing = false;
+            preparing = false;
+            if (playButton != null)
+            {
+                playButton.Text = "▶ Проверить";
+                playButton.Enabled = !working && !isImage &&
+                    path.Length > 0 && Duration() > 0;
+            }
+            if (!working)
+            {
+                openButton.Enabled = true;
+                range.Enabled = !isImage;
+                saveButton.Enabled = CanSave();
+                UseWaitCursor = false;
+            }
+            playFrames.Clear();
+            CleanupPlayFrames();
+            if (restoreFrame && hadFrames && !isImage && path.Length > 0)
+            {
+                RequestFrame(range.Start * Duration());
+            }
+        }
+
+        private void CleanupPlayFrames()
+        {
+            if (playTimer != null) playTimer.Stop();
+            if (playDir.Length > 0)
+            {
+                try { Directory.Delete(playDir, true); }
+                catch { }
+                playDir = "";
+            }
         }
 
         private void Save()
@@ -921,11 +1160,13 @@ namespace Video2Gif
 
         private void SetWorking(bool busy, string status)
         {
+            if (busy) StopPlayback(false);
             working = busy;
             openButton.Enabled = !busy;
             resetButton.Enabled = !busy;
-            range.Enabled = !busy;
+            range.Enabled = !busy && !isImage;
             saveButton.Enabled = !busy && CanSave();
+            playButton.Enabled = !busy && !isImage && path.Length > 0 && Duration() > 0;
             statusLabel.Text = status;
             UseWaitCursor = busy;
         }
