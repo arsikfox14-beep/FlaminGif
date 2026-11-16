@@ -87,7 +87,26 @@ namespace Video2Gif
             int y = Ui.P(13);
             DrawSwatch(g, new Rectangle(x, y, d, d), SwatchBg, Ui.Border);
             DrawSwatch(g, new Rectangle(x + Ui.P(19), y, d, d), SwatchCard, Ui.Border);
-            DrawSwatch(g, new Rectangle(x + Ui.P(38), y, d, d), SwatchAccent, Ui.Border);
+            if (ThemeKey == "gta6")
+            {
+                Rectangle swatch = new Rectangle(x + Ui.P(38), y, d, d);
+                using (GraphicsPath path = new GraphicsPath())
+                {
+                    path.AddEllipse(swatch);
+                    using (LinearGradientBrush brush = Ui.GtaGradient(swatch, 35f))
+                    {
+                        g.FillPath(brush, path);
+                    }
+                    using (Pen pen = new Pen(Ui.Border, 1f))
+                    {
+                        g.DrawPath(pen, path);
+                    }
+                }
+            }
+            else
+            {
+                DrawSwatch(g, new Rectangle(x + Ui.P(38), y, d, d), SwatchAccent, Ui.Border);
+            }
 
             Ui.Write(g, Title, Ui.Bold,
                 new Rectangle(Ui.P(14), Ui.P(38), Width - Ui.P(28), Ui.P(18)),

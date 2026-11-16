@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -13,6 +17,103 @@ namespace Video2Gif
         Settings,
         Discord,
         Donate
+    }
+
+    /// <summary>
+    /// Логотип Discord из исходного PNG: чёрный фон превращается в прозрачность,
+    /// а сам знак перекрашивается в цвет темы.
+    /// </summary>
+    internal static class DiscordMark
+    {
+        private const string ResourceName = "Video2Gif.discord.png";
+
+        private static Bitmap source;
+        private static bool sourceLoaded;
+        private static readonly Dictionary<int, Bitmap> cache = new Dictionary<int, Bitmap>();
+
+        public static bool Available
+        {
+            get { return Source() != null; }
+        }
+
+        public static void Draw(Graphics g, RectangleF target, Color color)
+        {
+            Bitmap image = Get(color);
+            if (image == null) return;
+
+            InterpolationMode oldMode = g.InterpolationMode;
+            PixelOffsetMode oldPixel = g.PixelOffsetMode;
+            CompositingQuality oldQuality = g.CompositingQuality;
+            try
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                g.CompositingQuality = CompositingQuality.HighQuality;
+                g.DrawImage(image, target);
+            }
+            finally
+            {
+                g.InterpolationMode = oldMode;
+                g.PixelOffsetMode = oldPixel;
+                g.CompositingQuality = oldQuality;
+            }
+        }
+
+        private static Bitmap Get(Color color)
+        {
+            int key = color.ToArgb();
+            lock (cache)
+            {
+                Bitmap cached;
+                if (cache.TryGetValue(key, out cached)) return cached;
+            }
+
+            Bitmap src = Source();
+            if (src == null) return null;
+
+            Bitmap tinted = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
+            for (int y = 0; y < src.Height; y++)
+            {
+                for (int x = 0; x < src.Width; x++)
+                {
+                    Color pixel = src.GetPixel(x, y);
+                    int alpha = Math.Max(pixel.R, Math.Max(pixel.G, pixel.B));
+                    if (alpha < 6) continue;
+                    tinted.SetPixel(x, y, Color.FromArgb(alpha, color));
+                }
+            }
+
+            lock (cache) cache[key] = tinted;
+            return tinted;
+        }
+
+        private static Bitmap Source()
+        {
+            lock (cache)
+            {
+                if (sourceLoaded) return source;
+                sourceLoaded = true;
+                try
+                {
+                    using (Stream stream = Assembly.GetExecutingAssembly()
+                        .GetManifestResourceStream(ResourceName))
+                    {
+                        if (stream != null)
+                        {
+                            using (Bitmap loaded = new Bitmap(stream))
+                            {
+                                source = new Bitmap(loaded);
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    source = null;
+                }
+                return source;
+            }
+        }
     }
 
     internal sealed class IconButton : UiControl
@@ -120,105 +221,43 @@ namespace Video2Gif
                 }
                 else if (Kind == IconKind.Discord)
                 {
-                    float u = unit * 0.82f;
-                    Color mark = !Enabled ? Ui.Faint : Ui.Accent;
-
-                    // Тонкие «плавники» вокруг лица — как в оригинальном логотипе.
-                    using (Pen fin = new Pen(mark, Math.Max(1.2f, u * 0.14f)))
-                    {
-                        fin.StartCap = LineCap.Round;
-                        fin.EndCap = LineCap.Round;
-                        float radius = u * 1.32f;
-                        RectangleF orbit = new RectangleF(
-                            cx - radius, cy - u * 0.02f - radius, radius * 2f, radius * 2f);
-                        g.DrawArc(fin, orbit, 202f, 34f);
-                        g.DrawArc(fin, orbit, 304f, 34f);
-                        g.DrawArc(fin, orbit, 105f, 28f);
-                        g.DrawArc(fin, orbit, 47f, 28f);
-                    }
-
-                    using (GraphicsPath face = new GraphicsPath())
-                    {
-                        PointF tl = new PointF(cx - u * 0.80f, cy - u * 0.72f);
-                        PointF tr = new PointF(cx + u * 0.80f, cy - u * 0.72f);
-                        PointF rw = new PointF(cx + u * 1.12f, cy + u * 0.08f);
-                        PointF br = new PointF(cx + u * 0.60f, cy + u * 0.88f);
-                        PointF bc = new PointF(cx, cy + u * 0.70f);
-                        PointF bl = new PointF(cx - u * 0.60f, cy + u * 0.88f);
-                        PointF lw = new PointF(cx - u * 1.12f, cy + u * 0.08f);
-
-                        face.AddBezier(tl,
-                            new PointF(cx - u * 0.30f, cy - u * 0.58f),
-                            new PointF(cx + u * 0.30f, cy - u * 0.58f),
-                            tr);
-                        face.AddBezier(tr,
-                            new PointF(cx + u * 1.04f, cy - u * 0.50f),
-                            new PointF(cx + u * 1.12f, cy - u * 0.20f),
-                            rw);
-                        face.AddBezier(rw,
-                            new PointF(cx + u * 1.10f, cy + u * 0.52f),
-                            new PointF(cx + u * 0.90f, cy + u * 0.82f),
-                            br);
-                        face.AddBezier(br,
-                            new PointF(cx + u * 0.34f, cy + u * 0.93f),
-                            new PointF(cx + u * 0.15f, cy + u * 0.78f),
-                            bc);
-                        face.AddBezier(bc,
-                            new PointF(cx - u * 0.15f, cy + u * 0.78f),
-                            new PointF(cx - u * 0.34f, cy + u * 0.93f),
-                            bl);
-                        face.AddBezier(bl,
-                            new PointF(cx - u * 0.90f, cy + u * 0.82f),
-                            new PointF(cx - u * 1.10f, cy + u * 0.52f),
-                            lw);
-                        face.AddBezier(lw,
-                            new PointF(cx - u * 1.12f, cy - u * 0.20f),
-                            new PointF(cx - u * 1.04f, cy - u * 0.50f),
-                            tl);
-                        face.CloseFigure();
-
-                        using (SolidBrush faceBrush = new SolidBrush(mark))
-                        {
-                            g.FillPath(faceBrush, face);
-                        }
-                    }
-
-                    float eyeW = u * 0.42f;
-                    float eyeH = u * 0.56f;
-                    float eyeX = u * 0.45f;
-                    using (SolidBrush eyeBrush = new SolidBrush(fill))
-                    {
-                        g.FillEllipse(eyeBrush, cx - eyeX - eyeW / 2f,
-                            cy - u * 0.06f - eyeH / 2f, eyeW, eyeH);
-                        g.FillEllipse(eyeBrush, cx + eyeX - eyeW / 2f,
-                            cy - u * 0.06f - eyeH / 2f, eyeW, eyeH);
-                    }
+                    // Оригинальный логотип Discord из ресурса, перекрашенный под тему.
+                    Color mark = !Enabled ? Ui.Faint : (hover ? Ui.AccentInk : Ui.Accent);
+                    float size = Math.Min(Width, Height) * 0.84f;
+                    DiscordMark.Draw(g,
+                        new RectangleF(cx - size / 2f, cy - size / 2f, size, size),
+                        mark);
                 }
                 else if (Kind == IconKind.Donate)
                 {
-                    float u = unit * 0.92f;
+                    float u = unit * 1.02f;
                     using (GraphicsPath heart = new GraphicsPath())
                     {
-                        heart.AddBezier(
-                            new PointF(cx, cy + u * 0.98f),
-                            new PointF(cx - u * 1.05f, cy + u * 0.20f),
-                            new PointF(cx - u * 1.02f, cy - u * 0.92f),
-                            new PointF(cx - u * 0.36f, cy - u * 0.72f));
-                        heart.AddBezier(
-                            new PointF(cx - u * 0.36f, cy - u * 0.72f),
-                            new PointF(cx - u * 0.14f, cy - u * 0.62f),
-                            new PointF(cx - u * 0.05f, cy - u * 0.42f),
-                            new PointF(cx, cy - u * 0.26f));
-                        heart.AddBezier(
-                            new PointF(cx, cy - u * 0.26f),
-                            new PointF(cx + u * 0.05f, cy - u * 0.42f),
-                            new PointF(cx + u * 0.14f, cy - u * 0.62f),
-                            new PointF(cx + u * 0.36f, cy - u * 0.72f));
-                        heart.AddBezier(
-                            new PointF(cx + u * 0.36f, cy - u * 0.72f),
-                            new PointF(cx + u * 1.02f, cy - u * 0.92f),
-                            new PointF(cx + u * 1.05f, cy + u * 0.20f),
-                            new PointF(cx, cy + u * 0.98f));
+                        PointF tip = new PointF(cx, cy + u * 0.98f);
+                        PointF left = new PointF(cx - u * 0.95f, cy - u * 0.02f);
+                        PointF cleft = new PointF(cx, cy - u * 0.24f);
+                        PointF right = new PointF(cx + u * 0.95f, cy - u * 0.02f);
+
+                        // Левая сторона: остриё → левое плечо.
+                        heart.AddBezier(tip,
+                            new PointF(cx - u * 0.48f, cy + u * 0.62f),
+                            new PointF(cx - u * 1.00f, cy + u * 0.28f),
+                            left);
+                        // Левая доля: плечо → выемка.
+                        heart.AddBezier(left,
+                            new PointF(cx - u * 0.92f, cy - u * 0.62f),
+                            new PointF(cx - u * 0.42f, cy - u * 0.82f),
+                            cleft);
+                        // Правая доля: выемка → правое плечо.
+                        heart.AddBezier(cleft,
+                            new PointF(cx + u * 0.42f, cy - u * 0.82f),
+                            new PointF(cx + u * 0.92f, cy - u * 0.62f),
+                            right);
+                        // Правая сторона: плечо → остриё.
+                        heart.AddBezier(right,
+                            new PointF(cx + u * 1.00f, cy + u * 0.28f),
+                            new PointF(cx + u * 0.48f, cy + u * 0.62f),
+                            tip);
                         heart.CloseFigure();
                         using (SolidBrush heartBrush = new SolidBrush(ink))
                         {

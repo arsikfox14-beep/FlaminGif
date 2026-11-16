@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
@@ -213,6 +214,28 @@ namespace Video2Gif
                 Check("theme gta 6",
                     Ui.Dark && Ui.Gta6 && Ui.ThemeName == "gta6" &&
                     Ui.Accent == Color.FromArgb(255, 79, 163) && !Ui.Holiday);
+
+                ColorBlend gtaBlend = Ui.GtaBlend();
+                Check("theme gta 6 gradient",
+                    gtaBlend.Colors.Length == 5 &&
+                    gtaBlend.Colors[0].B > gtaBlend.Colors[0].R &&
+                    gtaBlend.Colors[4].R > gtaBlend.Colors[4].B);
+
+                using (Bitmap mark = new Bitmap(32, 32))
+                using (Graphics markGraphics = Graphics.FromImage(mark))
+                {
+                    DiscordMark.Draw(markGraphics,
+                        new RectangleF(4, 4, 24, 24), Color.White);
+                    int lit = 0;
+                    for (int y = 0; y < mark.Height; y++)
+                    {
+                        for (int x = 0; x < mark.Width; x++)
+                        {
+                            if (mark.GetPixel(x, y).A > 0) lit++;
+                        }
+                    }
+                    Check("discord logo draws", DiscordMark.Available && lit > 120);
+                }
 
                 Check("updater version parse",
                     Updater.NormalizeVersion("v3.8") == "3.8" &&
