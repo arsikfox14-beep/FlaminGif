@@ -612,6 +612,79 @@ namespace Video2Gif
             }
         }
 
+        /// <summary>Силуэт пальмы для темы GTA 6.</summary>
+        public static void DrawPalm(Graphics g, float x, float baseY, float height,
+            Color color, float lean)
+        {
+            float topX = x + lean * height * 0.12f;
+            float topY = baseY - height;
+            using (Pen trunk = new Pen(color, Math.Max(2f, height * 0.055f)))
+            {
+                trunk.StartCap = LineCap.Round;
+                trunk.EndCap = LineCap.Round;
+                using (GraphicsPath path = new GraphicsPath())
+                {
+                    path.AddBezier(x, baseY,
+                        x + lean * height * 0.02f, baseY - height * 0.42f,
+                        x + lean * height * 0.07f, baseY - height * 0.72f,
+                        topX, topY);
+                    g.DrawPath(trunk, path);
+                }
+            }
+
+            float reach = height * 0.42f;
+            PointF[] tips = new PointF[]
+            {
+                new PointF(topX - reach, topY - reach * 0.10f),
+                new PointF(topX - reach * 0.62f, topY - reach * 0.70f),
+                new PointF(topX - reach * 0.18f, topY - reach * 0.95f),
+                new PointF(topX + reach * 0.28f, topY - reach * 0.88f),
+                new PointF(topX + reach * 0.70f, topY - reach * 0.52f),
+                new PointF(topX + reach, topY - reach * 0.02f),
+                new PointF(topX + reach * 0.62f, topY + reach * 0.28f),
+                new PointF(topX - reach * 0.62f, topY + reach * 0.28f)
+            };
+            using (Pen leaf = new Pen(color, Math.Max(1.4f, height * 0.028f)))
+            {
+                leaf.StartCap = LineCap.Round;
+                leaf.EndCap = LineCap.Round;
+                for (int i = 0; i < tips.Length; i++)
+                {
+                    PointF tip = tips[i];
+                    using (GraphicsPath path = new GraphicsPath())
+                    {
+                        path.AddBezier(topX, topY,
+                            topX + (tip.X - topX) * 0.35f, topY - height * 0.16f,
+                            topX + (tip.X - topX) * 0.72f, tip.Y - height * 0.03f,
+                            tip.X, tip.Y);
+                        g.DrawPath(leaf, path);
+                    }
+                }
+            }
+        }
+
+        /// <summary>Маленькая чайка: две дуги.</summary>
+        public static void DrawGull(Graphics g, float x, float y, float size, Color color)
+        {
+            using (Pen pen = new Pen(color, Math.Max(1f, size * 0.16f)))
+            {
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
+                using (GraphicsPath path = new GraphicsPath())
+                {
+                    path.AddBezier(x - size, y,
+                        x - size * 0.55f, y - size * 0.55f,
+                        x - size * 0.12f, y - size * 0.55f,
+                        x, y);
+                    path.AddBezier(x, y,
+                        x + size * 0.12f, y - size * 0.55f,
+                        x + size * 0.55f, y - size * 0.55f,
+                        x + size, y);
+                    g.DrawPath(pen, path);
+                }
+            }
+        }
+
         public static void DrawUpArrow(Graphics g, Rectangle r, Color color)
         {
             float cx = r.X + r.Width / 2f;
@@ -992,6 +1065,18 @@ namespace Video2Gif
                         shade.InterpolationColors = blend;
                         g.FillRectangle(shade, full);
                     }
+
+                    // Пальмы и чайки в стиле Vice City.
+                    Ui.DrawPalm(g, Width * 0.53f, Height * 0.99f, Height * 0.84f,
+                        Color.FromArgb(86, 10, 5, 18), -8f);
+                    Ui.DrawPalm(g, Width * 0.62f, Height * 0.99f, Height * 0.62f,
+                        Color.FromArgb(70, 10, 5, 18), 10f);
+                    Ui.DrawGull(g, Width * 0.48f, Height * 0.22f, Ui.P(9),
+                        Color.FromArgb(110, 255, 255, 255));
+                    Ui.DrawGull(g, Width * 0.55f, Height * 0.14f, Ui.P(6),
+                        Color.FromArgb(95, 255, 255, 255));
+                    Ui.DrawGull(g, Width * 0.60f, Height * 0.28f, Ui.P(7),
+                        Color.FromArgb(100, 255, 255, 255));
 
                     Ui.Write(g, "VI", Ui.GtaMark,
                         new Rectangle(Width - Ui.P(130), (Height - Ui.P(64)) / 2,

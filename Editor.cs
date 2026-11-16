@@ -1061,6 +1061,7 @@ namespace Video2Gif
                             statusLabel.Text = "Не удалось показать кадр.";
                             return;
                         }
+                        ApplyPreviewDecoration(task.Result);
                         preview.SetImage(task.Result, false);
                         saveButton.Enabled = !working && CanSave();
                     });
@@ -1183,6 +1184,7 @@ namespace Video2Gif
             try
             {
                 Bitmap bitmap = EditorCore.LoadBitmap(playFrames[index]);
+                ApplyPreviewDecoration(bitmap);
                 preview.SetImage(bitmap, false);
             }
             catch { }
@@ -1239,6 +1241,7 @@ namespace Video2Gif
         private void OpenOverlayEditor()
         {
             if (working) return;
+            if (playing) StopPlayback(true);
             using (OverlayForm dialog = new OverlayForm())
             {
                 dialog.SetValues(caption, captionTop, overlayPath, overlayCorner, overlayScale);
@@ -1249,9 +1252,21 @@ namespace Video2Gif
                     overlayPath = dialog.OverlayPath;
                     overlayCorner = dialog.OverlayCorner;
                     overlayScale = dialog.OverlayScale;
-                    statusLabel.Text = "Оформление сохранено.";
+                    statusLabel.Text = "Оформление сохранено. Применится при сохранении.";
+                    if (!isImage && path.Length > 0)
+                    {
+                        RequestFrame(range.Start * Duration());
+                    }
                 }
             }
+        }
+
+        private void ApplyPreviewDecoration(Bitmap bitmap)
+        {
+            if (isImage || bitmap == null) return;
+            if (overlayPath.Length == 0 && caption.Length == 0) return;
+            EditorCore.DecoratePhoto(bitmap, overlayPath, overlayCorner,
+                overlayScale, caption, captionTop);
         }
 
         private void SaveVideo()
