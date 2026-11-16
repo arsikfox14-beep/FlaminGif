@@ -61,6 +61,8 @@ namespace Video2Gif
             base.OnPaintBackground(e);
             Graphics g = e.Graphics;
 
+            if (Ui.Gamesense) Ui.DrawCarbon(g, ClientRectangle);
+
             if (Ui.Gta6)
             {
                 Rectangle glow = new Rectangle(0, 0, ClientSize.Width, Ui.P(66));

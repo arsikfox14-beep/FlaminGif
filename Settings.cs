@@ -247,9 +247,9 @@ namespace Video2Gif
             Controls.Add(gtaTile);
 
             gamesenseTile = MakeTile("gamesense", "Gamesense");
-            gamesenseTile.SwatchBg = Color.FromArgb(7, 7, 8);
-            gamesenseTile.SwatchCard = Color.FromArgb(14, 14, 15);
-            gamesenseTile.SwatchAccent = Color.FromArgb(90, 255, 140);
+            gamesenseTile.SwatchBg = Color.FromArgb(18, 18, 20);
+            gamesenseTile.SwatchCard = Color.FromArgb(24, 24, 27);
+            gamesenseTile.SwatchAccent = Color.FromArgb(88, 178, 124);
             gamesenseTile.SetBounds(Ui.P(154), Ui.P(208), Ui.P(120), Ui.P(64));
             gamesenseTile.Click += delegate { Choose("gamesense"); };
             Controls.Add(gamesenseTile);
@@ -385,6 +385,12 @@ namespace Video2Gif
         {
             base.OnHandleCreated(e);
             ApplyTitleBar();
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            base.OnPaintBackground(e);
+            if (Ui.Gamesense) Ui.DrawCarbon(e.Graphics, ClientRectangle);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
