@@ -24,6 +24,9 @@ namespace Video2Gif
 
             try
             {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+
                 Line(Program.AppName + " selftest, version " + Program.Version);
                 Line("os: " + Environment.OSVersion + ", 64-bit: " + Environment.Is64BitProcess);
                 Line("temp: " + work);
@@ -349,6 +352,15 @@ namespace Video2Gif
                     }
                 }
 
+                RangeBar rangeBar = new RangeBar();
+                rangeBar.MinGap = 0.05;
+                rangeBar.SetRange(-1, 2);
+                Check("editor range clamp", rangeBar.Start == 0 && rangeBar.End == 1);
+                rangeBar.SetRange(0.8, 0.2);
+                Check("editor range order",
+                    rangeBar.Start <= rangeBar.End &&
+                    rangeBar.End - rangeBar.Start >= 0.05);
+
                 VideoInfo imageInfo = Ffmpeg.Probe(still);
                 Line("image probe: " + imageInfo.Describe());
                 Check("probe image", imageInfo.IsImage && imageInfo.Width == 400 && imageInfo.Height == 300);
@@ -420,8 +432,6 @@ namespace Video2Gif
                 string ui = Path.Combine(work, "ui.png");
                 try
                 {
-                    Application.EnableVisualStyles();
-                    Application.SetCompatibleTextRenderingDefault(false);
                     using (MainForm form = new MainForm())
                     {
                         form.StartPosition = FormStartPosition.Manual;
@@ -700,6 +710,14 @@ namespace Video2Gif
                         Application.DoEvents();
                         Invoke(editor, "LoadFile", still);
                         Application.DoEvents();
+                        Check("editor range slider",
+                            GetField(editor, "range") as RangeBar != null);
+                        Check("editor trim buttons removed",
+                            GetField(editor, "startHereButton") == null &&
+                            GetField(editor, "endHereButton") == null &&
+                            GetField(editor, "startInput") == null &&
+                            GetField(editor, "endInput") == null &&
+                            GetField(editor, "seek") == null);
                         string shot = Path.Combine(work, "ui-editor.png");
                         SaveShot(editor, shot);
                         Check("ui editor screenshot",
