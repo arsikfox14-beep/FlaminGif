@@ -91,39 +91,41 @@ namespace Video2Gif
 
             if (Ui.NewYear)
             {
-                Ui.DrawSnowflake(g, Ui.P(390), Ui.P(18), Ui.P(9),
-                    Color.FromArgb(118, Ui.Accent), Math.Max(1.2f, Ui.P(1.4)));
-                Ui.DrawSnowflake(g, Ui.P(430), Ui.P(46), Ui.P(12),
-                    Color.FromArgb(124, Ui.Accent), Math.Max(1.3f, Ui.P(1.5)));
-                Ui.DrawSnowflake(g, Ui.P(470), Ui.P(16), Ui.P(7),
-                    Color.FromArgb(100, Ui.Accent), Math.Max(1.1f, Ui.P(1.2)));
-                Ui.DrawSnowflake(g, Ui.P(520), Ui.P(52), Ui.P(9),
-                    Color.FromArgb(106, Ui.Accent), Math.Max(1.1f, Ui.P(1.3)));
-                Ui.DrawSnowflake(g, Ui.P(570), Ui.P(20), Ui.P(8),
-                    Color.FromArgb(96, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
-                Ui.DrawSnowflake(g, Ui.P(620), Ui.P(48), Ui.P(10),
-                    Color.FromArgb(108, Ui.Accent), Math.Max(1.2f, Ui.P(1.3)));
-                Ui.DrawSnowflake(g, Ui.P(666), Ui.P(14), Ui.P(7),
-                    Color.FromArgb(92, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                Ui.DrawSnowflake(g, Ui.P(386), Ui.P(20), Ui.P(12),
+                    Color.FromArgb(150, Ui.Accent), Math.Max(1.3f, Ui.P(1.6)));
+                Ui.DrawSnowflake(g, Ui.P(432), Ui.P(50), Ui.P(16),
+                    Color.FromArgb(160, Ui.Accent), Math.Max(1.4f, Ui.P(1.7)));
+                Ui.DrawSnowflake(g, Ui.P(480), Ui.P(16), Ui.P(9),
+                    Color.FromArgb(130, Ui.Accent), Math.Max(1.1f, Ui.P(1.3)));
+                Ui.DrawSnowflake(g, Ui.P(530), Ui.P(54), Ui.P(12),
+                    Color.FromArgb(140, Ui.Accent), Math.Max(1.2f, Ui.P(1.4)));
+                Ui.DrawSnowflake(g, Ui.P(580), Ui.P(20), Ui.P(10),
+                    Color.FromArgb(125, Ui.Accent), Math.Max(1.1f, Ui.P(1.3)));
+                Ui.DrawSnowflake(g, Ui.P(630), Ui.P(50), Ui.P(13),
+                    Color.FromArgb(145, Ui.Accent), Math.Max(1.2f, Ui.P(1.5)));
+                Ui.DrawSnowflake(g, Ui.P(672), Ui.P(14), Ui.P(8),
+                    Color.FromArgb(115, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
                 return;
             }
 
             Rectangle pumpkin = new Rectangle(
-                Ui.P(398), Ui.P(8), Ui.P(30), Ui.P(26));
+                Ui.P(392), Ui.P(6), Ui.P(34), Ui.P(30));
             Ui.DrawPumpkin(g, pumpkin,
-                Color.FromArgb(140, Ui.Accent), Ui.Bg);
-            Ui.DrawLeaf(g, Ui.P(442), Ui.P(44), Ui.P(14),
-                Color.FromArgb(126, Ui.Accent), -28f);
-            Ui.DrawLeaf(g, Ui.P(488), Ui.P(16), Ui.P(11),
-                Color.FromArgb(112, Ui.Accent), 40f);
-            Ui.DrawLeaf(g, Ui.P(534), Ui.P(44), Ui.P(12),
-                Color.FromArgb(120, Ui.Accent), 18f);
-            Ui.DrawLeaf(g, Ui.P(580), Ui.P(18), Ui.P(9),
-                Color.FromArgb(104, Ui.Accent), 56f);
-            Ui.DrawLeaf(g, Ui.P(626), Ui.P(44), Ui.P(10),
-                Color.FromArgb(110, Ui.Accent), -64f);
-            Ui.DrawLeaf(g, Ui.P(668), Ui.P(16), Ui.P(8),
-                Color.FromArgb(96, Ui.Accent), 20f);
+                Color.FromArgb(170, Ui.Accent), Ui.Bg);
+            Ui.DrawLeaf(g, Ui.P(442), Ui.P(46), Ui.P(18),
+                Color.FromArgb(165, Ui.Accent), -28f);
+            Ui.DrawLeaf(g, Ui.P(492), Ui.P(14), Ui.P(13),
+                Color.FromArgb(145, Ui.Accent), 40f);
+            Ui.DrawLeaf(g, Ui.P(542), Ui.P(48), Ui.P(15),
+                Color.FromArgb(155, Ui.Accent), 18f);
+            Ui.DrawLeaf(g, Ui.P(592), Ui.P(18), Ui.P(11),
+                Color.FromArgb(135, Ui.Accent), 56f);
+            Ui.DrawLeaf(g, Ui.P(642), Ui.P(46), Ui.P(13),
+                Color.FromArgb(150, Ui.Accent), -64f);
+            Ui.DrawLeaf(g, Ui.P(678), Ui.P(16), Ui.P(9),
+                Color.FromArgb(120, Ui.Accent), 20f);
+            Ui.DrawLeaf(g, Ui.P(366), Ui.P(52), Ui.P(10),
+                Color.FromArgb(120, Ui.Accent), 60f);
         }
 
         /* --------------------------------------------------------------- Тема */

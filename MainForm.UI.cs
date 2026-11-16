@@ -431,30 +431,30 @@ namespace Video2Gif
                 if (Ui.NewYear)
                 {
                     Ui.DrawSnowflake(g, Width - Ui.P(28), Ui.P(28), Ui.P(20),
-                        Color.FromArgb(92, Ui.Accent), Math.Max(1.2f, Ui.P(1.5)));
+                        Color.FromArgb(120, Ui.Accent), Math.Max(1.2f, Ui.P(1.5)));
                     Ui.DrawSnowflake(g, Ui.P(28), Ui.P(46), Ui.P(12),
-                        Color.FromArgb(80, Ui.Accent), Math.Max(1.1f, Ui.P(1.3)));
+                        Color.FromArgb(105, Ui.Accent), Math.Max(1.1f, Ui.P(1.3)));
                     Ui.DrawSnowflake(g, Width - Ui.P(72), Ui.P(88), Ui.P(9),
-                        Color.FromArgb(74, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
+                        Color.FromArgb(95, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
                     Ui.DrawSnowflake(g, Width - Ui.P(34), Ui.P(142), Ui.P(8),
-                        Color.FromArgb(68, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                        Color.FromArgb(90, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
                 }
                 else
                 {
                     Rectangle pumpkin = new Rectangle(
                         Width - Ui.P(62), Ui.P(20), Ui.P(38), Ui.P(32));
                     Ui.DrawPumpkin(g, pumpkin,
-                        Color.FromArgb(112, Ui.Accent), Ui.Bg);
+                        Color.FromArgb(140, Ui.Accent), Ui.Bg);
                     Ui.DrawLeaf(g, Ui.P(26), Ui.P(58), Ui.P(20),
-                        Color.FromArgb(104, Ui.Accent), -28f);
+                        Color.FromArgb(135, Ui.Accent), -28f);
                     Ui.DrawLeaf(g, Width - Ui.P(92), Ui.P(74), Ui.P(15),
-                        Color.FromArgb(92, Ui.Accent), 40f);
+                        Color.FromArgb(120, Ui.Accent), 40f);
                     Ui.DrawLeaf(g, Width - Ui.P(30), Ui.P(126), Ui.P(12),
-                        Color.FromArgb(82, Ui.Accent), 18f);
+                        Color.FromArgb(110, Ui.Accent), 18f);
                     Ui.DrawLeaf(g, Ui.P(58), Ui.P(24), Ui.P(11),
-                        Color.FromArgb(82, Ui.Accent), 56f);
+                        Color.FromArgb(110, Ui.Accent), 56f);
                     Ui.DrawLeaf(g, Width - Ui.P(26), Ui.P(210), Ui.P(10),
-                        Color.FromArgb(76, Ui.Accent), -64f);
+                        Color.FromArgb(100, Ui.Accent), -64f);
                 }
             }
 
