@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
@@ -47,6 +48,20 @@ namespace Video2Gif
 
         /// <summary>Возвращает сведения о последнем релизе. Бросает UpdateException.</summary>
         public static UpdateInfo Check()
+        {
+            try
+            {
+                return CheckApi();
+            }
+            catch (UpdateException)
+            {
+                // Если api.github.com недоступен (блокировка, лимит запросов),
+                // пробуем обычную страницу релизов на github.com.
+                return CheckWeb();
+            }
+        }
+
+        private static UpdateInfo CheckApi()
         {
             string json = Get(Api + "?per_page=10");
             JavaScriptSerializer serializer = new JavaScriptSerializer();
@@ -112,6 +127,105 @@ namespace Video2Gif
 
             if (newest == null) newest = new UpdateInfo { Version = Program.Version };
             return newest;
+        }
+
+        /// <summary>
+        /// Резервная проверка без api.github.com: читает страницу последнего
+        /// релиза и список его файлов на обычном github.com.
+        /// </summary>
+        private static UpdateInfo CheckWeb()
+        {
+            try
+            {
+                string latest = "https://github.com/" + Repo + "/releases/latest";
+                Uri finalUri;
+                GetHtml(latest, out finalUri);
+
+                string path = finalUri.AbsolutePath;
+                int tagIndex = path.IndexOf("/tag/", StringComparison.OrdinalIgnoreCase);
+                if (tagIndex < 0) throw new UpdateException("Не удалось определить последнюю версию на GitHub.");
+                string tag = path.Substring(tagIndex + 5);
+                string version = NormalizeVersion(tag);
+                if (version.Length == 0) throw new UpdateException("Не удалось определить последнюю версию на GitHub.");
+
+                if (!IsNewer(version, Program.Version))
+                {
+                    return new UpdateInfo { Version = Program.Version };
+                }
+
+                string assetsUrl = "https://github.com/" + Repo +
+                    "/releases/expanded_assets/" + Uri.EscapeDataString(tag);
+                Uri assetsUri;
+                string html = GetHtml(assetsUrl, out assetsUri);
+                string pattern = "/releases/download/" + Regex.Escape(tag) + "/[^\"'<> ]+";
+                MatchCollection matches = Regex.Matches(html, pattern);
+
+                string exe = null;
+                string zip = null;
+                foreach (Match match in matches)
+                {
+                    string url = "https://github.com" + match.Value;
+                    string clean = match.Value.ToLowerInvariant();
+                    if (clean.EndsWith(".exe"))
+                    {
+                        if (exe == null ||
+                            clean.EndsWith("/video2gif.exe", StringComparison.Ordinal))
+                        {
+                            exe = url;
+                        }
+                    }
+                    else if (clean.EndsWith(".zip") && zip == null)
+                    {
+                        zip = url;
+                    }
+                }
+
+                string asset = exe != null ? exe : zip;
+                if (asset == null)
+                {
+                    throw new UpdateException(
+                        "На GitHub есть версия " + version +
+                        ", но в релизе нет файла Video2Gif.exe.");
+                }
+
+                return new UpdateInfo
+                {
+                    HasUpdate = true,
+                    Version = version,
+                    AssetUrl = asset,
+                    PageUrl = "https://github.com/" + Repo + "/releases/tag/" + tag
+                };
+            }
+            catch (UpdateException)
+            {
+                throw;
+            }
+            catch (WebException)
+            {
+                throw new UpdateException("Не удалось связаться с GitHub. Проверьте интернет.");
+            }
+            catch (Exception ex)
+            {
+                throw new UpdateException("Не удалось проверить обновления: " + ex.Message);
+            }
+        }
+
+        private static string GetHtml(string url, out Uri finalUri)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.UserAgent = UserAgent;
+            request.Accept = "text/html";
+            request.Timeout = 10000;
+            request.ReadWriteTimeout = 10000;
+            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            using (Stream stream = response.GetResponseStream())
+            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                finalUri = response.ResponseUri;
+                return reader.ReadToEnd();
+            }
         }
 
         /// <summary>Скачивает exe релиза во временную папку, возвращает путь.</summary>
@@ -251,8 +365,8 @@ namespace Video2Gif
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.UserAgent = UserAgent;
             request.Accept = "application/vnd.github+json";
-            request.Timeout = 15000;
-            request.ReadWriteTimeout = 15000;
+            request.Timeout = 8000;
+            request.ReadWriteTimeout = 8000;
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             request.Headers["X-GitHub-Api-Version"] = "2022-11-28";
 
