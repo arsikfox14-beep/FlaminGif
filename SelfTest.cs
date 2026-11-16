@@ -179,6 +179,14 @@ namespace Video2Gif
                 Check("playlist folder reuse empty",
                     MediaDownloader.MakeCollectionFolder(playlists, "My: Mix") == secondFolder);
 
+                MethodInfo qualityMethod = typeof(MediaDownloader).GetMethod(
+                    "QualityVideoFormat", BindingFlags.Static | BindingFlags.NonPublic);
+                string quality720 = qualityMethod != null
+                    ? (string)qualityMethod.Invoke(null, new object[] { "720" })
+                    : "";
+                Check("download quality format",
+                    quality720.Length > 0 && quality720.IndexOf("height<=720") >= 0);
+
                 Check("theme seasonal halloween",
                     Ui.SeasonalTheme(new DateTime(2026, 10, 1)) == ThemeKind.Halloween &&
                     Ui.SeasonalTheme(new DateTime(2026, 10, 31)) == ThemeKind.Halloween &&
@@ -327,6 +335,47 @@ namespace Video2Gif
                     "-hide_banner -loglevel error -f lavfi -i testsrc2=size=400x300 -frames:v 1 -y " +
                     Fmt.Quote(still), out stillOut);
                 Check("generate image", stillCode == 0 && File.Exists(still));
+
+                string gifFrames = Path.Combine(work, "gif-frames");
+                int gifFrameCount = EditorCore.ExtractGifFrames(fast, gifFrames);
+                Check("gif split frames", gifFrameCount >= 10);
+                string gifBuild = Path.Combine(work, "gif-build");
+                Directory.CreateDirectory(gifBuild);
+                string[] frameFiles = Directory.GetFiles(gifFrames, "frame-*.png");
+                Array.Sort(frameFiles, StringComparer.Ordinal);
+                for (int i = 0; i < frameFiles.Length; i++)
+                {
+                    File.Copy(frameFiles[i], Path.Combine(gifBuild,
+                        "f" + (i + 1).ToString("0000") + ".png"), true);
+                }
+                string gifRebuilt = Path.Combine(work, "gif-rebuilt.gif");
+                EditorCore.AssembleGif(gifBuild, 20, 160, gifRebuilt);
+                Check("gif assemble", IsGif(gifRebuilt) &&
+                    new FileInfo(gifRebuilt).Length > 1000);
+
+                string decorated = Path.Combine(work, "editor-decorated.mp4");
+                EditorCore.TrimVideo(sample, decorated, 0.4, 1.4,
+                    still, 3, 20, "Test caption", false, 320, 240);
+                VideoInfo decoratedInfo = Ffmpeg.Probe(decorated);
+                Check("editor video overlay",
+                    File.Exists(decorated) &&
+                    new FileInfo(decorated).Length > 1000 &&
+                    decoratedInfo.Duration > 0.6 && decoratedInfo.Duration < 1.8);
+
+                string decoratedPhoto = Path.Combine(work, "editor-decorated.png");
+                using (Bitmap basePhoto = new Bitmap(240, 160))
+                {
+                    using (Graphics graphics = Graphics.FromImage(basePhoto))
+                    {
+                        graphics.Clear(Color.FromArgb(255, 40, 80, 120));
+                    }
+                    EditorCore.DecoratePhoto(basePhoto, still, 3, 20,
+                        "Test caption", false);
+                    EditorCore.SaveBitmap(basePhoto, decoratedPhoto);
+                }
+                Check("editor photo overlay",
+                    File.Exists(decoratedPhoto) &&
+                    new FileInfo(decoratedPhoto).Length > 1000);
 
                 string trimmed = Path.Combine(work, "editor-trim.mp4");
                 EditorCore.TrimVideo(sample, trimmed, 0.4, 1.4);
@@ -491,22 +540,28 @@ namespace Video2Gif
                         Check("ui colors slider removed", GetField(form, "colorsSlider") == null);
                         IconButton game = GetField(form, "gameButton") as IconButton;
                         IconButton editor = GetField(form, "editorButton") as IconButton;
+                        IconButton gifTools = GetField(form, "gifToolsButton") as IconButton;
                         IconButton download = GetField(form, "downloadsButton") as IconButton;
                         IconButton settings = GetField(form, "settingsButton") as IconButton;
                         Check("ui mouse button",
                             game != null && game.Kind == IconKind.Mouse);
                         Check("ui editor icon button",
                             editor != null && editor.Kind == IconKind.Editor);
+                        Check("ui gif tools icon button",
+                            gifTools != null && gifTools.Kind == IconKind.Frames);
                         Check("ui download icon button",
                             download != null && download.Kind == IconKind.Download);
                         Check("ui settings icon button",
                             settings != null && settings.Kind == IconKind.Settings);
                         Check("ui header order",
-                            game != null && editor != null && download != null &&
-                            editor.Left > game.Left && download.Left > editor.Left);
+                            game != null && editor != null && gifTools != null && download != null &&
+                            editor.Left > game.Left && gifTools.Left > editor.Left &&
+                            download.Left > gifTools.Left);
                         Check("ui header buttons compact",
-                            game != null && editor != null && download != null && settings != null &&
+                            game != null && editor != null && gifTools != null &&
+                            download != null && settings != null &&
                             game.Width <= Ui.P(34) && editor.Width <= Ui.P(34) &&
+                            gifTools.Width <= Ui.P(34) &&
                             download.Width <= Ui.P(34) && settings.Width <= Ui.P(34));
 
                         IconButton discord = GetField(form, "discordButton") as IconButton;
@@ -779,6 +834,41 @@ namespace Video2Gif
                 {
                     Check("ui editor screenshot", false);
                     Line("  editor ui error: " + ex.Message);
+                }
+
+                try
+                {
+                    Ui.SetDark(true);
+                    using (GifToolsForm tools = new GifToolsForm())
+                    {
+                        tools.StartPosition = FormStartPosition.Manual;
+                        tools.Location = new Point(-4000, -4000);
+                        tools.Show();
+                        Application.DoEvents();
+                        string shot = Path.Combine(work, "ui-gif-tools.png");
+                        SaveShot(tools, shot);
+                        Check("ui gif tools screenshot",
+                            File.Exists(shot) && new FileInfo(shot).Length > 2000);
+                        tools.Close();
+                    }
+
+                    using (OverlayForm overlay = new OverlayForm())
+                    {
+                        overlay.StartPosition = FormStartPosition.Manual;
+                        overlay.Location = new Point(-4000, -4000);
+                        overlay.Show();
+                        Application.DoEvents();
+                        string shot = Path.Combine(work, "ui-overlay.png");
+                        SaveShot(overlay, shot);
+                        Check("ui overlay screenshot",
+                            File.Exists(shot) && new FileInfo(shot).Length > 2000);
+                        overlay.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Check("ui gif tools screenshot", false);
+                    Line("  gif tools ui error: " + ex.Message);
                 }
 
                 try
