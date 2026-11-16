@@ -330,7 +330,7 @@ namespace Video2Gif
     internal sealed class InfoBadge : Control
     {
         private static readonly Font MarkFont =
-            new Font("Segoe UI", 7.5f, FontStyle.Bold);
+            new Font("Segoe UI", 12.5f, FontStyle.Bold);
 
         public string InfoText = "";
 
@@ -381,6 +381,77 @@ namespace Video2Gif
             Ui.Write(g, "!", MarkFont,
                 new Rectangle(0, -Ui.P(1), Width, Height),
                 color, Ui.CenterMid);
+        }
+    }
+
+    /// <summary>Небольшое окно с авторами, открывается по клику на «!».</summary>
+    internal sealed class CreditsForm : Form
+    {
+        public CreditsForm(string text)
+        {
+            BackColor = Ui.Card;
+            Font = Ui.Base;
+            FormBorderStyle = FormBorderStyle.None;
+            StartPosition = FormStartPosition.Manual;
+            ShowInTaskbar = false;
+            DoubleBuffered = true;
+            KeyPreview = true;
+            ClientSize = new Size(Ui.P(392), Ui.P(136));
+
+            Controls.Add(MakeLabel("Авторы", Ui.H2, Ui.Text, 16, 10, 356, 26));
+
+            string[] lines = (text ?? "").Split(new char[] { '\n' });
+            int y = 40;
+            for (int i = 0; i < lines.Length && i < 4; i++)
+            {
+                Controls.Add(MakeLabel(lines[i].Trim(), Ui.Small, Ui.Muted,
+                    16, y, 360, 20));
+                y += 22;
+            }
+
+            Deactivate += delegate { Close(); };
+            KeyDown += delegate(object sender, KeyEventArgs e)
+            {
+                if (e.KeyCode == Keys.Escape) Close();
+            };
+        }
+
+        private static Label MakeLabel(string text, Font font, Color color,
+            int x, int y, int w, int h)
+        {
+            Label label = new Label();
+            label.Text = text;
+            label.Font = font;
+            label.ForeColor = color;
+            label.BackColor = Color.Transparent;
+            label.UseMnemonic = false;
+            label.Tag = Ui.RoleOf(color);
+            label.SetBounds(Ui.P(x), Ui.P(y), Ui.P(w), Ui.P(h));
+            label.TextAlign = ContentAlignment.MiddleLeft;
+            return label;
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            e.Graphics.Clear(Ui.Card);
+            if (Ui.Gamesense) Ui.DrawCarbon(e.Graphics, ClientRectangle);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
+            Ui.StrokeRound(g, r, Ui.P(10), Ui.Border, 1.1f);
+            if (Ui.Gamesense)
+            {
+                Rectangle strip = new Rectangle(0, 0, Width, Math.Max(2, Ui.P(3)));
+                using (LinearGradientBrush brush = Ui.RainbowBrush(strip, 0.12, 8))
+                {
+                    g.FillRectangle(brush, strip);
+                }
+            }
         }
     }
 

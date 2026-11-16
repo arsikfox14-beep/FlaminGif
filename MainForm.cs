@@ -24,6 +24,7 @@ namespace Video2Gif
         private System.Windows.Forms.Timer themeTimer;
         private System.Windows.Forms.Timer shimmerTimer;
         private float shimmerPhase;
+        private CreditsForm credits;
 
         public MainForm()
         {
@@ -403,6 +404,29 @@ namespace Video2Gif
             {
                 editor.ShowDialog(this);
             }
+        }
+
+        private void ShowCredits()
+        {
+            if (credits != null && !credits.IsDisposed)
+            {
+                credits.Close();
+                credits = null;
+            }
+
+            CreditsForm popup = new CreditsForm(infoBadge.InfoText);
+            Point anchor = infoBadge.PointToScreen(new Point(infoBadge.Width, 0));
+            Rectangle area = Screen.FromControl(infoBadge).WorkingArea;
+            int x = Math.Max(area.Left + 8,
+                Math.Min(anchor.X - popup.Width, area.Right - popup.Width - 8));
+            int y = Math.Max(area.Top + 8, anchor.Y - popup.Height - 8);
+            popup.Location = new Point(x, y);
+            popup.FormClosed += delegate
+            {
+                if (credits == popup) credits = null;
+            };
+            credits = popup;
+            popup.Show(this);
         }
 
         private void LoadVideo(string path)
