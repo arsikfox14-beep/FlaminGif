@@ -140,15 +140,29 @@ namespace Video2Gif
 
         /// <summary>
         /// Хэллоуин — с 1 октября по 1 ноября, Новый год — с 1 декабря
-        /// по 1 января (границы включительно). В остальное время — тёмная.
+        /// по 1 января, а тема GTA 6 — с 18 ноября 22:00 по 20 ноября 00:00
+        /// (границы включительно). В остальное время — тёмная.
         /// </summary>
         public static ThemeKind SeasonalTheme(DateTime date)
         {
+            if (Gta6Window(date))
+                return ThemeKind.Gta6;
             if (date.Month == 10 || (date.Month == 11 && date.Day == 1))
                 return ThemeKind.Halloween;
             if (date.Month == 12 || (date.Month == 1 && date.Day == 1))
                 return ThemeKind.NewYear;
             return ThemeKind.Dark;
+        }
+
+        /// <summary>
+        /// Праздничное окно темы GTA 6: с 18 ноября 2026, 22:00
+        /// до 20 ноября 2026, 00:00 (конец не включается).
+        /// </summary>
+        public static bool Gta6Window(DateTime date)
+        {
+            DateTime start = new DateTime(2026, 11, 18, 22, 0, 0);
+            DateTime end = new DateTime(2026, 11, 20, 0, 0, 0);
+            return date >= start && date < end;
         }
 
         private static void ApplyTheme(ThemeKind kind)

@@ -26,21 +26,19 @@ namespace Video2Gif
         public MainForm()
         {
             string setting = LoadThemeSetting();
-            if (setting.Length == 0 || setting == "auto") Ui.SetThemeAuto(DateTime.Now);
+            if (Ui.Gta6Window(DateTime.Now)) Ui.SetTheme(ThemeKind.Gta6);
+            else if (setting.Length == 0 || setting == "auto") Ui.SetThemeAuto(DateTime.Now);
             else Ui.SetTheme(setting);
             BuildUi();
             EnableDrop(this);
             FormClosing += delegate { Shutdown(); };
             UpdateActions();
 
-            // Если программа открыта в ночь смены сезона, тема переключится
-            // сама — без перезапуска.
+            // Если программа открыта в ночь смены сезона или в окне GTA 6,
+            // тема переключится сама — без перезапуска.
             themeTimer = new System.Windows.Forms.Timer();
             themeTimer.Interval = 60000;
-            themeTimer.Tick += delegate
-            {
-                if (Ui.RefreshAutoTheme(DateTime.Now)) ApplyThemeNow();
-            };
+            themeTimer.Tick += delegate { RefreshScheduledTheme(); };
             themeTimer.Start();
         }
 
@@ -114,6 +112,35 @@ namespace Video2Gif
                 File.WriteAllText(path, Ui.AutoTheme ? "auto" : Ui.ThemeName);
             }
             catch { }
+        }
+
+        private void RefreshScheduledTheme()
+        {
+            DateTime now = DateTime.Now;
+            string setting = LoadThemeSetting();
+            bool savedGta6 =
+                setting == "gta6" || setting == "gta" || setting == "gta-6";
+
+            if (Ui.Gta6Window(now))
+            {
+                if (!Ui.Gta6)
+                {
+                    Ui.SetTheme(ThemeKind.Gta6);
+                    ApplyThemeNow();
+                }
+                return;
+            }
+
+            if (Ui.Gta6 && !savedGta6)
+            {
+                // Праздничное окно закончилось — возвращаем сохранённую тему.
+                if (setting.Length == 0 || setting == "auto") Ui.SetThemeAuto(now);
+                else Ui.SetTheme(setting);
+                ApplyThemeNow();
+                return;
+            }
+
+            if (Ui.RefreshAutoTheme(now)) ApplyThemeNow();
         }
 
         private void ApplyThemeNow()
