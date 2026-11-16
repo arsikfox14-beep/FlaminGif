@@ -612,54 +612,82 @@ namespace Video2Gif
             }
         }
 
-        /// <summary>Силуэт пальмы для темы GTA 6.</summary>
+        /// <summary>Силуэт пальмы для темы GTA 6: ствол и широкие листья.</summary>
         public static void DrawPalm(Graphics g, float x, float baseY, float height,
             Color color, float lean)
         {
-            float topX = x + lean * height * 0.12f;
+            float topX = x + lean * height;
             float topY = baseY - height;
-            using (Pen trunk = new Pen(color, Math.Max(2f, height * 0.055f)))
-            {
-                trunk.StartCap = LineCap.Round;
-                trunk.EndCap = LineCap.Round;
-                using (GraphicsPath path = new GraphicsPath())
-                {
-                    path.AddBezier(x, baseY,
-                        x + lean * height * 0.02f, baseY - height * 0.42f,
-                        x + lean * height * 0.07f, baseY - height * 0.72f,
-                        topX, topY);
-                    g.DrawPath(trunk, path);
-                }
-            }
+            float baseWidth = Math.Max(2.4f, height * 0.105f);
+            float topWidth = Math.Max(1.6f, height * 0.05f);
 
-            float reach = height * 0.42f;
-            PointF[] tips = new PointF[]
+            using (SolidBrush brush = new SolidBrush(color))
             {
-                new PointF(topX - reach, topY - reach * 0.10f),
-                new PointF(topX - reach * 0.62f, topY - reach * 0.70f),
-                new PointF(topX - reach * 0.18f, topY - reach * 0.95f),
-                new PointF(topX + reach * 0.28f, topY - reach * 0.88f),
-                new PointF(topX + reach * 0.70f, topY - reach * 0.52f),
-                new PointF(topX + reach, topY - reach * 0.02f),
-                new PointF(topX + reach * 0.62f, topY + reach * 0.28f),
-                new PointF(topX - reach * 0.62f, topY + reach * 0.28f)
-            };
-            using (Pen leaf = new Pen(color, Math.Max(1.4f, height * 0.028f)))
-            {
-                leaf.StartCap = LineCap.Round;
-                leaf.EndCap = LineCap.Round;
+                // Ствол — изогнутая сужающаяся фигура.
+                using (GraphicsPath trunk = new GraphicsPath())
+                {
+                    trunk.AddBezier(
+                        x - baseWidth / 2f, baseY,
+                        x - baseWidth * 0.25f + lean * height * 0.3f, baseY - height * 0.42f,
+                        topX - topWidth * 1.2f, topY + height * 0.20f,
+                        topX - topWidth / 2f, topY);
+                    trunk.AddBezier(
+                        topX + topWidth / 2f, topY,
+                        topX + topWidth * 1.2f, topY + height * 0.20f,
+                        x + baseWidth * 0.25f + lean * height * 0.3f, baseY - height * 0.42f,
+                        x + baseWidth / 2f, baseY);
+                    trunk.CloseFigure();
+                    g.FillPath(brush, trunk);
+                }
+
+                float reach = height * 0.42f;
+                float leafWidth = Math.Max(3f, height * 0.14f);
+                PointF crown = new PointF(topX, topY + height * 0.02f);
+                PointF[] tips = new PointF[]
+                {
+                    new PointF(crown.X - reach, crown.Y - reach * 0.12f),
+                    new PointF(crown.X - reach * 0.55f, crown.Y - reach * 0.82f),
+                    new PointF(crown.X + reach * 0.55f, crown.Y - reach * 0.82f),
+                    new PointF(crown.X + reach, crown.Y - reach * 0.12f),
+                    new PointF(crown.X + reach * 0.55f, crown.Y + reach * 0.36f),
+                    new PointF(crown.X - reach * 0.55f, crown.Y + reach * 0.36f)
+                };
+
                 for (int i = 0; i < tips.Length; i++)
                 {
-                    PointF tip = tips[i];
-                    using (GraphicsPath path = new GraphicsPath())
+                    float dx = tips[i].X - crown.X;
+                    float dy = tips[i].Y - crown.Y;
+                    float length = (float)Math.Sqrt(dx * dx + dy * dy);
+                    if (length < 1f) continue;
+                    float px = -dy / length * leafWidth;
+                    float py = dx / length * leafWidth;
+
+                    using (GraphicsPath leaf = new GraphicsPath())
                     {
-                        path.AddBezier(topX, topY,
-                            topX + (tip.X - topX) * 0.35f, topY - height * 0.16f,
-                            topX + (tip.X - topX) * 0.72f, tip.Y - height * 0.03f,
-                            tip.X, tip.Y);
-                        g.DrawPath(leaf, path);
+                        leaf.AddBezier(crown,
+                            new PointF(crown.X + dx * 0.32f + px, crown.Y + dy * 0.32f + py),
+                            new PointF(crown.X + dx * 0.72f + px * 0.55f, crown.Y + dy * 0.72f + py * 0.55f),
+                            tips[i]);
+                        leaf.AddBezier(tips[i],
+                            new PointF(crown.X + dx * 0.72f - px * 0.55f, crown.Y + dy * 0.72f - py * 0.55f),
+                            new PointF(crown.X + dx * 0.32f - px, crown.Y + dy * 0.32f - py),
+                            crown);
+                        leaf.CloseFigure();
+                        g.FillPath(brush, leaf);
                     }
                 }
+
+                // Основание кроны.
+                float cap = Math.Max(2f, height * 0.05f);
+                g.FillEllipse(brush, crown.X - cap, crown.Y - cap * 0.6f,
+                    cap * 2f, cap * 1.2f);
+
+                // Кокосы у основания кроны.
+                float nut = Math.Max(1.4f, height * 0.045f);
+                g.FillEllipse(brush, crown.X - nut * 1.6f, crown.Y - nut * 0.4f,
+                    nut * 1.5f, nut * 1.5f);
+                g.FillEllipse(brush, crown.X + nut * 0.2f, crown.Y - nut * 0.6f,
+                    nut * 1.5f, nut * 1.5f);
             }
         }
 
@@ -1067,10 +1095,10 @@ namespace Video2Gif
                     }
 
                     // Пальмы и чайки в стиле Vice City.
-                    Ui.DrawPalm(g, Width * 0.53f, Height * 0.99f, Height * 0.84f,
-                        Color.FromArgb(86, 10, 5, 18), -8f);
-                    Ui.DrawPalm(g, Width * 0.62f, Height * 0.99f, Height * 0.62f,
-                        Color.FromArgb(70, 10, 5, 18), 10f);
+                    Ui.DrawPalm(g, Width * 0.56f, Height * 0.99f, Height * 0.84f,
+                        Color.FromArgb(140, 18, 6, 28), -0.10f);
+                    Ui.DrawPalm(g, Width * 0.66f, Height * 0.99f, Height * 0.62f,
+                        Color.FromArgb(112, 18, 6, 28), 0.12f);
                     Ui.DrawGull(g, Width * 0.48f, Height * 0.22f, Ui.P(9),
                         Color.FromArgb(110, 255, 255, 255));
                     Ui.DrawGull(g, Width * 0.55f, Height * 0.14f, Ui.P(6),
