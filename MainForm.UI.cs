@@ -28,6 +28,7 @@ namespace Video2Gif
         private IconButton downloadsButton;
         private IconButton settingsButton;
         private IconButton gameButton;
+        private IconButton editorButton;
         private IconButton discordButton;
         private IconButton donateButton;
         private ToolTip headerTip;
@@ -95,12 +96,17 @@ namespace Video2Gif
             Controls.Add(Lbl("видео и картинки → GIF",
                 Ui.Small, Ui.Muted, 71, 36, 300, 18));
             Controls.Add(Lbl("v" + Program.Version + " · локально", Ui.Tiny, Ui.Faint,
-                536, 24, 204, 18, ContentAlignment.MiddleRight));
+                496, 24, 204, 18, ContentAlignment.MiddleRight));
 
             gameButton = new IconButton(IconKind.Mouse);
-            gameButton.SetBounds(Ui.P(744), Ui.P(16), Ui.P(32), Ui.P(32));
+            gameButton.SetBounds(Ui.P(704), Ui.P(16), Ui.P(32), Ui.P(32));
             gameButton.Click += delegate { OpenGame(); };
             Controls.Add(gameButton);
+
+            editorButton = new IconButton(IconKind.Editor);
+            editorButton.SetBounds(Ui.P(744), Ui.P(16), Ui.P(32), Ui.P(32));
+            editorButton.Click += delegate { OpenEditor(); };
+            Controls.Add(editorButton);
 
             downloadsButton = new IconButton(IconKind.Download);
             downloadsButton.SetBounds(Ui.P(784), Ui.P(16), Ui.P(32), Ui.P(32));
@@ -124,6 +130,7 @@ namespace Video2Gif
 
             headerTip = new ToolTip();
             headerTip.SetToolTip(gameButton, "Играть · Змейка");
+            headerTip.SetToolTip(editorButton, "Видеоредактор · обрезка видео и фото");
             headerTip.SetToolTip(downloadsButton, "Скачать видео, музыку или TikTok");
             headerTip.SetToolTip(settingsButton, "Настройки · тема оформления");
             headerTip.SetToolTip(discordButton, "Discord — чат сообщества");
