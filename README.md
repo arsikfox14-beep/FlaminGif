@@ -15,8 +15,10 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 
 ## Скриншоты
 
-**(Версия 2.7+ mobile)**
+**(Версия 5.1 mobile)**
+<img width="962" height="606" alt="Снимок экрана 2026-11-16 181755" src="https://github.com/user-attachments/assets/398c733b-d248-42a4-9bbe-1e7f23e7fd9a" />
 
+**(Версия 2.7+ mobile)**
 <img width="1613" height="656" alt="изображение" src="https://github.com/user-attachments/assets/30e7113c-34a5-4553-a284-8c1e7e0222ec" />
 
 <img width="600" height="800" alt="Screenshot_20261110_112637" src="https://github.com/user-attachments/assets/981a8b8f-5164-4d3b-86d7-7e0894544d79" />
