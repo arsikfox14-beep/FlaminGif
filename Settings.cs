@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Video2Gif
@@ -129,6 +130,10 @@ namespace Video2Gif
         private readonly ThemeTile darkTile;
         private readonly ThemeTile newYearTile;
         private readonly ThemeTile halloweenTile;
+        private readonly ThemeTile gtaTile;
+        private PillButton updateButton;
+        private Label updateStatus;
+        private bool checking;
 
         public SettingsForm(Action<string> pickTheme)
         {
@@ -137,7 +142,7 @@ namespace Video2Gif
             Text = "Настройки — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(428), Ui.P(336));
+            ClientSize = new Size(Ui.P(428), Ui.P(448));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -147,8 +152,8 @@ namespace Video2Gif
             KeyPreview = true;
             try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
 
-            Controls.Add(Lbl("Настройки", Ui.H2, Ui.Text, 24, 14, 300, 26));
-            Controls.Add(Lbl("Тема оформления", Ui.Small, Ui.Muted, 24, 44, 300, 18));
+            Controls.Add(Lbl("Настройки", Ui.H2, Ui.Text, 24, 12, 300, 26));
+            Controls.Add(Lbl("Тема оформления", Ui.Small, Ui.Muted, 24, 40, 300, 18));
 
             autoTile = MakeTile("auto", "Авто");
             autoTile.SwatchBg = Color.FromArgb(247, 247, 248);
@@ -159,7 +164,7 @@ namespace Video2Gif
                 : seasonal == ThemeKind.NewYear
                     ? Color.FromArgb(126, 200, 255)
                     : Color.FromArgb(126, 126, 132);
-            autoTile.SetBounds(Ui.P(24), Ui.P(68), Ui.P(120), Ui.P(64));
+            autoTile.SetBounds(Ui.P(24), Ui.P(64), Ui.P(120), Ui.P(64));
             autoTile.Click += delegate { Choose("auto"); };
             Controls.Add(autoTile);
 
@@ -167,7 +172,7 @@ namespace Video2Gif
             lightTile.SwatchBg = Color.FromArgb(247, 247, 248);
             lightTile.SwatchCard = Color.White;
             lightTile.SwatchAccent = Color.FromArgb(23, 23, 23);
-            lightTile.SetBounds(Ui.P(154), Ui.P(68), Ui.P(120), Ui.P(64));
+            lightTile.SetBounds(Ui.P(154), Ui.P(64), Ui.P(120), Ui.P(64));
             lightTile.Click += delegate { Choose("light"); };
             Controls.Add(lightTile);
 
@@ -175,7 +180,7 @@ namespace Video2Gif
             darkTile.SwatchBg = Color.FromArgb(14, 14, 15);
             darkTile.SwatchCard = Color.FromArgb(24, 24, 26);
             darkTile.SwatchAccent = Color.FromArgb(242, 242, 243);
-            darkTile.SetBounds(Ui.P(284), Ui.P(68), Ui.P(120), Ui.P(64));
+            darkTile.SetBounds(Ui.P(284), Ui.P(64), Ui.P(120), Ui.P(64));
             darkTile.Click += delegate { Choose("dark"); };
             Controls.Add(darkTile);
 
@@ -183,7 +188,7 @@ namespace Video2Gif
             newYearTile.SwatchBg = Color.FromArgb(9, 21, 38);
             newYearTile.SwatchCard = Color.FromArgb(16, 34, 56);
             newYearTile.SwatchAccent = Color.FromArgb(126, 200, 255);
-            newYearTile.SetBounds(Ui.P(24), Ui.P(140), Ui.P(184), Ui.P(64));
+            newYearTile.SetBounds(Ui.P(24), Ui.P(136), Ui.P(120), Ui.P(64));
             newYearTile.Click += delegate { Choose("newyear"); };
             Controls.Add(newYearTile);
 
@@ -191,22 +196,45 @@ namespace Video2Gif
             halloweenTile.SwatchBg = Color.FromArgb(18, 12, 24);
             halloweenTile.SwatchCard = Color.FromArgb(29, 19, 38);
             halloweenTile.SwatchAccent = Color.FromArgb(255, 140, 66);
-            halloweenTile.SetBounds(Ui.P(220), Ui.P(140), Ui.P(184), Ui.P(64));
+            halloweenTile.SetBounds(Ui.P(154), Ui.P(136), Ui.P(120), Ui.P(64));
             halloweenTile.Click += delegate { Choose("halloween"); };
             Controls.Add(halloweenTile);
 
+            gtaTile = MakeTile("gta6", "GTA 6");
+            gtaTile.SwatchBg = Color.FromArgb(12, 11, 14);
+            gtaTile.SwatchCard = Color.FromArgb(23, 19, 28);
+            gtaTile.SwatchAccent = Color.FromArgb(255, 79, 163);
+            gtaTile.SetBounds(Ui.P(284), Ui.P(136), Ui.P(120), Ui.P(64));
+            gtaTile.Click += delegate { Choose("gta6"); };
+            Controls.Add(gtaTile);
+
             Controls.Add(Lbl("Авто по дате Windows: Хэллоуин — 1 октября–1 ноября,\n" +
                 "Новый год — 1 декабря–1 января.", Ui.Tiny, Ui.Faint,
-                24, 212, 380, 32));
+                24, 208, 380, 32));
 
             Controls.Add(Lbl("Тема применяется сразу и запоминается.", Ui.Tiny, Ui.Faint,
-                24, 250, 380, 18));
+                24, 242, 380, 18));
+
+            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 276, 300, 24));
+            Controls.Add(Lbl("Версия " + Program.Version + " · GitHub: " + Updater.Repo,
+                Ui.Tiny, Ui.Faint, 24, 302, 380, 18));
+
+            updateButton = new PillButton();
+            updateButton.Ghost = true;
+            updateButton.Text = "Проверить обновления";
+            updateButton.Font = Ui.Small;
+            updateButton.SetBounds(Ui.P(24), Ui.P(328), Ui.P(208), Ui.P(36));
+            updateButton.Click += delegate { CheckUpdates(); };
+            Controls.Add(updateButton);
+
+            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 244, 328, 160, 36);
+            Controls.Add(updateStatus);
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(300), Ui.P(284), Ui.P(104), Ui.P(36));
+            done.SetBounds(Ui.P(300), Ui.P(396), Ui.P(104), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 
@@ -238,6 +266,66 @@ namespace Video2Gif
             darkTile.Active = !Ui.AutoTheme && current == "dark";
             newYearTile.Active = !Ui.AutoTheme && current == "newyear";
             halloweenTile.Active = !Ui.AutoTheme && current == "halloween";
+            gtaTile.Active = !Ui.AutoTheme && current == "gta6";
+        }
+
+        /* ---------------------------------------------------------- Обновления */
+
+        private void CheckUpdates()
+        {
+            if (checking) return;
+            checking = true;
+            updateButton.Enabled = false;
+            SetUpdateStatus("Проверяем…", false);
+
+            Task.Factory.StartNew(delegate { return Updater.Check(); })
+                .ContinueWith(delegate(Task<UpdateInfo> task)
+                {
+                    if (IsDisposed || !IsHandleCreated) return;
+                    try
+                    {
+                        BeginInvoke((MethodInvoker)delegate { OnUpdateChecked(task); });
+                    }
+                    catch { }
+                });
+        }
+
+        private void OnUpdateChecked(Task<UpdateInfo> task)
+        {
+            checking = false;
+            updateButton.Enabled = true;
+
+            if (task.IsFaulted)
+            {
+                Exception inner = task.Exception != null ? task.Exception.InnerException : null;
+                SetUpdateStatus(inner != null ? inner.Message : "Не удалось проверить обновления.", true);
+                return;
+            }
+
+            UpdateInfo info = task.Result;
+            if (info == null || !info.HasUpdate)
+            {
+                SetUpdateStatus("Установлена последняя версия.", false);
+                return;
+            }
+
+            SetUpdateStatus("Доступна версия " + info.Version + ".", false);
+            DialogResult answer = MessageBox.Show(this,
+                "Доступна версия " + info.Version + ".\nСкачать и установить сейчас?",
+                Program.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (answer != DialogResult.Yes) return;
+
+            using (UpdateForm dialog = new UpdateForm(info))
+            {
+                dialog.ShowDialog(this);
+            }
+        }
+
+        private void SetUpdateStatus(string text, bool error)
+        {
+            updateStatus.Text = text;
+            updateStatus.ForeColor = error ? Ui.Bad : Ui.Faint;
+            updateStatus.Tag = Ui.RoleOf(updateStatus.ForeColor);
         }
 
         private void ApplyTitleBar()

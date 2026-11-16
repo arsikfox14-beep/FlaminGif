@@ -123,6 +123,61 @@ namespace Video2Gif
             {
                 LoadVideo(args[1]);
             }
+            if (!Program.SelfTestMode) CheckUpdatesOnStart();
+        }
+
+        /* ------------------------------------------------------------ Обновления */
+
+        private static string SeenUpdatePath
+        {
+            get
+            {
+                return Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Video2Gif", "update.txt");
+            }
+        }
+
+        private void CheckUpdatesOnStart()
+        {
+            Task.Factory.StartNew(delegate
+            {
+                try { return Updater.Check(); }
+                catch { return null; }
+            }).ContinueWith(delegate(Task<UpdateInfo> task)
+            {
+                if (IsDisposed || !IsHandleCreated) return;
+                try
+                {
+                    BeginInvoke((MethodInvoker)delegate { OfferUpdate(task.Result); });
+                }
+                catch { }
+            });
+        }
+
+        private void OfferUpdate(UpdateInfo info)
+        {
+            if (info == null || !info.HasUpdate) return;
+
+            try
+            {
+                string seen = SeenUpdatePath;
+                if (File.Exists(seen) && File.ReadAllText(seen).Trim() == info.Version) return;
+                Directory.CreateDirectory(Path.GetDirectoryName(seen));
+                File.WriteAllText(seen, info.Version);
+            }
+            catch { }
+
+            DialogResult answer = MessageBox.Show(this,
+                "Доступна новая версия " + info.Version + " (у вас " + Program.Version + ").\n" +
+                "Скачать и установить сейчас?",
+                Program.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (answer != DialogResult.Yes) return;
+
+            using (UpdateForm dialog = new UpdateForm(info))
+            {
+                dialog.ShowDialog(this);
+            }
         }
 
         /* ------------------------------------------------------------ FFmpeg */

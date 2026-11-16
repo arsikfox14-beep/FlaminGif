@@ -11,7 +11,8 @@ namespace Video2Gif
         Light,
         Dark,
         NewYear,
-        Halloween
+        Halloween,
+        Gta6
     }
 
     internal static class Ui
@@ -27,6 +28,11 @@ namespace Video2Gif
         public static bool Holiday
         {
             get { return Theme == ThemeKind.NewYear || Theme == ThemeKind.Halloween; }
+        }
+
+        public static bool Gta6
+        {
+            get { return Theme == ThemeKind.Gta6; }
         }
 
         public static bool NewYear
@@ -46,6 +52,7 @@ namespace Video2Gif
                 if (Theme == ThemeKind.Light) return "light";
                 if (Theme == ThemeKind.NewYear) return "newyear";
                 if (Theme == ThemeKind.Halloween) return "halloween";
+                if (Theme == ThemeKind.Gta6) return "gta6";
                 return "dark";
             }
         }
@@ -105,6 +112,7 @@ namespace Video2Gif
             if (value == "light") kind = ThemeKind.Light;
             else if (value == "newyear" || value == "new-year" || value == "ny") kind = ThemeKind.NewYear;
             else if (value == "halloween" || value == "spooky") kind = ThemeKind.Halloween;
+            else if (value == "gta6" || value == "gta" || value == "gta-6") kind = ThemeKind.Gta6;
             SetTheme(kind);
         }
 
@@ -217,6 +225,26 @@ namespace Video2Gif
                 Bad = Color.FromArgb(255, 92, 92);
                 OnAccent = Color.FromArgb(26, 14, 8);
             }
+            else if (kind == ThemeKind.Gta6)
+            {
+                Bg = Color.FromArgb(12, 11, 14);
+                Card = Color.FromArgb(23, 19, 28);
+                Border = Color.FromArgb(44, 36, 54);
+                BorderStrong = Color.FromArgb(72, 58, 88);
+                Text = Color.FromArgb(247, 244, 251);
+                Muted = Color.FromArgb(181, 169, 197);
+                Faint = Color.FromArgb(124, 113, 137);
+                Accent = Color.FromArgb(255, 79, 163);
+                AccentDark = Color.FromArgb(226, 58, 138);
+                AccentInk = Color.FromArgb(255, 127, 192);
+                AccentSoft = Color.FromArgb(43, 27, 45);
+                AccentLine = Color.FromArgb(78, 51, 82);
+                AccentWash = Color.FromArgb(28, 20, 33);
+                Track = Color.FromArgb(38, 30, 45);
+                Good = Color.FromArgb(74, 222, 128);
+                Bad = Color.FromArgb(255, 107, 107);
+                OnAccent = Color.FromArgb(26, 10, 20);
+            }
             else
             {
                 Bg = Color.FromArgb(14, 14, 15);
@@ -287,6 +315,35 @@ namespace Video2Gif
         public static readonly Font H2 = new Font("Segoe UI", 12.5f, FontStyle.Bold);
         public static readonly Font H1 = new Font("Segoe UI", 15f, FontStyle.Bold);
         public static readonly Font Logo = new Font("Segoe UI", 14f, FontStyle.Bold);
+        public static readonly Font GtaMark = new Font("Segoe UI", 30f, FontStyle.Bold);
+
+        /* ------------------------------------------------- Тема GTA 6 (неон) */
+
+        /// <summary>Неоновый градиент темы GTA 6: розовый → фиолетовый → оранжевый.</summary>
+        public static ColorBlend GtaBlend()
+        {
+            ColorBlend blend = new ColorBlend(4);
+            blend.Colors = new Color[]
+            {
+                Color.FromArgb(255, 255, 79, 163),
+                Color.FromArgb(255, 168, 74, 255),
+                Color.FromArgb(255, 255, 110, 92),
+                Color.FromArgb(255, 255, 158, 66)
+            };
+            blend.Positions = new float[] { 0f, 0.42f, 0.76f, 1f };
+            return blend;
+        }
+
+        public static LinearGradientBrush GtaGradient(Rectangle bounds, float angle)
+        {
+            LinearGradientBrush brush = new LinearGradientBrush(
+                bounds,
+                Color.FromArgb(255, 79, 163),
+                Color.FromArgb(255, 158, 66),
+                angle);
+            brush.InterpolationColors = GtaBlend();
+            return brush;
+        }
 
         private static double DetectScale()
         {
@@ -755,6 +812,48 @@ namespace Video2Gif
                 g.DrawPath(pen, path);
             }
 
+            if (Ui.Gta6 && !Selected)
+            {
+                GraphicsState neon = g.Save();
+                try
+                {
+                    using (GraphicsPath clip = Ui.Round(new Rectangle(0, 0, Width, Height), radius))
+                    {
+                        g.SetClip(clip);
+                    }
+
+                    Rectangle glow = new Rectangle(0, 0, Width, Height);
+                    using (LinearGradientBrush brush = new LinearGradientBrush(
+                        glow,
+                        Color.FromArgb(0, 255, 79, 163),
+                        Color.FromArgb(48, 255, 158, 66),
+                        18f))
+                    {
+                        ColorBlend blend = new ColorBlend(4);
+                        blend.Colors = new Color[]
+                        {
+                            Color.FromArgb(0, 255, 79, 163),
+                            Color.FromArgb(0, 168, 74, 255),
+                            Color.FromArgb(34, 168, 74, 255),
+                            Color.FromArgb(48, 255, 158, 66)
+                        };
+                        blend.Positions = new float[] { 0f, 0.40f, 0.66f, 1f };
+                        brush.InterpolationColors = blend;
+                        g.FillRectangle(brush, glow);
+                    }
+
+                    Ui.Write(g, "VI", Ui.GtaMark,
+                        new Rectangle(Width - Ui.P(126), (Height - Ui.P(58)) / 2, Ui.P(96), Ui.P(58)),
+                        Color.FromArgb(44, 255, 255, 255),
+                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter |
+                        TextFormatFlags.NoPadding | TextFormatFlags.SingleLine);
+                }
+                finally
+                {
+                    g.Restore(neon);
+                }
+            }
+
             if (Ui.Holiday && !Selected)
             {
                 if (Ui.NewYear)
@@ -852,11 +951,22 @@ namespace Video2Gif
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
-            Color badge = Ui.Halloween ? Ui.AccentWash : Ui.Accent;
-            using (GraphicsPath path = Ui.Round(r, Ui.P(10)))
-            using (SolidBrush brush = new SolidBrush(badge))
+            if (Ui.Gta6)
             {
-                g.FillPath(brush, path);
+                using (GraphicsPath path = Ui.Round(r, Ui.P(10)))
+                using (LinearGradientBrush brush = Ui.GtaGradient(r, 45f))
+                {
+                    g.FillPath(brush, path);
+                }
+            }
+            else
+            {
+                Color badge = Ui.Halloween ? Ui.AccentWash : Ui.Accent;
+                using (GraphicsPath path = Ui.Round(r, Ui.P(10)))
+                using (SolidBrush brush = new SolidBrush(badge))
+                {
+                    g.FillPath(brush, path);
+                }
             }
 
             if (Ui.NewYear)
@@ -871,7 +981,7 @@ namespace Video2Gif
                 Rectangle pumpkin = new Rectangle(
                     (int)(Width * 0.18f), (int)(Height * 0.30f),
                     (int)(Width * 0.64f), (int)(Height * 0.52f));
-                Ui.DrawPumpkin(g, pumpkin, Ui.Accent, badge);
+                Ui.DrawPumpkin(g, pumpkin, Ui.Accent, Ui.AccentWash);
                 return;
             }
 
@@ -881,7 +991,7 @@ namespace Video2Gif
                 new PointF(Width * 0.40f, Height * 0.71f),
                 new PointF(Width * 0.72f, Height * 0.50f)
             };
-            using (SolidBrush ink = new SolidBrush(Ui.OnAccent))
+            using (SolidBrush ink = new SolidBrush(Ui.Gta6 ? Color.White : Ui.OnAccent))
             {
                 g.FillPolygon(ink, triangle);
             }

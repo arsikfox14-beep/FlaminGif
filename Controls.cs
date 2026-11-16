@@ -120,62 +120,78 @@ namespace Video2Gif
                 }
                 else if (Kind == IconKind.Discord)
                 {
-                    float u = unit;
+                    float u = unit * 0.82f;
+                    Color mark = !Enabled ? Ui.Faint : Ui.Accent;
+
+                    // Тонкие «плавники» вокруг лица — как в оригинальном логотипе.
+                    using (Pen fin = new Pen(mark, Math.Max(1.2f, u * 0.14f)))
+                    {
+                        fin.StartCap = LineCap.Round;
+                        fin.EndCap = LineCap.Round;
+                        float radius = u * 1.32f;
+                        RectangleF orbit = new RectangleF(
+                            cx - radius, cy - u * 0.02f - radius, radius * 2f, radius * 2f);
+                        g.DrawArc(fin, orbit, 202f, 34f);
+                        g.DrawArc(fin, orbit, 304f, 34f);
+                        g.DrawArc(fin, orbit, 105f, 28f);
+                        g.DrawArc(fin, orbit, 47f, 28f);
+                    }
+
                     using (GraphicsPath face = new GraphicsPath())
                     {
-                        PointF left = new PointF(cx - u * 1.05f, cy - u * 0.90f);
-                        PointF right = new PointF(cx + u * 1.05f, cy - u * 0.90f);
-                        PointF bottomLeft = new PointF(cx - u * 0.72f, cy + u * 0.86f);
-                        PointF bottomRight = new PointF(cx + u * 0.72f, cy + u * 0.86f);
-                        PointF top = new PointF(cx, cy - u * 0.62f);
+                        PointF tl = new PointF(cx - u * 0.80f, cy - u * 0.72f);
+                        PointF tr = new PointF(cx + u * 0.80f, cy - u * 0.72f);
+                        PointF rw = new PointF(cx + u * 1.12f, cy + u * 0.08f);
+                        PointF br = new PointF(cx + u * 0.60f, cy + u * 0.88f);
+                        PointF bc = new PointF(cx, cy + u * 0.70f);
+                        PointF bl = new PointF(cx - u * 0.60f, cy + u * 0.88f);
+                        PointF lw = new PointF(cx - u * 1.12f, cy + u * 0.08f);
 
-                        face.AddBezier(left,
-                            new PointF(cx - u * 1.25f, cy - u * 0.10f),
-                            new PointF(cx - u * 1.05f, cy + u * 0.55f),
-                            bottomLeft);
-                        face.AddBezier(bottomLeft,
-                            new PointF(cx - u * 0.35f, cy + u * 1.02f),
-                            new PointF(cx + u * 0.35f, cy + u * 1.02f),
-                            bottomRight);
-                        face.AddBezier(bottomRight,
-                            new PointF(cx + u * 1.05f, cy + u * 0.55f),
-                            new PointF(cx + u * 1.25f, cy - u * 0.10f),
-                            right);
-                        face.AddBezier(right,
-                            new PointF(cx + u * 0.78f, cy - u * 1.02f),
-                            new PointF(cx + u * 0.30f, cy - u * 0.86f),
-                            top);
-                        face.AddBezier(top,
-                            new PointF(cx - u * 0.30f, cy - u * 0.86f),
-                            new PointF(cx - u * 0.78f, cy - u * 1.02f),
-                            left);
+                        face.AddBezier(tl,
+                            new PointF(cx - u * 0.30f, cy - u * 0.58f),
+                            new PointF(cx + u * 0.30f, cy - u * 0.58f),
+                            tr);
+                        face.AddBezier(tr,
+                            new PointF(cx + u * 1.04f, cy - u * 0.50f),
+                            new PointF(cx + u * 1.12f, cy - u * 0.20f),
+                            rw);
+                        face.AddBezier(rw,
+                            new PointF(cx + u * 1.10f, cy + u * 0.52f),
+                            new PointF(cx + u * 0.90f, cy + u * 0.82f),
+                            br);
+                        face.AddBezier(br,
+                            new PointF(cx + u * 0.34f, cy + u * 0.93f),
+                            new PointF(cx + u * 0.15f, cy + u * 0.78f),
+                            bc);
+                        face.AddBezier(bc,
+                            new PointF(cx - u * 0.15f, cy + u * 0.78f),
+                            new PointF(cx - u * 0.34f, cy + u * 0.93f),
+                            bl);
+                        face.AddBezier(bl,
+                            new PointF(cx - u * 0.90f, cy + u * 0.82f),
+                            new PointF(cx - u * 1.10f, cy + u * 0.52f),
+                            lw);
+                        face.AddBezier(lw,
+                            new PointF(cx - u * 1.12f, cy - u * 0.20f),
+                            new PointF(cx - u * 1.04f, cy - u * 0.50f),
+                            tl);
                         face.CloseFigure();
 
-                        using (SolidBrush faceBrush = new SolidBrush(ink))
+                        using (SolidBrush faceBrush = new SolidBrush(mark))
                         {
                             g.FillPath(faceBrush, face);
                         }
                     }
 
-                    float eyeW = u * 0.34f;
+                    float eyeW = u * 0.42f;
                     float eyeH = u * 0.56f;
-                    float eyeX = u * 0.58f;
+                    float eyeX = u * 0.45f;
                     using (SolidBrush eyeBrush = new SolidBrush(fill))
-                    using (GraphicsPath leftEye = new GraphicsPath())
-                    using (GraphicsPath rightEye = new GraphicsPath())
                     {
-                        leftEye.AddEllipse(cx - eyeX - eyeW / 2f, cy - eyeH / 2f, eyeW, eyeH);
-                        rightEye.AddEllipse(cx + eyeX - eyeW / 2f, cy - eyeH / 2f, eyeW, eyeH);
-                        using (Matrix m = new Matrix())
-                        {
-                            m.RotateAt(-10f, new PointF(cx - eyeX, cy));
-                            leftEye.Transform(m);
-                            m.Reset();
-                            m.RotateAt(10f, new PointF(cx + eyeX, cy));
-                            rightEye.Transform(m);
-                        }
-                        g.FillPath(eyeBrush, leftEye);
-                        g.FillPath(eyeBrush, rightEye);
+                        g.FillEllipse(eyeBrush, cx - eyeX - eyeW / 2f,
+                            cy - u * 0.06f - eyeH / 2f, eyeW, eyeH);
+                        g.FillEllipse(eyeBrush, cx + eyeX - eyeW / 2f,
+                            cy - u * 0.06f - eyeH / 2f, eyeW, eyeH);
                     }
                 }
                 else if (Kind == IconKind.Donate)
@@ -184,15 +200,25 @@ namespace Video2Gif
                     using (GraphicsPath heart = new GraphicsPath())
                     {
                         heart.AddBezier(
-                            new PointF(cx, cy + u * 0.92f),
-                            new PointF(cx - u * 1.25f, cy + u * 0.10f),
-                            new PointF(cx - u * 1.02f, cy - u * 1.05f),
-                            new PointF(cx, cy - u * 0.36f));
+                            new PointF(cx, cy + u * 0.98f),
+                            new PointF(cx - u * 1.05f, cy + u * 0.20f),
+                            new PointF(cx - u * 1.02f, cy - u * 0.92f),
+                            new PointF(cx - u * 0.36f, cy - u * 0.72f));
                         heart.AddBezier(
-                            new PointF(cx, cy - u * 0.36f),
-                            new PointF(cx + u * 1.02f, cy - u * 1.05f),
-                            new PointF(cx + u * 1.25f, cy + u * 0.10f),
-                            new PointF(cx, cy + u * 0.92f));
+                            new PointF(cx - u * 0.36f, cy - u * 0.72f),
+                            new PointF(cx - u * 0.14f, cy - u * 0.62f),
+                            new PointF(cx - u * 0.05f, cy - u * 0.42f),
+                            new PointF(cx, cy - u * 0.26f));
+                        heart.AddBezier(
+                            new PointF(cx, cy - u * 0.26f),
+                            new PointF(cx + u * 0.05f, cy - u * 0.42f),
+                            new PointF(cx + u * 0.14f, cy - u * 0.62f),
+                            new PointF(cx + u * 0.36f, cy - u * 0.72f));
+                        heart.AddBezier(
+                            new PointF(cx + u * 0.36f, cy - u * 0.72f),
+                            new PointF(cx + u * 1.02f, cy - u * 0.92f),
+                            new PointF(cx + u * 1.05f, cy + u * 0.20f),
+                            new PointF(cx, cy + u * 0.98f));
                         heart.CloseFigure();
                         using (SolidBrush heartBrush = new SolidBrush(ink))
                         {

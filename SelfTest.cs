@@ -209,9 +209,21 @@ namespace Video2Gif
                 Ui.SetTheme("halloween");
                 Check("theme halloween",
                     Ui.Dark && Ui.Halloween && Ui.ThemeName == "halloween" && Ui.Accent != newYearAccent);
+                Ui.SetTheme("gta6");
+                Check("theme gta 6",
+                    Ui.Dark && Ui.Gta6 && Ui.ThemeName == "gta6" &&
+                    Ui.Accent == Color.FromArgb(255, 79, 163) && !Ui.Holiday);
+
+                Check("updater version parse",
+                    Updater.NormalizeVersion("v3.8") == "3.8" &&
+                    Updater.NormalizeVersion("release 3.9") == "3.9" &&
+                    Updater.IsNewer("3.8", "3.7") &&
+                    !Updater.IsNewer("3.7", "3.7") &&
+                    Updater.IsNewer("3.10", "3.9") &&
+                    !Updater.IsNewer("3.7", "4.0"));
 
                 bool gridVisible = true;
-                string[] gridThemes = new string[] { "light", "dark", "newyear", "halloween" };
+                string[] gridThemes = new string[] { "light", "dark", "newyear", "halloween", "gta6" };
                 for (int i = 0; i < gridThemes.Length; i++)
                 {
                     Ui.SetTheme(gridThemes[i]);
@@ -526,11 +538,13 @@ namespace Video2Gif
                         ThemeTile autoTile = GetField(dialog, "autoTile") as ThemeTile;
                         ThemeTile newYearTile = GetField(dialog, "newYearTile") as ThemeTile;
                         ThemeTile halloweenTile = GetField(dialog, "halloweenTile") as ThemeTile;
+                        ThemeTile gtaTile = GetField(dialog, "gtaTile") as ThemeTile;
                         ThemeTile darkTile = GetField(dialog, "darkTile") as ThemeTile;
                         Check("settings theme tiles",
                             autoTile != null && autoTile.ThemeKey == "auto" &&
                             newYearTile != null && newYearTile.ThemeKey == "newyear" &&
                             halloweenTile != null && halloweenTile.ThemeKey == "halloween" &&
+                            gtaTile != null && gtaTile.ThemeKey == "gta6" &&
                             darkTile != null && darkTile.Active);
 
                         newYearTile.Pick();
@@ -549,6 +563,15 @@ namespace Video2Gif
                         SaveShot(dialog, halloweenSettings);
                         Check("settings halloween screenshot",
                             File.Exists(halloweenSettings) && new FileInfo(halloweenSettings).Length > 2000);
+
+                        gtaTile.Pick();
+                        Application.DoEvents();
+                        Check("settings choose gta 6",
+                            Ui.ThemeName == "gta6" && gtaTile.Active && !halloweenTile.Active);
+                        string gtaSettings = Path.Combine(work, "ui-settings-gta6.png");
+                        SaveShot(dialog, gtaSettings);
+                        Check("settings gta 6 screenshot",
+                            File.Exists(gtaSettings) && new FileInfo(gtaSettings).Length > 2000);
 
                         autoTile.Pick();
                         Application.DoEvents();
