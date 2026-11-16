@@ -1095,16 +1095,16 @@ namespace Video2Gif
                     }
 
                     // Пальмы и чайки в стиле Vice City.
-                    Ui.DrawPalm(g, Width * 0.56f, Height * 0.99f, Height * 0.84f,
+                    Ui.DrawPalm(g, Width * 0.52f, Height * 0.99f, Height * 0.94f,
                         Color.FromArgb(140, 18, 6, 28), -0.10f);
-                    Ui.DrawPalm(g, Width * 0.66f, Height * 0.99f, Height * 0.62f,
+                    Ui.DrawPalm(g, Width * 0.63f, Height * 0.99f, Height * 0.74f,
                         Color.FromArgb(112, 18, 6, 28), 0.12f);
-                    Ui.DrawGull(g, Width * 0.48f, Height * 0.22f, Ui.P(9),
-                        Color.FromArgb(110, 255, 255, 255));
-                    Ui.DrawGull(g, Width * 0.55f, Height * 0.14f, Ui.P(6),
-                        Color.FromArgb(95, 255, 255, 255));
-                    Ui.DrawGull(g, Width * 0.60f, Height * 0.28f, Ui.P(7),
-                        Color.FromArgb(100, 255, 255, 255));
+                    Ui.DrawGull(g, Width * 0.46f, Height * 0.22f, Ui.P(13),
+                        Color.FromArgb(125, 255, 255, 255));
+                    Ui.DrawGull(g, Width * 0.54f, Height * 0.13f, Ui.P(9),
+                        Color.FromArgb(105, 255, 255, 255));
+                    Ui.DrawGull(g, Width * 0.61f, Height * 0.28f, Ui.P(11),
+                        Color.FromArgb(115, 255, 255, 255));
 
                     Ui.Write(g, "VI", Ui.GtaMark,
                         new Rectangle(Width - Ui.P(130), (Height - Ui.P(64)) / 2,

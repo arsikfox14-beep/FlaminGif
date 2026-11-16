@@ -476,7 +476,21 @@ namespace Video2Gif
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            if (Ui.Holiday)
+            if (Ui.Gta6)
+            {
+                // Пальмы и чайки вокруг пустого результата.
+                Ui.DrawPalm(g, Width * 0.13f, Height * 0.98f, Height * 0.34f,
+                    Color.FromArgb(74, Ui.Accent), -0.08f);
+                Ui.DrawPalm(g, Width * 0.87f, Height * 0.98f, Height * 0.27f,
+                    Color.FromArgb(58, Ui.Accent), 0.10f);
+                Ui.DrawGull(g, Width * 0.36f, Height * 0.13f, Ui.P(9),
+                    Color.FromArgb(110, Ui.Accent));
+                Ui.DrawGull(g, Width * 0.50f, Height * 0.09f, Ui.P(6),
+                    Color.FromArgb(90, Ui.Accent));
+                Ui.DrawGull(g, Width * 0.63f, Height * 0.16f, Ui.P(8),
+                    Color.FromArgb(100, Ui.Accent));
+            }
+            else if (Ui.Holiday)
             {
                 if (Ui.NewYear)
                 {
