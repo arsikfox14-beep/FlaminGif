@@ -159,7 +159,7 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 
 ## Сборка из исходников
 
-Исходники лежат в корне репозитория (C#, WinForms, .NET Framework 4.8).
+Исходники лежат в папке `src` (C#, WinForms, .NET Framework 4.8).
 Компилятор берётся из Windows: `csc.exe`, отдельный SDK не нужен.
 
 1. Положить в папку `bin` в корне проекта (рядом с папкой `src`)
@@ -169,10 +169,10 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 2. Запустить:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1
+powershell -ExecutionPolicy Bypass -File src\build.ps1
 ```
 
-Собирается `Video2Gif.exe`.
+Собирается `Video2Gif.exe` в корне проекта.
 
 Скрипт сжимает FFmpeg и yt-dlp в `build\*.gz`, рисует иконку и собирает exe
 в корне проекта. Файлы `.cs` должны быть в UTF-8 с BOM.
@@ -187,20 +187,22 @@ Video2Gif.exe --selftest
 
 ## Файлы
 
-- `Program.cs` — запуск, версия, имя сборки;
-- `MainForm.cs`, `MainForm.UI.cs` — главное окно;
-- `Theme.cs`, `Controls.cs` — темы, значки и элементы интерфейса;
-- `Settings.cs` — окно настроек с плитками тем и проверкой обновлений;
-- `Updater.cs`, `UpdateForm.cs` — автообновление с GitHub и окно обновления;
-- `Core.cs` — FFmpeg, yt-dlp, конвертация;
-- `MediaDownloader.cs` — загрузчик, Spotify, поиск на YouTube;
-- `MediaDownloadForm.cs` — окно скачивания;
-- `TikTok.cs`, `TikTokForm.cs` — скачивание TikTok;
-- `SelfTest.cs` — самопроверка;
-- `Snake.cs` — мини-игра «Змейка»;
-- `build.ps1` — сборка;
-- `app.ico`, `app.manifest` — иконка и манифест;
-- `discord.png` — оригинальный логотип Discord, встроенный в exe;
+- `src/Program.cs` — запуск, версия, имя сборки;
+- `src/MainForm.cs`, `src/MainForm.UI.cs` — главное окно;
+- `src/Theme.cs`, `src/Controls.cs` — темы, значки и элементы интерфейса;
+- `src/Settings.cs` — окно настроек с плитками тем и проверкой обновлений;
+- `src/Updater.cs`, `src/UpdateForm.cs` — автообновление с GitHub и окно обновления;
+- `src/Core.cs` — FFmpeg, yt-dlp, конвертация;
+- `src/MediaDownloader.cs` — загрузчик, Spotify, поиск на YouTube;
+- `src/MediaDownloadForm.cs` — окно скачивания;
+- `src/TikTok.cs`, `src/TikTokForm.cs` — скачивание TikTok;
+- `src/Editor.cs`, `src/OverlayForm.cs` — видеоредактор, текст и картинка поверх;
+- `src/GifTools.cs` — GIF-инструменты: кадры и сборка;
+- `src/SelfTest.cs` — самопроверка;
+- `src/Snake.cs` — мини-игра «Змейка»;
+- `src/build.ps1` — сборка;
+- `src/app.ico`, `src/app.manifest` — иконка и манифест;
+- `src/discord.png` — оригинальный логотип Discord, встроенный в exe;
 - `mobile/index.html` — мобильная веб-версия для iPhone и Android.
 
 ## Благодарности и лицензии
