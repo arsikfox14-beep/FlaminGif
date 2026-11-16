@@ -174,7 +174,7 @@ namespace Video2Gif
             using (OpenFileDialog dialog = new OpenFileDialog())
             {
                 dialog.Title = "Картинка поверх";
-                dialog.Filter = "Картинки|*.png;*.jpg;*.jpeg;*.bmp;*.webp|Все файлы|*.*";
+                dialog.Filter = "Картинки|*.png;*.jpg;*.jpeg;*.bmp|Все файлы|*.*";
                 if (dialog.ShowDialog(this) == DialogResult.OK)
                 {
                     OverlayPath = dialog.FileName;
