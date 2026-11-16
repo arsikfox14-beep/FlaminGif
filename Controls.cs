@@ -327,6 +327,63 @@ namespace Video2Gif
         }
     }
 
+    internal sealed class InfoBadge : Control
+    {
+        private static readonly Font MarkFont =
+            new Font("Segoe UI", 7.5f, FontStyle.Bold);
+
+        public string InfoText = "";
+
+        private bool hover;
+
+        public InfoBadge()
+        {
+            SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                     ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.UserPaint |
+                     ControlStyles.SupportsTransparentBackColor, true);
+            BackColor = Color.Transparent;
+            Cursor = Cursors.Hand;
+        }
+
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            hover = true;
+            Invalidate();
+            base.OnMouseEnter(e);
+        }
+
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            hover = false;
+            Invalidate();
+            base.OnMouseLeave(e);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            Rectangle r = new Rectangle(1, 1, Width - 3, Height - 3);
+            Color color = hover ? Ui.Text : Ui.Faint;
+            if (hover)
+            {
+                using (SolidBrush fill = new SolidBrush(Color.FromArgb(26, Ui.Text)))
+                {
+                    g.FillEllipse(fill, r);
+                }
+            }
+            using (Pen pen = new Pen(color, Math.Max(1.4f, Ui.P(1.5))))
+            {
+                g.DrawEllipse(pen, r);
+            }
+            Ui.Write(g, "!", MarkFont,
+                new Rectangle(0, -Ui.P(1), Width, Height),
+                color, Ui.CenterMid);
+        }
+    }
+
     internal sealed class ToggleRow : UiControl
     {
         private bool isChecked;

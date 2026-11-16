@@ -514,6 +514,17 @@ namespace Video2Gif
                         Check("ui social icon buttons",
                             discord != null && discord.Kind == IconKind.Discord &&
                             donate != null && donate.Kind == IconKind.Donate);
+
+                        InfoBadge infoBadge = GetField(form, "infoBadge") as InfoBadge;
+                        ToolTip creditsTip = GetField(form, "headerTip") as ToolTip;
+                        Check("ui credits info badge",
+                            infoBadge != null &&
+                            infoBadge.InfoText.IndexOf("Coders") >= 0 &&
+                            infoBadge.InfoText.IndexOf("beta-testers") >= 0 &&
+                            infoBadge.InfoText.IndexOf("donaters") >= 0);
+                        Check("ui credits tooltip",
+                            creditsTip != null && infoBadge != null &&
+                            creditsTip.GetToolTip(infoBadge).IndexOf("Coders") >= 0);
                         Check("ui social buttons in header",
                             discord != null && donate != null && settings != null &&
                             discord.Left > settings.Left && donate.Left > discord.Left &&
