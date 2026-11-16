@@ -389,6 +389,14 @@
           <option value="none">Без сглаживания</option>
         </select>
       </div>
+      <div class="field wide">
+        <label for="modeSelect">Режим GIF</label>
+        <select id="modeSelect">
+          <option value="fast">Быстро — кадры могут пропускаться</option>
+          <option value="quality">Качественно — все кадры, медленнее</option>
+        </select>
+        <div class="hint">«Быстро» экономит время на слабом телефоне.</div>
+      </div>
       <label class="switch">
         <input id="loopCheck" type="checkbox" checked>
         <span class="track" aria-hidden="true"></span>
@@ -465,6 +473,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     width: $("widthInput"),
     fps: $("fpsInput"),
     dither: $("ditherSelect"),
+    mode: $("modeSelect"),
     loop: $("loopCheck"),
     convert: $("convertBtn"),
     cancel: $("cancelBtn"),
@@ -731,7 +740,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     fps = clamp(fps, 1, 60);
     var start = Math.max(0, num(el.start.value, 0));
     var dur = Math.max(0, num(el.dur.value, 0));
-    return { width: width, fps: fps, start: start, dur: dur, dither: el.dither.value, loop: el.loop.checked };
+    return { width: width, fps: fps, start: start, dur: dur, dither: el.dither.value, loop: el.loop.checked, quality: el.mode.value === "quality" };
   }
 
   function canvasToBlob(canvas, type, quality) {
@@ -798,13 +807,15 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     ctx.drawImage(source, 0, 0, w, h);
   }
 
-  async function samplePalette(video, start, dur, w, h) {
-    var sampleW = Math.min(w, 180);
+  async function samplePalette(video, start, dur, w, h, quality) {
+    var sampleW = Math.min(w, quality ? 240 : 180);
     var sampleH = Math.max(1, Math.round(h * sampleW / w));
     var canvas = document.createElement("canvas");
     canvas.width = sampleW; canvas.height = sampleH;
     var ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
-    var points = dur > 0.25 ? [0, 0.35, 0.7, 0.98] : [0];
+    var points = quality
+      ? [0, 0.14, 0.28, 0.43, 0.57, 0.71, 0.85, 0.99]
+      : (dur > 0.25 ? [0, 0.35, 0.7, 0.98] : [0]);
     var parts = [];
     var total = 0;
     for (var i = 0; i < points.length; i++) {
@@ -835,10 +846,10 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
   // и с одной общей палитрой на весь GIF — это в разы быстрее.
   // На слабом телефоне кадров будет меньше, но задержки берутся из времени
   // видео, поэтому длительность GIF не меняется, а минуты кодирования уходят.
-  async function encodeVideoGif(video, start, dur, fps, w, h, dither, loop, onProgress, isCancelled) {
+  async function encodeVideoGif(video, start, dur, fps, w, h, dither, loop, quality, onProgress, isCancelled) {
     var total = Math.max(1, Math.floor(dur * fps));
     var delays = frameDelays(total, fps);
-    var palette = await samplePalette(video, start, dur, w, h);
+    var palette = await samplePalette(video, start, dur, w, h, quality);
     var lut = buildLut(palette);
     if (isCancelled()) throw new Error("cancelled");
 
@@ -885,6 +896,39 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
 
     if (!played) {
       await seekPass();
+    } else if (quality) {
+      // Медленно, но качественно: каждый кадр на месте, без пропусков.
+      var qStarted = Date.now();
+      var qLast = -1;
+      while (written < total && !isCancelled()) {
+        await nextVideoFrame(video);
+        if (isCancelled()) break;
+        var qTime = video.currentTime - start;
+        if (qTime < -0.05) {
+          if (video.ended) break;
+          continue;
+        }
+        var qTarget = Math.min(total - 1, Math.floor(qTime * fps));
+        if (qTarget > qLast) {
+          while (qLast < qTarget && written < total) {
+            drawTo(ctx, video, w, h);
+            emit(grab(), delays[written] || 100);
+            qLast++;
+            onProgress(written / total * 100);
+          }
+        }
+        if (video.ended) break;
+        if (Date.now() - qStarted > (dur + 15) * 1000) break;
+      }
+      try { video.pause(); } catch (e) {}
+
+      if (isCancelled()) throw new Error("cancelled");
+      while (written < total) {
+        if (isCancelled()) throw new Error("cancelled");
+        drawTo(ctx, video, w, h);
+        emit(grab(), delays[written] || 100);
+        onProgress(written / total * 100);
+      }
     } else {
       var startedAt = Date.now();
       var lastAdvanceAt = Date.now();
@@ -1116,7 +1160,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
         }
 
         setProgress(2, "Подбираю палитру…");
-        var encoded = await encodeVideoGif(video, start, dur, opts.fps, w, h, opts.dither, opts.loop, function (p) {
+        var encoded = await encodeVideoGif(video, start, dur, opts.fps, w, h, opts.dither, opts.loop, opts.quality, function (p) {
           setProgress(Math.round(p * 100), "Кодирую GIF… " + Math.round(p) + "%");
         }, function () { return state.cancelled; });
         blob = encoded.blob;
@@ -1222,7 +1266,8 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
   function saveSettings() {
     try {
       localStorage.setItem("video2gif-mobile-settings", JSON.stringify({
-        width: el.width.value, fps: el.fps.value, dither: el.dither.value, loop: el.loop.checked
+        width: el.width.value, fps: el.fps.value, dither: el.dither.value,
+        mode: el.mode.value, loop: el.loop.checked
       }));
     } catch (e) {}
   }
@@ -1233,6 +1278,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
       if (s.width != null) el.width.value = s.width;
       if (s.fps != null) el.fps.value = s.fps;
       if (s.dither) el.dither.value = s.dither;
+      if (s.mode) el.mode.value = s.mode;
       if (typeof s.loop === "boolean") el.loop.checked = s.loop;
     } catch (e) {}
   }
@@ -1246,7 +1292,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
       applyTheme(el.themeSelect.value);
     });
   }
-  [el.width, el.fps, el.dither, el.loop].forEach(function (node) {
+  [el.width, el.fps, el.dither, el.mode, el.loop].forEach(function (node) {
     node.addEventListener("change", saveSettings);
   });
 
