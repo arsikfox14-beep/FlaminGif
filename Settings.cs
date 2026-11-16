@@ -178,7 +178,7 @@ namespace Video2Gif
             Text = "Настройки — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(428), Ui.P(508));
+            ClientSize = new Size(Ui.P(428), Ui.P(470));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -261,26 +261,26 @@ namespace Video2Gif
             Controls.Add(Lbl("Тема применяется сразу и запоминается.", Ui.Tiny, Ui.Faint,
                 24, 316, 380, 18));
 
-            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 352, 300, 24));
+            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 340, 300, 24));
             Controls.Add(Lbl("Версия " + Program.Version + " · GitHub: " + Updater.Repo,
-                Ui.Tiny, Ui.Faint, 24, 378, 380, 18));
+                Ui.Tiny, Ui.Faint, 24, 366, 380, 18));
 
             updateButton = new PillButton();
             updateButton.Ghost = true;
             updateButton.Text = "Проверить обновления";
             updateButton.Font = Ui.Small;
-            updateButton.SetBounds(Ui.P(24), Ui.P(404), Ui.P(208), Ui.P(36));
+            updateButton.SetBounds(Ui.P(24), Ui.P(410), Ui.P(208), Ui.P(36));
             updateButton.Click += delegate { CheckUpdates(); };
             Controls.Add(updateButton);
 
-            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 244, 404, 160, 36);
+            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 388, 380, 18);
             Controls.Add(updateStatus);
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(300), Ui.P(448), Ui.P(104), Ui.P(36));
+            done.SetBounds(Ui.P(300), Ui.P(410), Ui.P(104), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 
