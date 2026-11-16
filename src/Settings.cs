@@ -255,7 +255,7 @@ namespace Video2Gif
             Controls.Add(gamesenseTile);
 
             Controls.Add(Lbl("Авто по дате: Хэллоуин 1 окт–1 ноя, Снежная 1 дек–1 янв,\n" +
-                "GTA 6 — 18 ноября 22:00 – 20 ноября 00:00.", Ui.Tiny, Ui.Faint,
+                "GTA 6 — 18 ноября 15:00 – 20 ноября 00:00.", Ui.Tiny, Ui.Faint,
                 24, 280, 380, 32));
 
             Controls.Add(Lbl("Тема применяется сразу и запоминается.", Ui.Tiny, Ui.Faint,
