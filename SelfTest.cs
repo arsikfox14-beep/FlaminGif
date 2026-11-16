@@ -221,6 +221,16 @@ namespace Video2Gif
                     gtaBlend.Colors[0].B > gtaBlend.Colors[0].R &&
                     gtaBlend.Colors[4].R > gtaBlend.Colors[4].B);
 
+                Check("theme gta 6 window",
+                    Ui.Gta6Window(new DateTime(2026, 11, 18, 22, 0, 0)) &&
+                    Ui.Gta6Window(new DateTime(2026, 11, 19, 12, 0, 0)) &&
+                    !Ui.Gta6Window(new DateTime(2026, 11, 18, 21, 59, 0)) &&
+                    !Ui.Gta6Window(new DateTime(2026, 11, 20, 0, 0, 0)));
+
+                Check("theme gta 6 auto window",
+                    Ui.SeasonalTheme(new DateTime(2026, 11, 18, 22, 0, 0)) == ThemeKind.Gta6 &&
+                    Ui.SeasonalTheme(new DateTime(2026, 11, 20, 0, 0, 0)) == ThemeKind.Dark);
+
                 using (Bitmap mark = new Bitmap(32, 32))
                 using (Graphics markGraphics = Graphics.FromImage(mark))
                 {

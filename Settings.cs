@@ -182,7 +182,9 @@ namespace Video2Gif
                 ? Color.FromArgb(255, 140, 66)
                 : seasonal == ThemeKind.NewYear
                     ? Color.FromArgb(126, 200, 255)
-                    : Color.FromArgb(126, 126, 132);
+                    : seasonal == ThemeKind.Gta6
+                        ? Color.FromArgb(255, 79, 163)
+                        : Color.FromArgb(126, 126, 132);
             autoTile.SetBounds(Ui.P(24), Ui.P(64), Ui.P(120), Ui.P(64));
             autoTile.Click += delegate { Choose("auto"); };
             Controls.Add(autoTile);
@@ -220,15 +222,15 @@ namespace Video2Gif
             Controls.Add(halloweenTile);
 
             gtaTile = MakeTile("gta6", "GTA 6");
-            gtaTile.SwatchBg = Color.FromArgb(12, 11, 14);
-            gtaTile.SwatchCard = Color.FromArgb(23, 19, 28);
+            gtaTile.SwatchBg = Color.FromArgb(10, 9, 12);
+            gtaTile.SwatchCard = Color.FromArgb(22, 17, 27);
             gtaTile.SwatchAccent = Color.FromArgb(255, 79, 163);
             gtaTile.SetBounds(Ui.P(284), Ui.P(136), Ui.P(120), Ui.P(64));
             gtaTile.Click += delegate { Choose("gta6"); };
             Controls.Add(gtaTile);
 
-            Controls.Add(Lbl("Авто по дате Windows: Хэллоуин — 1 октября–1 ноября,\n" +
-                "Новый год — 1 декабря–1 января.", Ui.Tiny, Ui.Faint,
+            Controls.Add(Lbl("Авто по дате: Хэллоуин 1 окт–1 ноя, Новый год 1 дек–1 янв,\n" +
+                "GTA 6 — 18 ноября 22:00 – 20 ноября 00:00.", Ui.Tiny, Ui.Faint,
                 24, 208, 380, 32));
 
             Controls.Add(Lbl("Тема применяется сразу и запоминается.", Ui.Tiny, Ui.Faint,

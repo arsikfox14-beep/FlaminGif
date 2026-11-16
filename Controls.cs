@@ -224,8 +224,10 @@ namespace Video2Gif
                     // Оригинальный логотип Discord из ресурса, перекрашенный под тему.
                     Color mark = !Enabled ? Ui.Faint : (hover ? Ui.AccentInk : Ui.Accent);
                     float size = Math.Min(Width, Height) * 0.84f;
+                    // Логотип чуть левее центра — так он выглядит ровнее в кнопке.
+                    float dx = -size * 0.04f;
                     DiscordMark.Draw(g,
-                        new RectangleF(cx - size / 2f, cy - size / 2f, size, size),
+                        new RectangleF(cx - size / 2f + dx, cy - size / 2f, size, size),
                         mark);
                 }
                 else if (Kind == IconKind.Donate)
@@ -259,6 +261,21 @@ namespace Video2Gif
                             new PointF(cx + u * 0.48f, cy + u * 0.62f),
                             tip);
                         heart.CloseFigure();
+
+                        // Ставим сердечко ровно по центру кнопки по его видимым границам.
+                        using (GraphicsPath measured = (GraphicsPath)heart.Clone())
+                        {
+                            measured.Flatten(null);
+                            RectangleF box = measured.GetBounds();
+                            using (Matrix shift = new Matrix())
+                            {
+                                shift.Translate(
+                                    cx - (box.Left + box.Width / 2f),
+                                    cy - (box.Top + box.Height / 2f));
+                                heart.Transform(shift);
+                            }
+                        }
+
                         using (SolidBrush heartBrush = new SolidBrush(ink))
                         {
                             g.FillPath(heartBrush, heart);
