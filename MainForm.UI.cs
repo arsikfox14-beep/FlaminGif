@@ -143,7 +143,7 @@ namespace Video2Gif
                 "donaters - none";
             infoBadge = new InfoBadge();
             infoBadge.InfoText = credits;
-            infoBadge.SetBounds(Ui.P(906), Ui.P(546), Ui.P(30), Ui.P(30));
+            infoBadge.SetBounds(Ui.P(914), Ui.P(552), Ui.P(22), Ui.P(22));
             infoBadge.Click += delegate { ShowCredits(); };
             Controls.Add(infoBadge);
 

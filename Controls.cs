@@ -329,9 +329,6 @@ namespace Video2Gif
 
     internal sealed class InfoBadge : Control
     {
-        private static readonly Font MarkFont =
-            new Font("Segoe UI", 12.5f, FontStyle.Bold);
-
         public string InfoText = "";
 
         private bool hover;
@@ -378,9 +375,24 @@ namespace Video2Gif
             {
                 g.DrawEllipse(pen, r);
             }
-            Ui.Write(g, "!", MarkFont,
-                new Rectangle(0, -Ui.P(1), Width, Height),
-                color, Ui.CenterMid);
+
+            // Чёткий «!» без сглаживания шрифта.
+            float cx = Width / 2f;
+            float barWidth = Math.Max(1.8f, Width * 0.11f);
+            float barTop = Height * 0.28f;
+            float barBottom = Height * 0.66f;
+            using (Pen mark = new Pen(color, barWidth))
+            {
+                mark.StartCap = LineCap.Round;
+                mark.EndCap = LineCap.Round;
+                g.DrawLine(mark, cx, barTop, cx, barBottom);
+            }
+            float dot = Math.Max(1.8f, Width * 0.105f);
+            using (SolidBrush brush = new SolidBrush(color))
+            {
+                g.FillEllipse(brush, cx - dot / 2f,
+                    Height * 0.78f - dot / 2f, dot, dot);
+            }
         }
     }
 

@@ -526,7 +526,12 @@ namespace Video2Gif
                             creditsTip != null && infoBadge != null &&
                             creditsTip.GetToolTip(infoBadge).IndexOf("Coders") >= 0);
                         Check("ui credits badge size",
-                            infoBadge != null && infoBadge.Width >= Ui.P(28));
+                            infoBadge != null &&
+                            infoBadge.Width >= Ui.P(20) && infoBadge.Width <= Ui.P(26));
+                        Check("ui credits badge place",
+                            infoBadge != null &&
+                            infoBadge.Top >= Ui.P(550) &&
+                            infoBadge.Bottom <= form.ClientSize.Height - Ui.P(2));
 
                         Invoke(form, "ShowCredits");
                         Application.DoEvents();
