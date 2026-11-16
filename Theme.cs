@@ -12,7 +12,8 @@ namespace Video2Gif
         Dark,
         NewYear,
         Halloween,
-        Gta6
+        Gta6,
+        Gamesense
     }
 
     internal static class Ui
@@ -35,6 +36,11 @@ namespace Video2Gif
             get { return Theme == ThemeKind.Gta6; }
         }
 
+        public static bool Gamesense
+        {
+            get { return Theme == ThemeKind.Gamesense; }
+        }
+
         public static bool NewYear
         {
             get { return Theme == ThemeKind.NewYear; }
@@ -53,6 +59,7 @@ namespace Video2Gif
                 if (Theme == ThemeKind.NewYear) return "newyear";
                 if (Theme == ThemeKind.Halloween) return "halloween";
                 if (Theme == ThemeKind.Gta6) return "gta6";
+                if (Theme == ThemeKind.Gamesense) return "gamesense";
                 return "dark";
             }
         }
@@ -63,6 +70,59 @@ namespace Video2Gif
         public static int ColorRef(Color color)
         {
             return color.R | (color.G << 8) | (color.B << 16);
+        }
+
+        /// <summary>Яркий цвет радуги: hue 0–1, saturation/value 0–1.</summary>
+        public static Color Rainbow(double hue, double saturation, double value)
+        {
+            hue -= Math.Floor(hue);
+            double h = hue * 6.0;
+            int sector = (int)h;
+            double f = h - sector;
+            double p = value * (1.0 - saturation);
+            double q = value * (1.0 - saturation * f);
+            double t = value * (1.0 - saturation * (1.0 - f));
+            double r;
+            double g;
+            double b;
+            switch (sector % 6)
+            {
+                case 0: r = value; g = t; b = p; break;
+                case 1: r = q; g = value; b = p; break;
+                case 2: r = p; g = value; b = t; break;
+                case 3: r = p; g = q; b = value; break;
+                case 4: r = t; g = p; b = value; break;
+                default: r = value; g = p; b = q; break;
+            }
+            return Color.FromArgb(ClampByte(r), ClampByte(g), ClampByte(b));
+        }
+
+        private static int ClampByte(double value)
+        {
+            int result = (int)Math.Round(value * 255.0);
+            if (result < 0) return 0;
+            if (result > 255) return 255;
+            return result;
+        }
+
+        /// <summary>Горизонтальный радужный градиент со сдвигом фазы.</summary>
+        public static LinearGradientBrush RainbowBrush(Rectangle rect, double offset, int steps)
+        {
+            if (steps < 2) steps = 2;
+            ColorBlend blend = new ColorBlend(steps);
+            Color[] colors = new Color[steps];
+            float[] positions = new float[steps];
+            for (int i = 0; i < steps; i++)
+            {
+                colors[i] = Rainbow(offset + (double)i / steps, 0.72, 1.0);
+                positions[i] = (float)i / (steps - 1);
+            }
+            blend.Colors = colors;
+            blend.Positions = positions;
+            LinearGradientBrush brush = new LinearGradientBrush(
+                rect, colors[0], colors[steps - 1], 0f);
+            brush.InterpolationColors = blend;
+            return brush;
         }
 
         public static void ApplyTitleBar(IntPtr hwnd)
@@ -113,6 +173,8 @@ namespace Video2Gif
             else if (value == "newyear" || value == "new-year" || value == "ny") kind = ThemeKind.NewYear;
             else if (value == "halloween" || value == "spooky") kind = ThemeKind.Halloween;
             else if (value == "gta6" || value == "gta" || value == "gta-6") kind = ThemeKind.Gta6;
+            else if (value == "gamesense" || value == "game-sense" ||
+                     value == "game sense" || value == "gs") kind = ThemeKind.Gamesense;
             SetTheme(kind);
         }
 
@@ -259,6 +321,26 @@ namespace Video2Gif
                 Bad = Color.FromArgb(255, 107, 107);
                 OnAccent = Color.White;
             }
+            else if (kind == ThemeKind.Gamesense)
+            {
+                Bg = Color.FromArgb(7, 7, 8);
+                Card = Color.FromArgb(14, 14, 15);
+                Border = Color.FromArgb(38, 38, 41);
+                BorderStrong = Color.FromArgb(74, 74, 78);
+                Text = Color.FromArgb(238, 238, 240);
+                Muted = Color.FromArgb(166, 166, 170);
+                Faint = Color.FromArgb(114, 114, 118);
+                Accent = Color.FromArgb(90, 255, 140);
+                AccentDark = Color.FromArgb(52, 190, 100);
+                AccentInk = Color.FromArgb(150, 255, 184);
+                AccentSoft = Color.FromArgb(18, 28, 20);
+                AccentLine = Color.FromArgb(40, 66, 46);
+                AccentWash = Color.FromArgb(12, 20, 14);
+                Track = Color.FromArgb(36, 36, 38);
+                Good = Color.FromArgb(90, 255, 140);
+                Bad = Color.FromArgb(255, 95, 95);
+                OnAccent = Color.FromArgb(8, 10, 8);
+            }
             else
             {
                 Bg = Color.FromArgb(14, 14, 15);
@@ -382,6 +464,12 @@ namespace Video2Gif
 
         public static GraphicsPath Round(Rectangle rect, int radius)
         {
+            if (Gamesense && radius > 0)
+            {
+                // В Gamesense всё выглядит почти прямоугольным.
+                radius = Math.Min(radius, Math.Max(1, P(2)));
+            }
+
             GraphicsPath path = new GraphicsPath();
             if (radius <= 0)
             {
@@ -910,81 +998,82 @@ namespace Video2Gif
             {
                 if (Ui.NewYear)
                 {
-                    // Крупные полупрозрачные снежинки по всей карточке.
-                    Ui.DrawSnowflake(g, Width * 0.40f, Height * 0.30f, Ui.P(24),
-                        Color.FromArgb(54, Ui.Accent), Math.Max(1.4f, Ui.P(1.7)));
-                    Ui.DrawSnowflake(g, Width * 0.54f, Height * 0.74f, Ui.P(18),
-                        Color.FromArgb(46, Ui.Accent), Math.Max(1.3f, Ui.P(1.5)));
-                    Ui.DrawSnowflake(g, Width * 0.31f, Height * 0.80f, Ui.P(12),
-                        Color.FromArgb(40, Ui.Accent), Math.Max(1.1f, Ui.P(1.3)));
+                    // Бледный фон под текстом: даёт глубину, но не мешает читать.
+                    Ui.DrawSnowflake(g, Width * 0.33f, Height * 0.30f, Ui.P(22),
+                        Color.FromArgb(44, Ui.Accent), Math.Max(1.4f, Ui.P(1.6)));
+                    Ui.DrawSnowflake(g, Width * 0.30f, Height * 0.80f, Ui.P(14),
+                        Color.FromArgb(38, Ui.Accent), Math.Max(1.2f, Ui.P(1.4)));
+                    Ui.DrawSnowflake(g, Width * 0.45f, Height * 0.72f, Ui.P(11),
+                        Color.FromArgb(34, Ui.Accent), Math.Max(1f, Ui.P(1.3)));
 
-                    if (!Selected)
+                    // Правая полоса свободна и в пустой, и в выбранной карточке:
+                    // между текстом и кнопкой «Другой файл» узор остаётся заметным.
+                    int right = Width - Ui.P(18);
+                    Ui.DrawSnowflake(g, right - Ui.P(100), Height * 0.30f, Ui.P(20),
+                        Color.FromArgb(140, Ui.Accent), Math.Max(1.4f, Ui.P(1.7)));
+                    Ui.DrawSnowflake(g, right - Ui.P(12), Height * 0.54f, Ui.P(12),
+                        Color.FromArgb(118, Ui.Accent), Math.Max(1.1f, Ui.P(1.4)));
+                    Ui.DrawSnowflake(g, right - Ui.P(60), Height * 0.82f, Ui.P(9),
+                        Color.FromArgb(106, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
+                    Ui.DrawSnowflake(g, right - Ui.P(34), Ui.P(10), Ui.P(7),
+                        Color.FromArgb(96, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+
+                    // Нижняя кромка свободна в обоих состояниях.
+                    Ui.DrawSnowflake(g, Width * 0.42f, Height - Ui.P(9), Ui.P(8),
+                        Color.FromArgb(104, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
+                    Ui.DrawSnowflake(g, Width * 0.52f, Height - Ui.P(6), Ui.P(6),
+                        Color.FromArgb(92, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                    Ui.DrawSnowflake(g, Width * 0.62f, Height - Ui.P(10), Ui.P(7),
+                        Color.FromArgb(98, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+
+                    if (Selected)
                     {
-                        int x = Width - Ui.P(18);
-                        Ui.DrawSnowflake(g, x - Ui.P(34), Height / 2f, Ui.P(22),
-                            Color.FromArgb(100, Ui.Accent), Math.Max(1.2f, Ui.P(1.6)));
-                        Ui.DrawSnowflake(g, x - Ui.P(128), Height * 0.30f, Ui.P(12),
-                            Color.FromArgb(85, Ui.Accent), Math.Max(1.1f, Ui.P(1.4)));
-                        Ui.DrawSnowflake(g, x - Ui.P(196), Height * 0.74f, Ui.P(9),
-                            Color.FromArgb(75, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
-                        Ui.DrawSnowflake(g, x - Ui.P(74), Ui.P(15), Ui.P(7),
-                            Color.FromArgb(70, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
-                    }
-                    else
-                    {
-                        Ui.DrawSnowflake(g, Width * 0.36f, Ui.P(10), Ui.P(9),
-                            Color.FromArgb(120, Ui.Accent), Math.Max(1.1f, Ui.P(1.2)));
-                        Ui.DrawSnowflake(g, Width * 0.44f, Ui.P(12), Ui.P(7),
-                            Color.FromArgb(110, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
-                        Ui.DrawSnowflake(g, Width * 0.50f, Ui.P(9), Ui.P(8),
-                            Color.FromArgb(115, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
-                        Ui.DrawSnowflake(g, Width * 0.33f, Height - Ui.P(10), Ui.P(8),
-                            Color.FromArgb(110, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
-                        Ui.DrawSnowflake(g, Width * 0.42f, Height - Ui.P(12), Ui.P(6),
-                            Color.FromArgb(100, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
-                        Ui.DrawSnowflake(g, Width * 0.49f, Height - Ui.P(9), Ui.P(7),
-                            Color.FromArgb(105, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                        // В выбранном состоянии заголовок ушёл ниже — верх тоже свободен.
+                        Ui.DrawSnowflake(g, Width * 0.44f, Ui.P(9), Ui.P(8),
+                            Color.FromArgb(104, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
+                        Ui.DrawSnowflake(g, Width * 0.53f, Ui.P(12), Ui.P(6),
+                            Color.FromArgb(92, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
                     }
                 }
                 else
                 {
-                    if (!Selected)
+                    // Тыква и листва держатся правой полосы: она свободна и в пустой,
+                    // и в выбранной карточке — там же, где кнопка «Другой файл» не мешает.
+                    int right = Width - Ui.P(18);
+                    Rectangle pumpkin = new Rectangle(
+                        right - Ui.P(66), (Height - Ui.P(44)) / 2, Ui.P(44), Ui.P(38));
+                    Ui.DrawPumpkin(g, pumpkin, Color.FromArgb(138, Ui.Accent), Ui.Card);
+                    Ui.DrawLeaf(g, right - Ui.P(96), Height * 0.26f, Ui.P(20),
+                        Color.FromArgb(132, Ui.Accent), 28f);
+                    Ui.DrawLeaf(g, right - Ui.P(10), Height * 0.66f, Ui.P(15),
+                        Color.FromArgb(118, Ui.Accent), -34f);
+                    Ui.DrawLeaf(g, right - Ui.P(52), Height * 0.90f, Ui.P(11),
+                        Color.FromArgb(106, Ui.Accent), 52f);
+                    Ui.DrawLeaf(g, right - Ui.P(120), Ui.P(12), Ui.P(10),
+                        Color.FromArgb(92, Ui.Accent), -18f);
+
+                    // Бледная листва под текстом — только фактура.
+                    Ui.DrawLeaf(g, Width * 0.34f, Height * 0.28f, Ui.P(20),
+                        Color.FromArgb(42, Ui.Accent), 24f);
+                    Ui.DrawLeaf(g, Width * 0.31f, Height * 0.80f, Ui.P(14),
+                        Color.FromArgb(36, Ui.Accent), -40f);
+                    Ui.DrawLeaf(g, Width * 0.47f, Height * 0.74f, Ui.P(11),
+                        Color.FromArgb(32, Ui.Accent), 60f);
+
+                    // Нижняя кромка свободна в обоих состояниях.
+                    Ui.DrawLeaf(g, Width * 0.42f, Height - Ui.P(9), Ui.P(8),
+                        Color.FromArgb(102, Ui.Accent), -20f);
+                    Ui.DrawLeaf(g, Width * 0.52f, Height - Ui.P(7), Ui.P(7),
+                        Color.FromArgb(92, Ui.Accent), 40f);
+                    Ui.DrawLeaf(g, Width * 0.62f, Height - Ui.P(10), Ui.P(8),
+                        Color.FromArgb(98, Ui.Accent), -60f);
+
+                    if (Selected)
                     {
-                        Rectangle pumpkin = new Rectangle(
-                            Width - Ui.P(84), (Height - Ui.P(46)) / 2, Ui.P(46), Ui.P(40));
-                        Ui.DrawPumpkin(g, pumpkin, Color.FromArgb(110, Ui.Accent), Ui.Card);
-                        Ui.DrawLeaf(g, Width - Ui.P(122), Height * 0.28f, Ui.P(24),
-                            Color.FromArgb(125, Ui.Accent), 28f);
-                        Ui.DrawLeaf(g, Width - Ui.P(152), Height * 0.72f, Ui.P(18),
-                            Color.FromArgb(110, Ui.Accent), -34f);
-                        Ui.DrawLeaf(g, Width - Ui.P(204), Ui.P(17), Ui.P(15),
-                            Color.FromArgb(95, Ui.Accent), 52f);
-                        Ui.DrawLeaf(g, Width - Ui.P(56), Ui.P(22), Ui.P(12),
-                            Color.FromArgb(90, Ui.Accent), -18f);
-                        Ui.DrawLeaf(g, Width - Ui.P(100), Height * 0.88f, Ui.P(14),
-                            Color.FromArgb(95, Ui.Accent), -108f);
-                        Ui.DrawLeaf(g, Width - Ui.P(254), Height * 0.20f, Ui.P(11),
-                            Color.FromArgb(85, Ui.Accent), 68f);
-                    }
-                    else
-                    {
-                        // Лёгкая листва по краям и в глубине карточки.
-                        Ui.DrawLeaf(g, Width * 0.40f, Height * 0.26f, Ui.P(22),
-                            Color.FromArgb(40, Ui.Accent), 24f);
-                        Ui.DrawLeaf(g, Width * 0.53f, Height * 0.76f, Ui.P(17),
-                            Color.FromArgb(34, Ui.Accent), -40f);
-                        Ui.DrawLeaf(g, Width * 0.36f, Ui.P(11), Ui.P(11),
-                            Color.FromArgb(120, Ui.Accent), 30f);
-                        Ui.DrawLeaf(g, Width * 0.45f, Ui.P(9), Ui.P(9),
-                            Color.FromArgb(110, Ui.Accent), -50f);
-                        Ui.DrawLeaf(g, Width * 0.52f, Ui.P(12), Ui.P(10),
-                            Color.FromArgb(115, Ui.Accent), 60f);
-                        Ui.DrawLeaf(g, Width * 0.34f, Height - Ui.P(11), Ui.P(9),
-                            Color.FromArgb(110, Ui.Accent), -20f);
-                        Ui.DrawLeaf(g, Width * 0.43f, Height - Ui.P(9), Ui.P(8),
-                            Color.FromArgb(100, Ui.Accent), 40f);
-                        Ui.DrawLeaf(g, Width * 0.51f, Height - Ui.P(12), Ui.P(10),
-                            Color.FromArgb(105, Ui.Accent), -60f);
+                        Ui.DrawLeaf(g, Width * 0.44f, Ui.P(10), Ui.P(8),
+                            Color.FromArgb(102, Ui.Accent), 30f);
+                        Ui.DrawLeaf(g, Width * 0.53f, Ui.P(12), Ui.P(7),
+                            Color.FromArgb(90, Ui.Accent), -50f);
                     }
                 }
             }

@@ -22,6 +22,8 @@ namespace Video2Gif
         private MemoryStream previewStream;
         private int lastReportTick;
         private System.Windows.Forms.Timer themeTimer;
+        private System.Windows.Forms.Timer shimmerTimer;
+        private float shimmerPhase;
 
         public MainForm()
         {
@@ -40,6 +42,12 @@ namespace Video2Gif
             themeTimer.Interval = 60000;
             themeTimer.Tick += delegate { RefreshScheduledTheme(); };
             themeTimer.Start();
+
+            // Переливающаяся полоска в теме Gamesense.
+            shimmerTimer = new System.Windows.Forms.Timer();
+            shimmerTimer.Interval = 40;
+            shimmerTimer.Tick += delegate { ShimmerTick(); };
+            UpdateShimmer();
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -81,7 +89,45 @@ namespace Video2Gif
                 }
             }
 
+            if (Ui.Gamesense)
+            {
+                Rectangle strip = new Rectangle(0, 0, ClientSize.Width,
+                    Math.Max(3, Ui.P(3)));
+                using (LinearGradientBrush brush = Ui.RainbowBrush(strip, shimmerPhase, 10))
+                {
+                    g.FillRectangle(brush, strip);
+                }
+            }
+
             if (Ui.Holiday) DrawHolidayDecorations(g);
+        }
+
+        private void ShimmerTick()
+        {
+            if (!Ui.Gamesense)
+            {
+                shimmerTimer.Stop();
+                return;
+            }
+            shimmerPhase += 0.015f;
+            if (shimmerPhase >= 1f) shimmerPhase -= 1f;
+            Invalidate(new Rectangle(0, 0, ClientSize.Width,
+                Math.Max(6, Ui.P(8))));
+        }
+
+        private void UpdateShimmer()
+        {
+            if (shimmerTimer == null) return;
+            if (Ui.Gamesense)
+            {
+                if (!shimmerTimer.Enabled) shimmerTimer.Start();
+            }
+            else
+            {
+                shimmerTimer.Stop();
+            }
+            Invalidate(new Rectangle(0, 0, ClientSize.Width,
+                Math.Max(6, Ui.P(8))));
         }
 
         /// <summary>Сезонные украшения в свободной части шапки.</summary>
@@ -196,6 +242,7 @@ namespace Video2Gif
         {
             Ui.ApplyTheme(this);
             ApplyTitleBarTheme();
+            UpdateShimmer();
             Invalidate(true);
         }
 
@@ -865,6 +912,12 @@ namespace Video2Gif
 
         private void Shutdown()
         {
+            if (shimmerTimer != null)
+            {
+                shimmerTimer.Stop();
+                shimmerTimer.Dispose();
+                shimmerTimer = null;
+            }
             if (themeTimer != null)
             {
                 themeTimer.Stop();
