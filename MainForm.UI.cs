@@ -17,6 +17,8 @@ namespace Video2Gif
         private Label imageNote;
         private FlatInput widthInput;
         private FlatInput fpsInput;
+        private FlatInput limitInput;
+        private Label limitLabel;
         private PillButton ditherBayer;
         private PillButton ditherSierra;
         private PillButton ditherNone;
@@ -29,6 +31,7 @@ namespace Video2Gif
         private IconButton settingsButton;
         private IconButton gameButton;
         private IconButton editorButton;
+        private IconButton gifToolsButton;
         private IconButton discordButton;
         private IconButton donateButton;
         private InfoBadge infoBadge;
@@ -45,6 +48,7 @@ namespace Video2Gif
         private PictureBox preview;
         private Label resultMeta;
         private PillButton saveButton;
+        private PillButton copyButton;
         private PillButton openButton;
 
         private EmptyState emptyState;
@@ -97,30 +101,35 @@ namespace Video2Gif
             Controls.Add(Lbl("видео и картинки → GIF",
                 Ui.Small, Ui.Muted, 71, 36, 300, 18));
             Controls.Add(Lbl("v" + Program.Version + " · локально", Ui.Tiny, Ui.Faint,
-                496, 24, 204, 18, ContentAlignment.MiddleRight));
+                480, 24, 204, 18, ContentAlignment.MiddleRight));
 
             gameButton = new IconButton(IconKind.Mouse);
-            gameButton.SetBounds(Ui.P(704), Ui.P(16), Ui.P(32), Ui.P(32));
+            gameButton.SetBounds(Ui.P(688), Ui.P(16), Ui.P(32), Ui.P(32));
             gameButton.Click += delegate { OpenGame(); };
             Controls.Add(gameButton);
 
             editorButton = new IconButton(IconKind.Editor);
-            editorButton.SetBounds(Ui.P(744), Ui.P(16), Ui.P(32), Ui.P(32));
+            editorButton.SetBounds(Ui.P(724), Ui.P(16), Ui.P(32), Ui.P(32));
             editorButton.Click += delegate { OpenEditor(); };
             Controls.Add(editorButton);
 
+            gifToolsButton = new IconButton(IconKind.Frames);
+            gifToolsButton.SetBounds(Ui.P(760), Ui.P(16), Ui.P(32), Ui.P(32));
+            gifToolsButton.Click += delegate { OpenGifTools(); };
+            Controls.Add(gifToolsButton);
+
             downloadsButton = new IconButton(IconKind.Download);
-            downloadsButton.SetBounds(Ui.P(784), Ui.P(16), Ui.P(32), Ui.P(32));
+            downloadsButton.SetBounds(Ui.P(796), Ui.P(16), Ui.P(32), Ui.P(32));
             downloadsButton.Click += delegate { ShowDownloadMenu(); };
             Controls.Add(downloadsButton);
 
             settingsButton = new IconButton(IconKind.Settings);
-            settingsButton.SetBounds(Ui.P(824), Ui.P(16), Ui.P(32), Ui.P(32));
+            settingsButton.SetBounds(Ui.P(832), Ui.P(16), Ui.P(32), Ui.P(32));
             settingsButton.Click += delegate { OpenSettings(); };
             Controls.Add(settingsButton);
 
             discordButton = new IconButton(IconKind.Discord);
-            discordButton.SetBounds(Ui.P(864), Ui.P(16), Ui.P(32), Ui.P(32));
+            discordButton.SetBounds(Ui.P(868), Ui.P(16), Ui.P(32), Ui.P(32));
             discordButton.Click += delegate { OpenLink("https://discord.gg/yMaS9HbjHV"); };
             Controls.Add(discordButton);
 
@@ -132,6 +141,7 @@ namespace Video2Gif
             headerTip = new ToolTip();
             headerTip.SetToolTip(gameButton, "Играть · Змейка");
             headerTip.SetToolTip(editorButton, "Видеоредактор · обрезка видео и фото");
+            headerTip.SetToolTip(gifToolsButton, "GIF-инструменты · кадры и сборка");
             headerTip.SetToolTip(downloadsButton, "Скачать видео, музыку или TikTok");
             headerTip.SetToolTip(settingsButton, "Настройки · тема оформления");
             headerTip.SetToolTip(discordButton, "Discord — чат сообщества");
@@ -156,6 +166,16 @@ namespace Video2Gif
             drop = new DropCard();
             drop.SetBounds(Ui.P(24), Ui.P(68), Ui.P(912), Ui.P(92));
             drop.PickFile += delegate { PickFile(); };
+            ContextMenuStrip dropMenu = new ContextMenuStrip();
+            dropMenu.ShowImageMargin = false;
+            dropMenu.ShowCheckMargin = false;
+            dropMenu.Font = Ui.Base;
+            dropMenu.BackColor = Ui.Card;
+            dropMenu.ForeColor = Ui.Text;
+            dropMenu.Renderer = new MenuRenderer();
+            AddMenuItem(dropMenu, "Вставить из буфера", delegate { PasteFromClipboard(); });
+            AddMenuItem(dropMenu, "Выбрать файл…", delegate { PickFile(); });
+            drop.ContextMenuStrip = dropMenu;
             Controls.Add(drop);
 
             Card settings = new Card();
@@ -164,14 +184,16 @@ namespace Video2Gif
 
             settings.Controls.Add(Lbl("Настройки", Ui.H2, Ui.Text, 18, 12, 300, 26));
 
-            startLabel = Lbl("Начало, с", Ui.Small, Ui.Muted, 18, 54, 128, 18);
+            startLabel = Lbl("Начало, с", Ui.Tiny, Ui.Muted, 18, 54, 96, 18);
             settings.Controls.Add(startLabel);
-            durationLabel = Lbl("Длительность, с", Ui.Small, Ui.Muted, 150, 54, 128, 18);
+            durationLabel = Lbl("Длительность, с", Ui.Tiny, Ui.Muted, 124, 54, 96, 18);
             settings.Controls.Add(durationLabel);
-            widthLabel = Lbl("Ширина (0=ориг.)", Ui.Small, Ui.Muted, 282, 54, 128, 18);
+            widthLabel = Lbl("Ширина, px", Ui.Tiny, Ui.Muted, 230, 54, 100, 18);
             settings.Controls.Add(widthLabel);
-            fpsLabel = Lbl("Кадры/с · 1–60", Ui.Small, Ui.Muted, 414, 54, 128, 18);
+            fpsLabel = Lbl("Кадры/с", Ui.Tiny, Ui.Muted, 336, 54, 96, 18);
             settings.Controls.Add(fpsLabel);
+            limitLabel = Lbl("Лимит, МБ", Ui.Tiny, Ui.Muted, 442, 54, 96, 18);
+            settings.Controls.Add(limitLabel);
 
             imageNote = Lbl("Для картинки время и кадры\nне нужны: получится GIF\nиз одного кадра.",
                 Ui.Small, Ui.Muted, 18, 52, 252, 52);
@@ -179,24 +201,31 @@ namespace Video2Gif
             settings.Controls.Add(imageNote);
 
             startInput = new FlatInput();
-            startInput.SetBounds(Ui.P(18), Ui.P(72), Ui.P(128), Ui.P(34));
+            startInput.SetBounds(Ui.P(18), Ui.P(72), Ui.P(96), Ui.P(34));
             startInput.Value = "0";
             settings.Controls.Add(startInput);
 
             durationInput = new FlatInput();
-            durationInput.SetBounds(Ui.P(150), Ui.P(72), Ui.P(128), Ui.P(34));
+            durationInput.SetBounds(Ui.P(124), Ui.P(72), Ui.P(96), Ui.P(34));
             durationInput.Placeholder = "весь клип";
             settings.Controls.Add(durationInput);
 
             widthInput = new FlatInput();
-            widthInput.SetBounds(Ui.P(282), Ui.P(72), Ui.P(128), Ui.P(34));
+            widthInput.SetBounds(Ui.P(230), Ui.P(72), Ui.P(96), Ui.P(34));
             widthInput.Value = "480";
             settings.Controls.Add(widthInput);
 
             fpsInput = new FlatInput();
-            fpsInput.SetBounds(Ui.P(414), Ui.P(72), Ui.P(128), Ui.P(34));
+            fpsInput.SetBounds(Ui.P(336), Ui.P(72), Ui.P(96), Ui.P(34));
             fpsInput.Value = "30";
             settings.Controls.Add(fpsInput);
+            headerTip.SetToolTip(widthInput, "0 — оригинальная ширина");
+            headerTip.SetToolTip(fpsInput, "От 1 до 60 кадров в секунду");
+
+            limitInput = new FlatInput();
+            limitInput.SetBounds(Ui.P(442), Ui.P(72), Ui.P(96), Ui.P(34));
+            limitInput.Placeholder = "без лимита";
+            settings.Controls.Add(limitInput);
 
             settings.Controls.Add(Lbl("Сглаживание переходов", Ui.Small, Ui.Muted, 18, 126, 300, 18));
 
@@ -315,16 +344,23 @@ namespace Video2Gif
 
             saveButton = new PillButton();
             saveButton.Accent = true;
-            saveButton.Text = "Сохранить GIF";
+            saveButton.Text = "Сохранить";
             saveButton.Font = Ui.Bold;
-            saveButton.SetBounds(Ui.P(18), Ui.P(272), Ui.P(145), Ui.P(42));
+            saveButton.SetBounds(Ui.P(18), Ui.P(272), Ui.P(94), Ui.P(42));
             saveButton.Click += delegate { SaveResult(); };
             resultView.Controls.Add(saveButton);
+
+            copyButton = new PillButton();
+            copyButton.Ghost = true;
+            copyButton.Text = "Копировать";
+            copyButton.SetBounds(Ui.P(117), Ui.P(272), Ui.P(100), Ui.P(42));
+            copyButton.Click += delegate { CopyResult(); };
+            resultView.Controls.Add(copyButton);
 
             openButton = new PillButton();
             openButton.Ghost = true;
             openButton.Text = "Открыть";
-            openButton.SetBounds(Ui.P(173), Ui.P(272), Ui.P(145), Ui.P(42));
+            openButton.SetBounds(Ui.P(222), Ui.P(272), Ui.P(96), Ui.P(42));
             openButton.Click += delegate { OpenResult(); };
             resultView.Controls.Add(openButton);
 

@@ -74,6 +74,78 @@ namespace Video2Gif
             bitmap.Save(path, ImageFormat.Png);
         }
 
+        /// <summary>Рисует подпись и картинку поверх готового фото.</summary>
+        public static void DecoratePhoto(Bitmap bitmap, string overlay,
+            int corner, int scale, string caption, bool captionTop)
+        {
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                int margin = Math.Max(8, bitmap.Width / 40);
+
+                if (!string.IsNullOrEmpty(overlay) && File.Exists(overlay))
+                {
+                    try
+                    {
+                        using (Bitmap image = LoadBitmap(overlay))
+                        {
+                            int width = Math.Max(1,
+                                (int)Math.Round(bitmap.Width * scale / 100.0));
+                            int height = Math.Max(1,
+                                (int)Math.Round(image.Height * (double)width / image.Width));
+                            int x = corner % 2 == 0 ? margin : bitmap.Width - width - margin;
+                            int y = corner < 2 ? margin : bitmap.Height - height - margin;
+                            g.DrawImage(image, x, y, width, height);
+                        }
+                    }
+                    catch { }
+                }
+
+                if (string.IsNullOrEmpty(caption)) return;
+
+                int size = Math.Max(12, bitmap.Height / 12);
+                Font font = null;
+                while (size >= 8)
+                {
+                    font = new Font("Segoe UI", size, FontStyle.Bold, GraphicsUnit.Pixel);
+                    SizeF measured = g.MeasureString(caption, font);
+                    if (measured.Width <= bitmap.Width - margin * 2) break;
+                    font.Dispose();
+                    font = null;
+                    size -= 2;
+                }
+                if (font == null)
+                    font = new Font("Segoe UI", 8f, FontStyle.Bold, GraphicsUnit.Pixel);
+
+                try
+                {
+                    SizeF measured = g.MeasureString(caption, font);
+                    float x = (bitmap.Width - measured.Width) / 2f;
+                    float y = captionTop
+                        ? margin
+                        : bitmap.Height - measured.Height - margin;
+                    using (SolidBrush shadow = new SolidBrush(Color.FromArgb(200, 0, 0, 0)))
+                    using (SolidBrush fill = new SolidBrush(Color.White))
+                    {
+                        for (int dx = -2; dx <= 2; dx += 2)
+                        {
+                            for (int dy = -2; dy <= 2; dy += 2)
+                            {
+                                if (dx == 0 && dy == 0) continue;
+                                g.DrawString(caption, font, shadow, x + dx, y + dy);
+                            }
+                        }
+                        g.DrawString(caption, font, fill, x, y);
+                    }
+                }
+                finally
+                {
+                    font.Dispose();
+                }
+            }
+        }
+
         public static void ExtractFrame(string input, double position, string output)
         {
             RunFfmpeg(
@@ -81,6 +153,30 @@ namespace Video2Gif
                 Fmt.Num(Math.Max(0, position)) +
                 " -i " + Fmt.Quote(input) +
                 " -frames:v 1 -f image2 " + Fmt.Quote(output));
+        }
+
+        /// <summary>Раскладывает GIF на PNG-кадры. Возвращает число кадров.</summary>
+        public static int ExtractGifFrames(string input, string folder)
+        {
+            Directory.CreateDirectory(folder);
+            string pattern = Path.Combine(folder, "frame-%04d.png");
+            RunFfmpeg(
+                "-hide_banner -loglevel error -y -i " + Fmt.Quote(input) +
+                " " + Fmt.Quote(pattern));
+            return Directory.GetFiles(folder, "frame-*.png").Length;
+        }
+
+        /// <summary>Собирает GIF из последовательных PNG-кадров f0001.png…</summary>
+        public static void AssembleGif(string folder, int fps, int width, string output)
+        {
+            string pattern = Path.Combine(folder, "f%04d.png");
+            string filter = "fps=" + fps + ",";
+            if (width > 0) filter += "scale=" + width + ":-1:flags=lanczos,";
+            filter += "split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse";
+            RunFfmpeg(
+                "-hide_banner -loglevel error -y -framerate " + fps +
+                " -i " + Fmt.Quote(pattern) +
+                " -vf \"" + filter + "\" -loop 0 " + Fmt.Quote(output));
         }
 
         public static void TrimVideo(string input, string output,
@@ -94,6 +190,69 @@ namespace Video2Gif
                 " -vf scale=trunc(iw/2)*2:trunc(ih/2)*2" +
                 " -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p" +
                 " -c:a aac -b:a 192k -movflags +faststart " + Fmt.Quote(output));
+        }
+
+        /// <summary>Обрезка видео с подписью и картинкой поверх.</summary>
+        public static void TrimVideo(string input, string output,
+            double start, double end, string overlay, int corner, int scale,
+            string caption, bool captionTop, int sourceWidth, int sourceHeight)
+        {
+            bool hasOverlay = !string.IsNullOrEmpty(overlay) && File.Exists(overlay);
+            bool hasCaption = !string.IsNullOrEmpty(caption);
+            if (!hasOverlay && !hasCaption)
+            {
+                TrimVideo(input, output, start, end);
+                return;
+            }
+
+            double duration = Math.Max(0.05, end - start);
+            int baseWidth = sourceWidth > 0 ? sourceWidth : 640;
+            StringBuilder filters = new StringBuilder();
+            filters.Append("[0:v]scale=trunc(iw/2)*2:trunc(ih/2)*2[base]");
+            string current = "base";
+
+            if (hasOverlay)
+            {
+                int width = Math.Max(24,
+                    (int)Math.Round(baseWidth * Math.Max(5, Math.Min(80, scale)) / 100.0));
+                string x = corner % 2 == 0 ? "20" : "W-w-20";
+                string y = corner < 2 ? "20" : "H-h-20";
+                filters.Append(";[1:v]scale=" + width + ":-1[ov];[" + current +
+                    "][ov]overlay=" + x + ":" + y + "[withov]");
+                current = "withov";
+            }
+
+            if (hasCaption)
+            {
+                int fontSize = Math.Max(18,
+                    (sourceHeight > 0 ? sourceHeight : 360) / 14);
+                string y = captionTop ? "20" : "h-text_h-20";
+                filters.Append(";[" + current +
+                    "]drawtext=fontfile='C\\:/Windows/Fonts/segoeui.ttf':text='" +
+                    EscapeDrawText(caption) + "':fontcolor=white:fontsize=" + fontSize +
+                    ":borderw=2:bordercolor=black:x=(w-text_w)/2:y=" + y + "[v]");
+                current = "v";
+            }
+
+            string args = "-hide_banner -loglevel error -y -ss " + Fmt.Num(start) +
+                " -i " + Fmt.Quote(input);
+            if (hasOverlay) args += " -i " + Fmt.Quote(overlay);
+            args += " -t " + Fmt.Num(duration) +
+                " -filter_complex \"" + filters + "\"" +
+                " -map \"[" + current + "]\" -map 0:a?" +
+                " -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p" +
+                " -c:a aac -b:a 192k -movflags +faststart " + Fmt.Quote(output);
+            RunFfmpeg(args);
+        }
+
+        private static string EscapeDrawText(string text)
+        {
+            string value = (text ?? "").Replace("\r", " ").Replace("\n", " ");
+            value = value.Replace("\\", "\\\\");
+            value = value.Replace(":", "\\:");
+            value = value.Replace("'", "\\'");
+            value = value.Replace("%", "\\%");
+            return value;
         }
 
         /// <summary>Раскадровка выбранного фрагмента для проигрывания в окне.</summary>
@@ -506,6 +665,13 @@ namespace Video2Gif
         private PillButton saveButton;
         private PillButton closeButton;
         private PillButton playButton;
+        private PillButton styleButton;
+
+        private string overlayPath = "";
+        private int overlayCorner = 3;
+        private int overlayScale = 20;
+        private string caption = "";
+        private bool captionTop;
 
         private readonly List<string> playFrames = new List<string>();
         private Timer playTimer;
@@ -637,6 +803,14 @@ namespace Video2Gif
             closeButton.SetBounds(Ui.P(364), Ui.P(500), Ui.P(160), Ui.P(44));
             closeButton.Click += delegate { Close(); };
             Controls.Add(closeButton);
+
+            styleButton = new PillButton();
+            styleButton.Ghost = true;
+            styleButton.Text = "Текст и поверх";
+            styleButton.Font = Ui.Small;
+            styleButton.SetBounds(Ui.P(532), Ui.P(500), Ui.P(164), Ui.P(44));
+            styleButton.Click += delegate { OpenOverlayEditor(); };
+            Controls.Add(styleButton);
 
             playTimer = new Timer();
             playTimer.Tick += delegate { PlayTick(); };
@@ -1062,6 +1236,24 @@ namespace Video2Gif
             else SaveVideo();
         }
 
+        private void OpenOverlayEditor()
+        {
+            if (working) return;
+            using (OverlayForm dialog = new OverlayForm())
+            {
+                dialog.SetValues(caption, captionTop, overlayPath, overlayCorner, overlayScale);
+                if (dialog.ShowDialog(this) == DialogResult.OK)
+                {
+                    caption = dialog.Caption;
+                    captionTop = dialog.CaptionTop;
+                    overlayPath = dialog.OverlayPath;
+                    overlayCorner = dialog.OverlayCorner;
+                    overlayScale = dialog.OverlayScale;
+                    statusLabel.Text = "Оформление сохранено.";
+                }
+            }
+        }
+
         private void SaveVideo()
         {
             if (path.Length == 0) return;
@@ -1095,11 +1287,19 @@ namespace Video2Gif
                 string source = path;
                 double from = start;
                 double to = end;
+                string overlay = overlayPath;
+                int corner = overlayCorner;
+                int scale = overlayScale;
+                string text = caption;
+                bool textTop = captionTop;
+                int sourceWidth = info != null ? info.Width : 0;
+                int sourceHeight = info != null ? info.Height : 0;
 
                 SetWorking(true, "Сохраняем видео…");
                 Task.Factory.StartNew(delegate
                 {
-                    EditorCore.TrimVideo(source, output, from, to);
+                    EditorCore.TrimVideo(source, output, from, to,
+                        overlay, corner, scale, text, textTop, sourceWidth, sourceHeight);
                 }).ContinueWith(delegate(Task task)
                 {
                     if (IsDisposed) return;
@@ -1151,6 +1351,8 @@ namespace Video2Gif
                 {
                     using (Bitmap result = EditorCore.CropBitmap(preview.Image, crop))
                     {
+                        EditorCore.DecoratePhoto(result, overlayPath, overlayCorner,
+                            overlayScale, caption, captionTop);
                         EditorCore.SaveBitmap(result, dialog.FileName);
                     }
                     statusLabel.Text = "Готово: " + Path.GetFileName(dialog.FileName) +

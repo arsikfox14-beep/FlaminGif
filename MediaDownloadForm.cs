@@ -25,6 +25,10 @@ namespace Video2Gif
 
         private bool audio;
         private string audioFormat = "mp3";
+        private string quality = "best";
+        private Label qualityLabel;
+        private PillButton[] qualityPills;
+        private string[] qualityKeys;
         private bool working;
         private string selectedFolder = "";
         private int lastPercent = -1;
@@ -51,7 +55,7 @@ namespace Video2Gif
             BackColor = Ui.Bg;
             Font = Ui.Base;
             AutoScaleMode = AutoScaleMode.None;
-            ClientSize = new Size(Ui.P(560), Ui.P(368));
+            ClientSize = new Size(Ui.P(560), Ui.P(spotify ? 368 : 422));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -127,11 +131,37 @@ namespace Video2Gif
                 wavPill.SetBounds(Ui.P(288), Ui.P(156), Ui.P(248), Ui.P(34));
                 wavPill.Visible = true;
             }
+            else
+            {
+                qualityLabel = MakeLabel("Качество видео", Ui.Small, Ui.Muted, 24, 200, 300, 18);
+                Controls.Add(qualityLabel);
+                qualityKeys = new string[] { "best", "1080", "720", "480", "360" };
+                string[] texts = new string[] { "Лучшее", "1080p", "720p", "480p", "360p" };
+                qualityPills = new PillButton[qualityKeys.Length];
+                for (int i = 0; i < qualityKeys.Length; i++)
+                {
+                    PillButton pill = new PillButton();
+                    pill.Text = texts[i];
+                    pill.Font = Ui.Small;
+                    pill.SetBounds(Ui.P(24 + i * 100), Ui.P(220), Ui.P(92), Ui.P(34));
+                    string key = qualityKeys[i];
+                    pill.Click += delegate { quality = key; UpdateFormat(); };
+                    Controls.Add(pill);
+                    qualityPills[i] = pill;
+                }
+            }
 
-            Controls.Add(MakeLabel("Куда сохранить", Ui.Small, Ui.Muted, 24, 198, 300, 18));
+            int folderLabelY = spotify ? 198 : 264;
+            int folderY = spotify ? 218 : 284;
+            int progressY = spotify ? 268 : 334;
+            int percentY = spotify ? 258 : 324;
+            int stageY = spotify ? 278 : 344;
+            int buttonY = spotify ? 300 : 366;
+
+            Controls.Add(MakeLabel("Куда сохранить", Ui.Small, Ui.Muted, 24, folderLabelY, 300, 18));
 
             folderInput = new FlatInput();
-            folderInput.SetBounds(Ui.P(24), Ui.P(218), Ui.P(400), Ui.P(40));
+            folderInput.SetBounds(Ui.P(24), Ui.P(folderY), Ui.P(400), Ui.P(40));
             folderInput.Box.ReadOnly = true;
             Controls.Add(folderInput);
 
@@ -139,21 +169,21 @@ namespace Video2Gif
             chooseButton.Ghost = true;
             chooseButton.Text = "Выбрать";
             chooseButton.Font = Ui.Small;
-            chooseButton.SetBounds(Ui.P(432), Ui.P(218), Ui.P(104), Ui.P(40));
+            chooseButton.SetBounds(Ui.P(432), Ui.P(folderY), Ui.P(104), Ui.P(40));
             chooseButton.Click += delegate { ChooseFolder(); };
             Controls.Add(chooseButton);
 
             progressBar = new SlimBar();
-            progressBar.SetBounds(Ui.P(24), Ui.P(268), Ui.P(420), Ui.P(6));
+            progressBar.SetBounds(Ui.P(24), Ui.P(progressY), Ui.P(420), Ui.P(6));
             progressBar.Visible = false;
             Controls.Add(progressBar);
 
-            percentLabel = MakeLabel("", Ui.Small, Ui.Accent, 452, 258, 84, 18);
+            percentLabel = MakeLabel("", Ui.Small, Ui.Accent, 452, percentY, 84, 18);
             percentLabel.TextAlign = ContentAlignment.MiddleRight;
             percentLabel.Visible = false;
             Controls.Add(percentLabel);
 
-            stageLabel = MakeLabel("", Ui.Tiny, Ui.Muted, 24, 278, 512, 18);
+            stageLabel = MakeLabel("", Ui.Tiny, Ui.Muted, 24, stageY, 512, 18);
             stageLabel.AutoEllipsis = true;
             stageLabel.Visible = false;
             Controls.Add(stageLabel);
@@ -162,14 +192,14 @@ namespace Video2Gif
             downloadButton.Accent = true;
             downloadButton.Text = "Скачать";
             downloadButton.Font = Ui.Bold;
-            downloadButton.SetBounds(Ui.P(24), Ui.P(300), Ui.P(248), Ui.P(44));
+            downloadButton.SetBounds(Ui.P(24), Ui.P(buttonY), Ui.P(248), Ui.P(44));
             downloadButton.Click += delegate { StartDownload(); };
             Controls.Add(downloadButton);
 
             cancelButton = new PillButton();
             cancelButton.Ghost = true;
             cancelButton.Text = "Закрыть";
-            cancelButton.SetBounds(Ui.P(288), Ui.P(300), Ui.P(248), Ui.P(44));
+            cancelButton.SetBounds(Ui.P(288), Ui.P(buttonY), Ui.P(248), Ui.P(44));
             cancelButton.Click += delegate
             {
                 if (working)
@@ -260,6 +290,19 @@ namespace Video2Gif
             videoPill.Invalidate();
             audioPill.Invalidate();
             wavPill.Invalidate();
+
+            if (qualityPills != null && qualityKeys != null)
+            {
+                bool enabled = !audio && !spotify;
+                for (int i = 0; i < qualityPills.Length; i++)
+                {
+                    qualityPills[i].Enabled = enabled;
+                    qualityPills[i].Active = enabled && qualityKeys[i] == quality;
+                    qualityPills[i].Invalidate();
+                }
+            }
+            if (qualityLabel != null)
+                qualityLabel.ForeColor = (!audio && !spotify) ? Ui.Muted : Ui.Faint;
         }
 
         private void PasteLink()
@@ -344,7 +387,7 @@ namespace Video2Gif
             Task.Factory.StartNew(delegate
             {
                 return active.Download(captured, spotify, capturedAudio, capturedFormat,
-                    folder, ReportProgress);
+                    folder, quality, ReportProgress);
             }).ContinueWith(delegate(Task<List<string>> task)
             {
                 if (IsDisposed || !IsHandleCreated) return;

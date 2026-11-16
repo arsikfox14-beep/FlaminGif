@@ -333,7 +333,7 @@ namespace Video2Gif
         }
 
         public List<string> Download(string url, bool spotify, bool audio, string audioFormat,
-            string folder, Action<int, string> report)
+            string folder, string quality, Action<int, string> report)
         {
             cancelled = false;
             lock (gate)
@@ -414,7 +414,7 @@ namespace Video2Gif
 
                 try
                 {
-                    RunOne(target, audio, audioFormat, targetFolder, delegate(int percent)
+                    RunOne(target, audio, audioFormat, targetFolder, quality, delegate(int percent)
                     {
                         int overall = total > 1
                             ? (int)Math.Round((index + percent / 100.0) * 100.0 / total)
@@ -684,6 +684,29 @@ namespace Video2Gif
         private const string BestVideoFormat = "bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b";
         private const string CombinedVideoFormat = "b[ext=mp4]/b/bv*+ba/b";
 
+        private static string QualityVideoFormat(string quality)
+        {
+            int height;
+            if (string.IsNullOrEmpty(quality) || quality == "best" ||
+                !int.TryParse(quality, out height) || height <= 0)
+            {
+                return BestVideoFormat;
+            }
+            return "bv*[height<=" + height + "][ext=mp4]+ba[ext=m4a]/" +
+                   "bv*[height<=" + height + "]+ba/b[height<=" + height + "]";
+        }
+
+        private static string QualityCombinedFormat(string quality)
+        {
+            int height;
+            if (string.IsNullOrEmpty(quality) || quality == "best" ||
+                !int.TryParse(quality, out height) || height <= 0)
+            {
+                return CombinedVideoFormat;
+            }
+            return "b[height<=" + height + "][ext=mp4]/b[height<=" + height + "]/b";
+        }
+
         private sealed class Attempt
         {
             public readonly string Format;
@@ -697,7 +720,7 @@ namespace Video2Gif
         }
 
         private void RunOne(string target, bool audio, string audioFormat, string folder,
-            Action<int> percent)
+            string quality, Action<int> percent)
         {
             string ffmpegDir = Path.GetDirectoryName(FfmpegBundle.Path);
             string format = string.IsNullOrEmpty(audioFormat) ? "mp3" : audioFormat;
@@ -716,13 +739,14 @@ namespace Video2Gif
             }
             else
             {
-                // Сначала лучшее качество: видео и звук отдельными дорожками.
-                attempts.Add(new Attempt(BestVideoFormat, null));
+                // Сначала выбранное качество: видео и звук отдельными дорожками.
+                string videoFormat = QualityVideoFormat(quality);
+                attempts.Add(new Attempt(videoFormat, null));
                 // Если первый клиент не отдал звук, пробуем другой —
-                // тоже в максимальном качестве.
-                attempts.Add(new Attempt(BestVideoFormat, "youtube:player_client=tv_embedded"));
+                // с тем же ограничением качества.
+                attempts.Add(new Attempt(videoFormat, "youtube:player_client=tv_embedded"));
                 // Последний шанс: готовый файл со звуком, без слияния.
-                attempts.Add(new Attempt(CombinedVideoFormat, "youtube:player_client=android"));
+                attempts.Add(new Attempt(QualityCombinedFormat(quality), "youtube:player_client=android"));
             }
 
             string lastError = null;

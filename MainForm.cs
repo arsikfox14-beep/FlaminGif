@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -374,6 +376,121 @@ namespace Video2Gif
 
         /* -------------------------------------------------------------- Файл */
 
+        private void PasteFromClipboard()
+        {
+            if (busy) return;
+            try
+            {
+                if (Clipboard.ContainsImage())
+                {
+                    using (Image image = Clipboard.GetImage())
+                    {
+                        if (image == null) return;
+                        string dir = Path.Combine(Path.GetTempPath(),
+                            "video2gif-paste-" + Guid.NewGuid().ToString("N").Substring(0, 8));
+                        Directory.CreateDirectory(dir);
+                        tempDirs.Add(dir);
+                        string file = Path.Combine(dir, "clipboard.png");
+                        using (Bitmap bitmap = new Bitmap(image))
+                        {
+                            bitmap.Save(file, ImageFormat.Png);
+                        }
+                        LoadVideo(file);
+                        return;
+                    }
+                }
+
+                if (Clipboard.ContainsFileDropList())
+                {
+                    StringCollection files = Clipboard.GetFileDropList();
+                    foreach (string file in files)
+                    {
+                        if (File.Exists(file))
+                        {
+                            LoadVideo(file);
+                            return;
+                        }
+                    }
+                }
+
+                if (Clipboard.ContainsText())
+                {
+                    string text = Clipboard.GetText().Trim();
+                    if (text.Length > 0 && File.Exists(text))
+                    {
+                        LoadVideo(text);
+                        return;
+                    }
+                    if (text.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                        text.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        OpenMediaDownload(false);
+                        return;
+                    }
+                }
+
+                MessageBox.Show(this, "В буфере нет картинки, файла или ссылки.",
+                    Program.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "Не удалось вставить из буфера.\n\n" + ex.Message,
+                    Program.AppName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void CopyResult()
+        {
+            if (resultPath == null || !File.Exists(resultPath)) return;
+            try
+            {
+                StringCollection files = new StringCollection();
+                files.Add(resultPath);
+                Clipboard.SetFileDropList(files);
+                if (copyButton != null) copyButton.Text = "Скопировано";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "Не удалось скопировать GIF.\n\n" + ex.Message,
+                    Program.AppName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private static bool IsTextInput(Control control)
+        {
+            while (control != null)
+            {
+                if (control is TextBoxBase || control is FlatInput) return true;
+                ContainerControl container = control as ContainerControl;
+                if (container != null && container.ActiveControl != null &&
+                    !ReferenceEquals(container.ActiveControl, control))
+                {
+                    control = container.ActiveControl;
+                    continue;
+                }
+                break;
+            }
+            return false;
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (!IsTextInput(ActiveControl))
+            {
+                if (keyData == (Keys.Control | Keys.V))
+                {
+                    PasteFromClipboard();
+                    return true;
+                }
+                if (keyData == (Keys.Control | Keys.C) && resultPath != null)
+                {
+                    CopyResult();
+                    return true;
+                }
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         private void PickFile()
         {
             if (busy) return;
@@ -403,6 +520,15 @@ namespace Video2Gif
             using (EditorForm editor = new EditorForm())
             {
                 editor.ShowDialog(this);
+            }
+        }
+
+        private void OpenGifTools()
+        {
+            if (busy) return;
+            using (GifToolsForm tools = new GifToolsForm())
+            {
+                tools.ShowDialog(this);
             }
         }
 
@@ -478,8 +604,8 @@ namespace Video2Gif
                 durationLabel.Visible = true;
                 fpsLabel.Visible = true;
                 imageNote.Visible = false;
-                widthLabel.SetBounds(Ui.P(282), Ui.P(54), Ui.P(128), Ui.P(18));
-                widthInput.SetBounds(Ui.P(282), Ui.P(72), Ui.P(128), Ui.P(34));
+                widthLabel.SetBounds(Ui.P(230), Ui.P(54), Ui.P(100), Ui.P(18));
+                widthInput.SetBounds(Ui.P(230), Ui.P(72), Ui.P(96), Ui.P(34));
                 durationInput.Placeholder = "0 — весь клип";
                 drop.FileMeta = "Не удалось прочитать файл";
                 drop.Invalidate();
@@ -504,8 +630,8 @@ namespace Video2Gif
             durationLabel.Visible = !image;
             fpsLabel.Visible = !image;
             imageNote.Visible = image;
-            widthLabel.SetBounds(Ui.P(282), Ui.P(54), Ui.P(image ? 260 : 128), Ui.P(18));
-            widthInput.SetBounds(Ui.P(282), Ui.P(72), Ui.P(image ? 260 : 128), Ui.P(34));
+            widthLabel.SetBounds(Ui.P(230), Ui.P(54), Ui.P(100), Ui.P(18));
+            widthInput.SetBounds(Ui.P(230), Ui.P(72), Ui.P(96), Ui.P(34));
             startInput.Value = image ? "" : "0";
             durationInput.Placeholder = image ? "не используется" : "0 — весь клип";
             durationInput.Value = image ? "" : InputNumber(Math.Min(8.0, info.Duration > 0 ? info.Duration : 8.0));
@@ -545,6 +671,7 @@ namespace Video2Gif
             downloadsButton.Enabled = !busy;
             if (gameButton != null) gameButton.Enabled = !busy;
             if (editorButton != null) editorButton.Enabled = !busy;
+            if (limitInput != null) limitInput.Enabled = !busy;
         }
 
         /* ------------------------------------------------------- Конвертация */
@@ -625,6 +752,17 @@ namespace Video2Gif
                 }
             }
 
+            double limitMb = 0;
+            string limitText = limitInput.Value.Trim();
+            if (limitText.Length > 0 &&
+                (!Fmt.TryNum(limitText, out limitMb) || limitMb < 0 || limitMb > 1000))
+            {
+                ShowFieldError("Лимит размера — от 0 до 1000 МБ. Пусто или 0 — без лимита.",
+                    limitInput);
+                return;
+            }
+            long limitBytes = limitMb > 0 ? (long)Math.Round(limitMb * 1024.0 * 1024.0) : 0;
+
             tempRoot = Path.Combine(Path.GetTempPath(),
                 "video2gif-" + Guid.NewGuid().ToString("N").Substring(0, 8));
             try
@@ -678,6 +816,7 @@ namespace Video2Gif
                 try
                 {
                     converter.Run(options, ReportProgress);
+                    if (limitBytes > 0) CompressToLimit(options, converter, limitBytes);
                     try
                     {
                         BeginInvoke((MethodInvoker)delegate { FinishSuccess(options.Output); });
@@ -702,6 +841,37 @@ namespace Video2Gif
                     catch { }
                 }
             });
+        }
+
+        /// <summary>Перекодирует GIF, пока он не влезет в заданный лимит.</summary>
+        private void CompressToLimit(ConversionOptions options, Converter converter, long limitBytes)
+        {
+            for (int attempt = 0; attempt < 4; attempt++)
+            {
+                FileInfo file;
+                try { file = new FileInfo(options.Output); }
+                catch { return; }
+                if (!file.Exists || file.Length <= limitBytes) return;
+
+                double ratio = (double)limitBytes / Math.Max(1, file.Length);
+                double scale = Math.Sqrt(ratio) * 0.92;
+                if (scale > 0.90) scale = 0.90;
+                if (scale < 0.40) scale = 0.40;
+
+                int currentWidth = options.Width > 0
+                    ? options.Width
+                    : (info != null && info.Width > 0 ? info.Width : 480);
+                int nextWidth = (int)Math.Round(currentWidth * scale);
+                if (nextWidth >= currentWidth) nextWidth = Math.Max(80, currentWidth - 40);
+                if (nextWidth < 80) nextWidth = 80;
+                options.Width = nextWidth;
+                if (options.Fps > 10)
+                    options.Fps = Math.Max(10, (int)Math.Round(options.Fps * 0.85));
+                if (options.Colors > 128) options.Colors = 128;
+
+                ReportProgress(0, "Сжимаем под лимит…");
+                converter.Run(options, ReportProgress);
+            }
         }
 
         private void ReportProgress(int percent, string stage)
@@ -734,6 +904,7 @@ namespace Video2Gif
             resultView.Visible = false;
             progressView.Visible = true;
             cancelButton.Enabled = true;
+            if (copyButton != null) copyButton.Text = "Копировать";
         }
 
         private void FinishSuccess(string output)
@@ -763,7 +934,8 @@ namespace Video2Gif
             progressView.Visible = false;
             emptyState.Visible = false;
             resultView.Visible = true;
-            saveButton.Text = "Сохранить GIF";
+            saveButton.Text = "Сохранить";
+            if (copyButton != null) copyButton.Text = "Копировать";
         }
 
         private void FinishFailure(string message, bool showDialog)

@@ -14,6 +14,7 @@ namespace Video2Gif
     {
         Mouse,
         Editor,
+        Frames,
         Download,
         Settings,
         Discord,
@@ -223,6 +224,30 @@ namespace Video2Gif
                     g.DrawEllipse(pen,
                         cx + u * 0.44f - ring, cy + u * 0.74f - ring,
                         ring * 2f, ring * 2f);
+                }
+                else if (Kind == IconKind.Frames)
+                {
+                    // Киноплёнка: три кадра и треугольник воспроизведения.
+                    float frameW = unit * 0.62f;
+                    float frameH = unit * 1.16f;
+                    float gap = unit * 0.16f;
+                    float left = cx - (frameW * 3f + gap * 2f) / 2f;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        float x = left + i * (frameW + gap);
+                        g.DrawRectangle(pen, x, cy - frameH / 2f, frameW, frameH);
+                    }
+                    float mx = left + frameW + gap;
+                    using (SolidBrush play = new SolidBrush(ink))
+                    {
+                        PointF[] triangle = new PointF[]
+                        {
+                            new PointF(mx + frameW * 0.30f, cy - frameH * 0.22f),
+                            new PointF(mx + frameW * 0.30f, cy + frameH * 0.22f),
+                            new PointF(mx + frameW * 0.72f, cy)
+                        };
+                        g.FillPolygon(play, triangle);
+                    }
                 }
                 else if (Kind == IconKind.Download)
                 {
