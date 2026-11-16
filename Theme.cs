@@ -329,7 +329,7 @@ namespace Video2Gif
         public static readonly Font H2 = new Font("Segoe UI", 12.5f, FontStyle.Bold);
         public static readonly Font H1 = new Font("Segoe UI", 15f, FontStyle.Bold);
         public static readonly Font Logo = new Font("Segoe UI", 14f, FontStyle.Bold);
-        public static readonly Font GtaMark = new Font("Segoe UI", 30f, FontStyle.Bold);
+        public static readonly Font GtaMark = new Font("Segoe UI", 38f, FontStyle.Bold);
 
         /* ------------------------------------------------- Тема GTA 6 (неон) */
 
@@ -880,8 +880,9 @@ namespace Video2Gif
                     }
 
                     Ui.Write(g, "VI", Ui.GtaMark,
-                        new Rectangle(Width - Ui.P(126), (Height - Ui.P(58)) / 2, Ui.P(96), Ui.P(58)),
-                        Color.FromArgb(86, 255, 255, 255),
+                        new Rectangle(Width - Ui.P(130), (Height - Ui.P(64)) / 2,
+                            Ui.P(104), Ui.P(64)),
+                        Color.FromArgb(104, 255, 255, 255),
                         TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter |
                         TextFormatFlags.NoPadding | TextFormatFlags.SingleLine);
                 }
@@ -911,31 +912,31 @@ namespace Video2Gif
                 {
                     int x = Width - Ui.P(18);
                     Ui.DrawSnowflake(g, x - Ui.P(34), Height / 2f, Ui.P(22),
-                        Color.FromArgb(58, Ui.Accent), Math.Max(1.2f, Ui.P(1.6)));
+                        Color.FromArgb(100, Ui.Accent), Math.Max(1.2f, Ui.P(1.6)));
                     Ui.DrawSnowflake(g, x - Ui.P(128), Height * 0.30f, Ui.P(12),
-                        Color.FromArgb(46, Ui.Accent), Math.Max(1.1f, Ui.P(1.4)));
+                        Color.FromArgb(85, Ui.Accent), Math.Max(1.1f, Ui.P(1.4)));
                     Ui.DrawSnowflake(g, x - Ui.P(196), Height * 0.74f, Ui.P(9),
-                        Color.FromArgb(38, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
+                        Color.FromArgb(75, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
                     Ui.DrawSnowflake(g, x - Ui.P(74), Ui.P(15), Ui.P(7),
-                        Color.FromArgb(34, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                        Color.FromArgb(70, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
                 }
                 else
                 {
                     Rectangle pumpkin = new Rectangle(
                         Width - Ui.P(84), (Height - Ui.P(46)) / 2, Ui.P(46), Ui.P(40));
-                    Ui.DrawPumpkin(g, pumpkin, Color.FromArgb(64, Ui.Accent), Ui.Card);
+                    Ui.DrawPumpkin(g, pumpkin, Color.FromArgb(110, Ui.Accent), Ui.Card);
                     Ui.DrawLeaf(g, Width - Ui.P(122), Height * 0.28f, Ui.P(24),
-                        Color.FromArgb(92, Ui.Accent), 28f);
+                        Color.FromArgb(125, Ui.Accent), 28f);
                     Ui.DrawLeaf(g, Width - Ui.P(152), Height * 0.72f, Ui.P(18),
-                        Color.FromArgb(74, Ui.Accent), -34f);
+                        Color.FromArgb(110, Ui.Accent), -34f);
                     Ui.DrawLeaf(g, Width - Ui.P(204), Ui.P(17), Ui.P(15),
-                        Color.FromArgb(62, Ui.Accent), 52f);
+                        Color.FromArgb(95, Ui.Accent), 52f);
                     Ui.DrawLeaf(g, Width - Ui.P(56), Ui.P(22), Ui.P(12),
-                        Color.FromArgb(56, Ui.Accent), -18f);
+                        Color.FromArgb(90, Ui.Accent), -18f);
                     Ui.DrawLeaf(g, Width - Ui.P(100), Height * 0.88f, Ui.P(14),
-                        Color.FromArgb(60, Ui.Accent), -108f);
+                        Color.FromArgb(95, Ui.Accent), -108f);
                     Ui.DrawLeaf(g, Width - Ui.P(254), Height * 0.20f, Ui.P(11),
-                        Color.FromArgb(44, Ui.Accent), 68f);
+                        Color.FromArgb(85, Ui.Accent), 68f);
                 }
             }
 
@@ -960,7 +961,7 @@ namespace Video2Gif
             }
 
             int textX = iconX + iconSize + Ui.P(16);
-            int rightPad = Selected ? Ui.P(150) : Ui.P(14);
+            int rightPad = Selected ? Ui.P(274) : Ui.P(150);
 
             if (Selected)
             {
@@ -972,7 +973,7 @@ namespace Video2Gif
                     new Rectangle(textX, Ui.P(48), Width - textX - rightPad, Ui.P(20)),
                     sub, Ui.LeftMid);
 
-                Rectangle chip = new Rectangle(Width - Ui.P(136), (Height - Ui.P(32)) / 2, Ui.P(116), Ui.P(32));
+                Rectangle chip = new Rectangle(Width - Ui.P(260), (Height - Ui.P(32)) / 2, Ui.P(116), Ui.P(32));
                 Ui.FillRound(g, chip, Ui.P(8),
                     Ui.Gta6 ? Color.FromArgb(150, 8, 6, 12) : Ui.Card);
                 Ui.StrokeRound(g, chip, Ui.P(8),

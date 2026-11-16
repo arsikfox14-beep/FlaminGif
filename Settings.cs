@@ -205,7 +205,7 @@ namespace Video2Gif
             darkTile.Click += delegate { Choose("dark"); };
             Controls.Add(darkTile);
 
-            newYearTile = MakeTile("newyear", "Новый год");
+            newYearTile = MakeTile("newyear", "Снежная тема");
             newYearTile.SwatchBg = Color.FromArgb(9, 21, 38);
             newYearTile.SwatchCard = Color.FromArgb(16, 34, 56);
             newYearTile.SwatchAccent = Color.FromArgb(126, 200, 255);
@@ -229,7 +229,7 @@ namespace Video2Gif
             gtaTile.Click += delegate { Choose("gta6"); };
             Controls.Add(gtaTile);
 
-            Controls.Add(Lbl("Авто по дате: Хэллоуин 1 окт–1 ноя, Новый год 1 дек–1 янв,\n" +
+            Controls.Add(Lbl("Авто по дате: Хэллоуин 1 окт–1 ноя, Снежная 1 дек–1 янв,\n" +
                 "GTA 6 — 18 ноября 22:00 – 20 ноября 00:00.", Ui.Tiny, Ui.Faint,
                 24, 208, 380, 32));
 
