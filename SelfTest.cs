@@ -316,6 +316,39 @@ namespace Video2Gif
                     Fmt.Quote(still), out stillOut);
                 Check("generate image", stillCode == 0 && File.Exists(still));
 
+                string trimmed = Path.Combine(work, "editor-trim.mp4");
+                EditorCore.TrimVideo(sample, trimmed, 0.4, 1.4);
+                VideoInfo trimmedInfo = Ffmpeg.Probe(trimmed);
+                Check("editor video trim",
+                    File.Exists(trimmed) && new FileInfo(trimmed).Length > 1000 &&
+                    trimmedInfo.Duration > 0.6 && trimmedInfo.Duration < 1.8);
+
+                string frameShot = Path.Combine(work, "editor-frame.png");
+                EditorCore.ExtractFrame(sample, 0.5, frameShot);
+                bool frameSize = false;
+                if (File.Exists(frameShot))
+                {
+                    using (Bitmap frame = EditorCore.LoadBitmap(frameShot))
+                    {
+                        frameSize = frame.Width == 320 && frame.Height == 240;
+                    }
+                }
+                Check("editor preview frame", frameSize);
+
+                using (Bitmap source = new Bitmap(40, 30))
+                {
+                    using (Graphics graphics = Graphics.FromImage(source))
+                    {
+                        graphics.Clear(Color.FromArgb(255, 30, 30, 30));
+                    }
+                    using (Bitmap cropped = EditorCore.CropBitmap(
+                        source, new Rectangle(10, 5, 20, 15)))
+                    {
+                        Check("editor photo crop",
+                            cropped.Width == 20 && cropped.Height == 15);
+                    }
+                }
+
                 VideoInfo imageInfo = Ffmpeg.Probe(still);
                 Line("image probe: " + imageInfo.Describe());
                 Check("probe image", imageInfo.IsImage && imageInfo.Width == 400 && imageInfo.Height == 300);
@@ -432,18 +465,24 @@ namespace Video2Gif
                         Check("ui fps default 30", fpsBox != null && fpsBox.Value == "30");
                         Check("ui colors slider removed", GetField(form, "colorsSlider") == null);
                         IconButton game = GetField(form, "gameButton") as IconButton;
+                        IconButton editor = GetField(form, "editorButton") as IconButton;
                         IconButton download = GetField(form, "downloadsButton") as IconButton;
                         IconButton settings = GetField(form, "settingsButton") as IconButton;
                         Check("ui mouse button",
                             game != null && game.Kind == IconKind.Mouse);
+                        Check("ui editor icon button",
+                            editor != null && editor.Kind == IconKind.Editor);
                         Check("ui download icon button",
                             download != null && download.Kind == IconKind.Download);
                         Check("ui settings icon button",
                             settings != null && settings.Kind == IconKind.Settings);
+                        Check("ui header order",
+                            game != null && editor != null && download != null &&
+                            editor.Left > game.Left && download.Left > editor.Left);
                         Check("ui header buttons compact",
-                            game != null && download != null && settings != null &&
-                            game.Width <= Ui.P(34) && download.Width <= Ui.P(34) &&
-                            settings.Width <= Ui.P(34));
+                            game != null && editor != null && download != null && settings != null &&
+                            game.Width <= Ui.P(34) && editor.Width <= Ui.P(34) &&
+                            download.Width <= Ui.P(34) && settings.Width <= Ui.P(34));
 
                         IconButton discord = GetField(form, "discordButton") as IconButton;
                         IconButton donate = GetField(form, "donateButton") as IconButton;
@@ -648,6 +687,30 @@ namespace Video2Gif
                 {
                     Check("ui snake screenshot", false);
                     Line("  snake ui error: " + ex.Message);
+                }
+
+                try
+                {
+                    Ui.SetDark(true);
+                    using (EditorForm editor = new EditorForm())
+                    {
+                        editor.StartPosition = FormStartPosition.Manual;
+                        editor.Location = new Point(-4000, -4000);
+                        editor.Show();
+                        Application.DoEvents();
+                        Invoke(editor, "LoadFile", still);
+                        Application.DoEvents();
+                        string shot = Path.Combine(work, "ui-editor.png");
+                        SaveShot(editor, shot);
+                        Check("ui editor screenshot",
+                            File.Exists(shot) && new FileInfo(shot).Length > 2000);
+                        editor.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Check("ui editor screenshot", false);
+                    Line("  editor ui error: " + ex.Message);
                 }
 
                 try

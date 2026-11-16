@@ -298,6 +298,15 @@ namespace Video2Gif
             }
         }
 
+        private void OpenEditor()
+        {
+            if (busy) return;
+            using (EditorForm editor = new EditorForm())
+            {
+                editor.ShowDialog(this);
+            }
+        }
+
         private void LoadVideo(string path)
         {
             if (busy) return;
@@ -413,6 +422,7 @@ namespace Video2Gif
             ditherNone.Enabled = !busy;
             downloadsButton.Enabled = !busy;
             if (gameButton != null) gameButton.Enabled = !busy;
+            if (editorButton != null) editorButton.Enabled = !busy;
         }
 
         /* ------------------------------------------------------- Конвертация */

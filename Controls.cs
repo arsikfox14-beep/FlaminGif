@@ -13,6 +13,7 @@ namespace Video2Gif
     internal enum IconKind
     {
         Mouse,
+        Editor,
         Download,
         Settings,
         Discord,
@@ -204,6 +205,24 @@ namespace Video2Gif
                     g.DrawLine(pen, cx, top + 1, cx, cy - unit * 0.06f);
                     g.DrawLine(pen, cx - unit * 0.18f, top + h * 0.30f,
                         cx + unit * 0.18f, top + h * 0.30f);
+                }
+                else if (Kind == IconKind.Editor)
+                {
+                    // Ножницы — обрезка видео и фото.
+                    float u = unit * 1.05f;
+                    float ring = u * 0.27f;
+                    g.DrawLine(pen,
+                        cx - u * 0.34f, cy + u * 0.55f,
+                        cx + u * 0.55f, cy - u * 0.95f);
+                    g.DrawLine(pen,
+                        cx + u * 0.34f, cy + u * 0.55f,
+                        cx - u * 0.55f, cy - u * 0.95f);
+                    g.DrawEllipse(pen,
+                        cx - u * 0.44f - ring, cy + u * 0.74f - ring,
+                        ring * 2f, ring * 2f);
+                    g.DrawEllipse(pen,
+                        cx + u * 0.44f - ring, cy + u * 0.74f - ring,
+                        ring * 2f, ring * 2f);
                 }
                 else if (Kind == IconKind.Download)
                 {
