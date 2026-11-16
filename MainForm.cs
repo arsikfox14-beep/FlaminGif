@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -47,6 +48,37 @@ namespace Video2Gif
         {
             base.OnHandleCreated(e);
             ApplyTitleBarTheme();
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            base.OnPaintBackground(e);
+            if (!Ui.Gta6) return;
+
+            Rectangle glow = new Rectangle(0, 0, ClientSize.Width, Ui.P(66));
+            using (LinearGradientBrush brush = new LinearGradientBrush(
+                glow,
+                Color.FromArgb(0, 255, 79, 163),
+                Color.FromArgb(28, 255, 79, 163),
+                0f))
+            {
+                ColorBlend blend = new ColorBlend(3);
+                blend.Colors = new Color[]
+                {
+                    Color.FromArgb(0, 96, 92, 240),
+                    Color.FromArgb(16, 255, 79, 163),
+                    Color.FromArgb(30, 255, 158, 66)
+                };
+                blend.Positions = new float[] { 0f, 0.55f, 1f };
+                brush.InterpolationColors = blend;
+                e.Graphics.FillRectangle(brush, glow);
+            }
+
+            Rectangle line = new Rectangle(0, 0, ClientSize.Width, Math.Max(2, Ui.P(2)));
+            using (LinearGradientBrush brush = Ui.GtaGradient(line, 0f))
+            {
+                e.Graphics.FillRectangle(brush, line);
+            }
         }
 
         /* --------------------------------------------------------------- Тема */

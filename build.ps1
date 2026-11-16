@@ -17,6 +17,7 @@ $out = Join-Path $root $(if ($OutName) { $OutName } else { "Video2Gif.exe" })
 $ffmpeg = Join-Path $root "bin\ffmpeg.exe"
 $gz = Join-Path $build "ffmpeg.gz"
 $ico = Join-Path $src "app.ico"
+$discord = Join-Path $src "discord.png"
 $csc = Join-Path $env:WINDIR "Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 
 if (-not (Test-Path $csc)) {
@@ -136,6 +137,7 @@ $cscArgs = @(
     "/win32manifest:$(Join-Path $src 'app.manifest')",
     "/resource:$gz,ffmpeg.gz",
     "/resource:$ytgz,yt-dlp.gz",
+    "/resource:$discord,Video2Gif.discord.png",
     "/reference:System.dll",
     "/reference:System.Core.dll",
     "/reference:System.Drawing.dll",

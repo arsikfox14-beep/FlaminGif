@@ -4,15 +4,15 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyTitle("video2gif")]
 [assembly: System.Reflection.AssemblyDescription("video2gif — видео и картинки в GIF, скачивание TikTok, YouTube и музыки")]
 [assembly: System.Reflection.AssemblyProduct("video2gif")]
-[assembly: System.Reflection.AssemblyVersion("3.7.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("3.7.0.0")]
+[assembly: System.Reflection.AssemblyVersion("3.8.0.0")]
+[assembly: System.Reflection.AssemblyFileVersion("3.8.0.0")]
 
 namespace Video2Gif
 {
     internal static class Program
     {
         public const string AppName = "video2gif";
-        public const string Version = "3.7";
+        public const string Version = "3.8";
 
         /// <summary>Самопроверка: окна не должны лезть в сеть за обновлениями.</summary>
         public static bool SelfTestMode;

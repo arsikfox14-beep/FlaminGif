@@ -227,23 +227,23 @@ namespace Video2Gif
             }
             else if (kind == ThemeKind.Gta6)
             {
-                Bg = Color.FromArgb(12, 11, 14);
-                Card = Color.FromArgb(23, 19, 28);
-                Border = Color.FromArgb(44, 36, 54);
-                BorderStrong = Color.FromArgb(72, 58, 88);
-                Text = Color.FromArgb(247, 244, 251);
-                Muted = Color.FromArgb(181, 169, 197);
-                Faint = Color.FromArgb(124, 113, 137);
+                Bg = Color.FromArgb(10, 9, 12);
+                Card = Color.FromArgb(22, 17, 27);
+                Border = Color.FromArgb(45, 35, 55);
+                BorderStrong = Color.FromArgb(78, 58, 92);
+                Text = Color.FromArgb(250, 247, 252);
+                Muted = Color.FromArgb(190, 176, 205);
+                Faint = Color.FromArgb(132, 118, 146);
                 Accent = Color.FromArgb(255, 79, 163);
                 AccentDark = Color.FromArgb(226, 58, 138);
-                AccentInk = Color.FromArgb(255, 127, 192);
-                AccentSoft = Color.FromArgb(43, 27, 45);
-                AccentLine = Color.FromArgb(78, 51, 82);
-                AccentWash = Color.FromArgb(28, 20, 33);
-                Track = Color.FromArgb(38, 30, 45);
+                AccentInk = Color.FromArgb(255, 143, 198);
+                AccentSoft = Color.FromArgb(46, 26, 47);
+                AccentLine = Color.FromArgb(96, 52, 92);
+                AccentWash = Color.FromArgb(30, 18, 34);
+                Track = Color.FromArgb(40, 30, 46);
                 Good = Color.FromArgb(74, 222, 128);
                 Bad = Color.FromArgb(255, 107, 107);
-                OnAccent = Color.FromArgb(26, 10, 20);
+                OnAccent = Color.White;
             }
             else
             {
@@ -319,18 +319,19 @@ namespace Video2Gif
 
         /* ------------------------------------------------- Тема GTA 6 (неон) */
 
-        /// <summary>Неоновый градиент темы GTA 6: розовый → фиолетовый → оранжевый.</summary>
+        /// <summary>Неоновый градиент темы GTA 6: сине-фиолетовый → пурпурный → розовый → оранжевый.</summary>
         public static ColorBlend GtaBlend()
         {
-            ColorBlend blend = new ColorBlend(4);
+            ColorBlend blend = new ColorBlend(5);
             blend.Colors = new Color[]
             {
+                Color.FromArgb(255, 96, 92, 240),
+                Color.FromArgb(255, 150, 48, 245),
                 Color.FromArgb(255, 255, 79, 163),
-                Color.FromArgb(255, 168, 74, 255),
-                Color.FromArgb(255, 255, 110, 92),
+                Color.FromArgb(255, 255, 122, 84),
                 Color.FromArgb(255, 255, 158, 66)
             };
-            blend.Positions = new float[] { 0f, 0.42f, 0.76f, 1f };
+            blend.Positions = new float[] { 0f, 0.28f, 0.55f, 0.78f, 1f };
             return blend;
         }
 
@@ -338,8 +339,8 @@ namespace Video2Gif
         {
             LinearGradientBrush brush = new LinearGradientBrush(
                 bounds,
-                Color.FromArgb(255, 79, 163),
-                Color.FromArgb(255, 158, 66),
+                Color.FromArgb(255, 96, 92, 240),
+                Color.FromArgb(255, 255, 158, 66),
                 angle);
             brush.InterpolationColors = GtaBlend();
             return brush;
@@ -720,6 +721,29 @@ namespace Video2Gif
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
             int radius = Ui.P(9);
 
+            if (Ui.Gta6 && Accent && Enabled)
+            {
+                using (GraphicsPath path = Ui.Round(r, radius))
+                using (LinearGradientBrush brush = Ui.GtaGradient(r, 18f))
+                {
+                    g.FillPath(brush, path);
+                    if (hover || down)
+                    {
+                        using (SolidBrush veil = new SolidBrush(
+                            Color.FromArgb(down ? 42 : 20, 0, 0, 0)))
+                        {
+                            g.FillPath(veil, path);
+                        }
+                    }
+                    using (Pen pen = new Pen(Color.FromArgb(64, 255, 255, 255), 1f))
+                    {
+                        g.DrawPath(pen, path);
+                    }
+                }
+                Ui.Write(g, Text, Font, r, Color.White, Ui.CenterMid);
+                return;
+            }
+
             Color fill;
             Color border;
             Color fore;
@@ -803,17 +827,15 @@ namespace Video2Gif
             Rectangle r = new Rectangle(0, 0, Width - 1, Height - 1);
             int radius = Ui.P(12);
 
-            Ui.FillRound(g, r, radius, Ui.Card);
-
-            using (GraphicsPath path = Ui.Round(r, radius))
-            using (Pen pen = new Pen(Highlight ? Ui.Accent : (hover ? Ui.BorderStrong : Ui.Border), 1.2f))
+            if (Ui.Gta6)
             {
-                pen.DashStyle = DashStyle.Solid;
-                g.DrawPath(pen, path);
-            }
+                using (GraphicsPath fill = Ui.Round(new Rectangle(0, 0, Width, Height), radius))
+                using (LinearGradientBrush brush = Ui.GtaGradient(
+                    new Rectangle(0, 0, Width, Height), 24f))
+                {
+                    g.FillPath(brush, fill);
+                }
 
-            if (Ui.Gta6 && !Selected)
-            {
                 GraphicsState neon = g.Save();
                 try
                 {
@@ -822,29 +844,30 @@ namespace Video2Gif
                         g.SetClip(clip);
                     }
 
-                    Rectangle glow = new Rectangle(0, 0, Width, Height);
-                    using (LinearGradientBrush brush = new LinearGradientBrush(
-                        glow,
-                        Color.FromArgb(0, 255, 79, 163),
-                        Color.FromArgb(48, 255, 158, 66),
-                        18f))
+                    // Затемнение слева, чтобы белый текст читался на градиенте.
+                    Rectangle full = new Rectangle(0, 0, Width, Height);
+                    using (LinearGradientBrush shade = new LinearGradientBrush(
+                        full,
+                        Color.FromArgb(224, 8, 6, 12),
+                        Color.FromArgb(0, 8, 6, 12),
+                        0f))
                     {
                         ColorBlend blend = new ColorBlend(4);
                         blend.Colors = new Color[]
                         {
-                            Color.FromArgb(0, 255, 79, 163),
-                            Color.FromArgb(0, 168, 74, 255),
-                            Color.FromArgb(34, 168, 74, 255),
-                            Color.FromArgb(48, 255, 158, 66)
+                            Color.FromArgb(235, 8, 6, 12),
+                            Color.FromArgb(205, 8, 6, 12),
+                            Color.FromArgb(60, 8, 6, 12),
+                            Color.FromArgb(0, 8, 6, 12)
                         };
-                        blend.Positions = new float[] { 0f, 0.40f, 0.66f, 1f };
-                        brush.InterpolationColors = blend;
-                        g.FillRectangle(brush, glow);
+                        blend.Positions = new float[] { 0f, 0.55f, 0.80f, 1f };
+                        shade.InterpolationColors = blend;
+                        g.FillRectangle(shade, full);
                     }
 
                     Ui.Write(g, "VI", Ui.GtaMark,
                         new Rectangle(Width - Ui.P(126), (Height - Ui.P(58)) / 2, Ui.P(96), Ui.P(58)),
-                        Color.FromArgb(44, 255, 255, 255),
+                        Color.FromArgb(86, 255, 255, 255),
                         TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter |
                         TextFormatFlags.NoPadding | TextFormatFlags.SingleLine);
                 }
@@ -852,6 +875,20 @@ namespace Video2Gif
                 {
                     g.Restore(neon);
                 }
+            }
+            else
+            {
+                Ui.FillRound(g, r, radius, Ui.Card);
+            }
+
+            Color edge = Ui.Gta6
+                ? Color.FromArgb(126, 255, 255, 255)
+                : (Highlight ? Ui.Accent : (hover ? Ui.BorderStrong : Ui.Border));
+            using (GraphicsPath path = Ui.Round(r, radius))
+            using (Pen pen = new Pen(edge, 1.2f))
+            {
+                pen.DashStyle = DashStyle.Solid;
+                g.DrawPath(pen, path);
             }
 
             if (Ui.Holiday && !Selected)
@@ -892,15 +929,20 @@ namespace Video2Gif
             int iconX = Ui.P(20);
             int iconY = (Height - iconSize) / 2;
             Rectangle iconRect = new Rectangle(iconX, iconY, iconSize, iconSize);
-            Ui.FillRound(g, iconRect, Ui.P(12), Ui.AccentSoft);
+            Ui.FillRound(g, iconRect, Ui.P(12),
+                Ui.Gta6 ? Color.FromArgb(62, 255, 255, 255) : Ui.AccentSoft);
+
+            Color title = Ui.Gta6 ? Color.White : Ui.Text;
+            Color sub = Ui.Gta6 ? Color.FromArgb(224, 255, 255, 255) : Ui.Muted;
+            Color hint = Ui.Gta6 ? Color.FromArgb(172, 255, 255, 255) : Ui.Faint;
 
             if (Selected)
             {
-                Ui.DrawPlayGlyph(g, iconRect, Ui.Text);
+                Ui.DrawPlayGlyph(g, iconRect, title);
             }
             else
             {
-                Ui.DrawUpArrow(g, iconRect, Ui.Text);
+                Ui.DrawUpArrow(g, iconRect, title);
             }
 
             int textX = iconX + iconSize + Ui.P(16);
@@ -911,27 +953,29 @@ namespace Video2Gif
                 string meta = BusyText.Length > 0 ? BusyText : FileMeta;
                 Ui.Write(g, FileName, Ui.Semi,
                     new Rectangle(textX, Ui.P(22), Width - textX - rightPad, Ui.P(24)),
-                    Ui.Text, Ui.LeftMid);
+                    title, Ui.LeftMid);
                 Ui.Write(g, meta, Ui.Small,
                     new Rectangle(textX, Ui.P(48), Width - textX - rightPad, Ui.P(20)),
-                    Ui.Muted, Ui.LeftMid);
+                    sub, Ui.LeftMid);
 
                 Rectangle chip = new Rectangle(Width - Ui.P(136), (Height - Ui.P(32)) / 2, Ui.P(116), Ui.P(32));
-                Ui.FillRound(g, chip, Ui.P(8), Ui.Card);
-                Ui.StrokeRound(g, chip, Ui.P(8), hover ? Ui.BorderStrong : Ui.Border, 1f);
-                Ui.Write(g, "Другой файл", Ui.Small, chip, Ui.Text, Ui.CenterMid);
+                Ui.FillRound(g, chip, Ui.P(8),
+                    Ui.Gta6 ? Color.FromArgb(150, 8, 6, 12) : Ui.Card);
+                Ui.StrokeRound(g, chip, Ui.P(8),
+                    Ui.Gta6 ? Color.FromArgb(120, 255, 255, 255) : (hover ? Ui.BorderStrong : Ui.Border), 1f);
+                Ui.Write(g, "Другой файл", Ui.Small, chip, title, Ui.CenterMid);
             }
             else
             {
                 Ui.Write(g, "Перетащите файл сюда", Ui.Semi,
                     new Rectangle(textX, Ui.P(12), Width - textX - rightPad, Ui.P(24)),
-                    Ui.Text, Ui.LeftMid);
+                    title, Ui.LeftMid);
                 Ui.Write(g, "или нажмите, чтобы выбрать", Ui.Small,
                     new Rectangle(textX, Ui.P(36), Width - textX - rightPad, Ui.P(18)),
-                    Ui.Muted, Ui.LeftMid);
+                    sub, Ui.LeftMid);
                 Ui.Write(g, "Видео: MP4, MKV, MOV, WEBM   ·   Картинки: PNG, JPG, WEBP, BMP, TIFF", Ui.Tiny,
                     new Rectangle(textX, Ui.P(56), Width - textX - rightPad, Ui.P(16)),
-                    Ui.Faint, Ui.LeftMid);
+                    hint, Ui.LeftMid);
             }
         }
     }
