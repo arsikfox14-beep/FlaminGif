@@ -460,7 +460,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
 (function () {
   "use strict";
 
-  var MAX_FRAMES = 600;
+  var MAX_FRAMES = 5000;
   var $ = function (id) { return document.getElementById(id); };
 
   var el = {
@@ -918,7 +918,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
           }
         }
         if (video.ended) break;
-        if (Date.now() - qStarted > (dur + 15) * 1000) break;
+        if (Date.now() - qStarted > (dur * 6 + 60) * 1000) break;
       }
       try { video.pause(); } catch (e) {}
 
