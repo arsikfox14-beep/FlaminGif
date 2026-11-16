@@ -825,18 +825,21 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     return quantize(all, 256, { format: "rgb565" });
   }
 
-  function indicesFor(rgba, w, h, palette, dither) {
-    if (dither === "bayer") return applyBayer(rgba, w, h, palette);
-    if (dither === "sierra") return applySierra(rgba, w, h, palette);
-    return applyPalette(rgba, palette, "rgb565");
+  function indicesFor(rgba, w, h, palette, lut, dither) {
+    if (dither === "bayer") return applyBayer(rgba, w, h, lut);
+    if (dither === "sierra") return applySierra(rgba, w, h, palette, lut);
+    return applyNone(rgba, w, h, lut);
   }
 
   // Кадры кодируются сразу во время проигрывания: без JPEG-промежутка
   // и с одной общей палитрой на весь GIF — это в разы быстрее.
+  // На слабом телефоне кадров будет меньше, но задержки берутся из времени
+  // видео, поэтому длительность GIF не меняется, а минуты кодирования уходят.
   async function encodeVideoGif(video, start, dur, fps, w, h, dither, loop, onProgress, isCancelled) {
     var total = Math.max(1, Math.floor(dur * fps));
     var delays = frameDelays(total, fps);
     var palette = await samplePalette(video, start, dur, w, h);
+    var lut = buildLut(palette);
     if (isCancelled()) throw new Error("cancelled");
 
     var canvas = document.createElement("canvas");
@@ -845,18 +848,24 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     var enc = GIFEncoder();
     var written = 0;
 
-    function writeFrame() {
-      var img = ctx.getImageData(0, 0, w, h);
-      var rgba = new Uint8Array(img.data.buffer);
-      var indices = indicesFor(rgba, w, h, palette, dither);
+    function emit(indices, delay) {
       enc.writeFrame(indices, w, h, {
         palette: written === 0 ? palette : null,
-        delay: delays[written] || 100,
+        delay: Math.max(20, Math.round(delay)),
         repeat: loop ? 0 : -1,
         dispose: 1
       });
       written++;
-      onProgress(written / total * 100);
+    }
+
+    function grab() {
+      var img = ctx.getImageData(0, 0, w, h);
+      var rgba = new Uint8Array(img.data.buffer);
+      return indicesFor(rgba, w, h, palette, lut, dither);
+    }
+
+    function progressByTime(t) {
+      onProgress(Math.max(0, Math.min(99, (t / dur) * 100)));
     }
 
     async function seekPass() {
@@ -864,7 +873,8 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
         if (isCancelled()) throw new Error("cancelled");
         await seekTo(video, start + i / fps);
         drawTo(ctx, video, w, h);
-        writeFrame();
+        emit(grab(), delays[i] || 100);
+        onProgress((i + 1) / total * 100);
         await yieldFrame();
       }
     }
@@ -877,44 +887,50 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
       await seekPass();
     } else {
       var startedAt = Date.now();
+      var lastAdvanceAt = Date.now();
+      var pending = null;
       var last = -1;
-      while (written < total && !isCancelled()) {
+
+      while (!isCancelled()) {
         await nextVideoFrame(video);
         if (isCancelled()) break;
-        var t = video.currentTime - start;
+        var current = video.currentTime;
+        var t = current - start;
         if (t < -0.05) {
           if (video.ended) break;
           continue;
         }
         var target = Math.min(total - 1, Math.floor(t * fps));
         if (target > last) {
-          while (last < target && written < total) {
-            drawTo(ctx, video, w, h);
-            writeFrame();
-            last++;
+          last = target;
+          lastAdvanceAt = Date.now();
+          drawTo(ctx, video, w, h);
+          var indices = grab();
+          if (pending) {
+            emit(pending.indices, (current - pending.time) * 1000);
           }
+          pending = { indices: indices, time: current };
+          progressByTime(t);
         }
         if (video.ended) break;
         if (Date.now() - startedAt > (dur + 10) * 1000) break;
-        if (written === 0 && Date.now() - startedAt > 2500) break;
+        if (Date.now() - lastAdvanceAt > 3000) break;
+        if (!pending && Date.now() - startedAt > 2500) break;
       }
       try { video.pause(); } catch (e) {}
 
       if (isCancelled()) throw new Error("cancelled");
-      if (written === 0) {
+      if (!pending) {
         await seekPass();
       } else {
-        while (written < total) {
-          if (isCancelled()) throw new Error("cancelled");
-          drawTo(ctx, video, w, h);
-          writeFrame();
-        }
+        emit(pending.indices, 1000 / fps);
       }
     }
 
     if (isCancelled()) throw new Error("cancelled");
     enc.finish();
-    return new Blob([enc.bytes()], { type: "image/gif" });
+    onProgress(100);
+    return { blob: new Blob([enc.bytes()], { type: "image/gif" }), frames: written };
   }
 
   function decodeBlob(blob) {
@@ -941,29 +957,59 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
 
   var BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
 
-  function applyBayer(rgba, w, h, palette) {
-    var copy = new Uint8ClampedArray(rgba.length);
+  // Таблица ближайших цветов 32×32×32 считается один раз на весь GIF.
+  // Иначе поиск по палитре выполнялся заново для каждого кадра — это и тормозило.
+  function buildLut(palette) {
+    var count = palette.length;
+    var pr = new Int32Array(count), pg = new Int32Array(count), pb = new Int32Array(count);
+    for (var k = 0; k < count; k++) {
+      var p = palette[k];
+      pr[k] = p[0]; pg[k] = p[1]; pb[k] = p[2];
+    }
+    var lut = new Uint8Array(32768);
+    for (var key = 0; key < 32768; key++) {
+      var r = ((key >> 10) & 31) * 8 + 4;
+      var g = ((key >> 5) & 31) * 8 + 4;
+      var b = (key & 31) * 8 + 4;
+      var best = 0, bestD = 1e9;
+      for (var i = 0; i < count; i++) {
+        var dr = r - pr[i], dg = g - pg[i], db = b - pb[i];
+        var d = dr * dr + dg * dg + db * db;
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      lut[key] = best;
+    }
+    return lut;
+  }
+
+  function applyBayer(rgba, w, h, lut) {
+    var out = new Uint8Array(w * h);
     var strength = 24;
     for (var y = 0; y < h; y++) {
       for (var x = 0; x < w; x++) {
         var i = (y * w + x) * 4;
         var m = (BAYER4[(y & 3) * 4 + (x & 3)] / 15 - 0.5) * strength;
-        copy[i] = clamp(rgba[i] + m, 0, 255);
-        copy[i + 1] = clamp(rgba[i + 1] + m, 0, 255);
-        copy[i + 2] = clamp(rgba[i + 2] + m, 0, 255);
-        copy[i + 3] = 255;
+        var r = clamp(rgba[i] + m, 0, 255);
+        var g = clamp(rgba[i + 1] + m, 0, 255);
+        var b = clamp(rgba[i + 2] + m, 0, 255);
+        out[y * w + x] = lut[((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3)];
       }
     }
-    return applyPalette(new Uint8Array(copy.buffer), palette, "rgb565");
+    return out;
   }
 
-  function applySierra(rgba, w, h, palette) {
+  function applyNone(rgba, w, h, lut) {
     var out = new Uint8Array(w * h);
-    var cache = new Int16Array(32768);
-    cache.fill(-1);
+    for (var i = 0, p = 0; i < out.length; i++, p += 4) {
+      out[i] = lut[((rgba[p] >> 3) << 10) | ((rgba[p + 1] >> 3) << 5) | (rgba[p + 2] >> 3)];
+    }
+    return out;
+  }
+
+  function applySierra(rgba, w, h, palette, lut) {
+    var out = new Uint8Array(w * h);
     var curR = new Float32Array(w), curG = new Float32Array(w), curB = new Float32Array(w);
     var nextR = new Float32Array(w), nextG = new Float32Array(w), nextB = new Float32Array(w);
-    var pc = palette.length;
 
     for (var y = 0; y < h; y++) {
       nextR.fill(0); nextG.fill(0); nextB.fill(0);
@@ -973,19 +1019,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
         var g = clamp(rgba[i + 1] + curG[x], 0, 255);
         var b = clamp(rgba[i + 2] + curB[x], 0, 255);
 
-        var key = ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
-        var idx = cache[key];
-        if (idx < 0) {
-          var best = 0, bestD = 1e100;
-          for (var k = 0; k < pc; k++) {
-            var p = palette[k];
-            var dr = r - p[0], dg = g - p[1], db = b - p[2];
-            var d = dr * dr + dg * dg + db * db;
-            if (d < bestD) { bestD = d; best = k; }
-          }
-          idx = best;
-          cache[key] = best;
-        }
+        var idx = lut[((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3)];
         out[y * w + x] = idx;
 
         var q = palette[idx];
@@ -1051,7 +1085,8 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
         var img = ctx.getImageData(0, 0, w, h);
         var rgba = new Uint8Array(img.data.buffer);
         var palette = quantize(rgba, 256, { format: "rgb565" });
-        var indices = indicesFor(rgba, w, h, palette, opts.dither);
+        var lut = buildLut(palette);
+        var indices = indicesFor(rgba, w, h, palette, lut, opts.dither);
         var enc = GIFEncoder();
         enc.writeFrame(indices, w, h, {
           palette: palette,
@@ -1081,9 +1116,11 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
         }
 
         setProgress(2, "Подбираю палитру…");
-        blob = await encodeVideoGif(video, start, dur, opts.fps, w, h, opts.dither, opts.loop, function (p) {
+        var encoded = await encodeVideoGif(video, start, dur, opts.fps, w, h, opts.dither, opts.loop, function (p) {
           setProgress(Math.round(p * 100), "Кодирую GIF… " + Math.round(p) + "%");
         }, function () { return state.cancelled; });
+        blob = encoded.blob;
+        frameCount = encoded.frames;
       }
 
       state.resultBlob = blob;
