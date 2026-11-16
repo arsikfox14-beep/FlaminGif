@@ -125,6 +125,26 @@ namespace Video2Gif
             return brush;
         }
 
+        /// <summary>Лёгкая текстура карбона: тонкая диагональная сетка.</summary>
+        public static void DrawCarbon(Graphics g, Rectangle bounds)
+        {
+            int step = Math.Max(4, P(6));
+            using (Pen light = new Pen(Color.FromArgb(13, 255, 255, 255), 1f))
+            using (Pen dark = new Pen(Color.FromArgb(24, 0, 0, 0), 1f))
+            {
+                for (int x = bounds.Left - bounds.Height; x < bounds.Right; x += step)
+                {
+                    g.DrawLine(light, x, bounds.Top,
+                        x + bounds.Height, bounds.Bottom);
+                }
+                for (int x = bounds.Left; x < bounds.Right + bounds.Height; x += step)
+                {
+                    g.DrawLine(dark, x, bounds.Top,
+                        x - bounds.Height, bounds.Bottom);
+                }
+            }
+        }
+
         public static void ApplyTitleBar(IntPtr hwnd)
         {
             if (hwnd == IntPtr.Zero) return;
@@ -323,23 +343,23 @@ namespace Video2Gif
             }
             else if (kind == ThemeKind.Gamesense)
             {
-                Bg = Color.FromArgb(7, 7, 8);
-                Card = Color.FromArgb(14, 14, 15);
-                Border = Color.FromArgb(38, 38, 41);
-                BorderStrong = Color.FromArgb(74, 74, 78);
-                Text = Color.FromArgb(238, 238, 240);
-                Muted = Color.FromArgb(166, 166, 170);
-                Faint = Color.FromArgb(114, 114, 118);
-                Accent = Color.FromArgb(90, 255, 140);
-                AccentDark = Color.FromArgb(52, 190, 100);
-                AccentInk = Color.FromArgb(150, 255, 184);
-                AccentSoft = Color.FromArgb(18, 28, 20);
-                AccentLine = Color.FromArgb(40, 66, 46);
-                AccentWash = Color.FromArgb(12, 20, 14);
-                Track = Color.FromArgb(36, 36, 38);
-                Good = Color.FromArgb(90, 255, 140);
-                Bad = Color.FromArgb(255, 95, 95);
-                OnAccent = Color.FromArgb(8, 10, 8);
+                Bg = Color.FromArgb(18, 18, 20);
+                Card = Color.FromArgb(24, 24, 27);
+                Border = Color.FromArgb(50, 50, 55);
+                BorderStrong = Color.FromArgb(84, 84, 90);
+                Text = Color.FromArgb(235, 235, 237);
+                Muted = Color.FromArgb(168, 168, 173);
+                Faint = Color.FromArgb(120, 120, 125);
+                Accent = Color.FromArgb(88, 178, 124);
+                AccentDark = Color.FromArgb(60, 132, 92);
+                AccentInk = Color.FromArgb(146, 204, 172);
+                AccentSoft = Color.FromArgb(24, 34, 28);
+                AccentLine = Color.FromArgb(52, 76, 60);
+                AccentWash = Color.FromArgb(20, 28, 22);
+                Track = Color.FromArgb(44, 44, 48);
+                Good = Color.FromArgb(88, 178, 124);
+                Bad = Color.FromArgb(232, 96, 96);
+                OnAccent = Color.FromArgb(10, 12, 10);
             }
             else
             {
@@ -739,6 +759,12 @@ namespace Video2Gif
             }
         }
 
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            e.Graphics.Clear(Ui.Card);
+            if (Ui.Gamesense) Ui.DrawCarbon(e.Graphics, ClientRectangle);
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -982,6 +1008,18 @@ namespace Video2Gif
             else
             {
                 Ui.FillRound(g, r, radius, Ui.Card);
+            }
+
+            if (Ui.Gamesense)
+            {
+                GraphicsState texture = g.Save();
+                using (GraphicsPath clip = Ui.Round(
+                    new Rectangle(0, 0, Width, Height), radius))
+                {
+                    g.SetClip(clip);
+                }
+                Ui.DrawCarbon(g, new Rectangle(0, 0, Width, Height));
+                g.Restore(texture);
             }
 
             Color edge = Ui.Gta6

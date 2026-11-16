@@ -221,7 +221,7 @@ namespace Video2Gif
                 Ui.SetTheme("gamesense");
                 Check("theme gamesense",
                     Ui.Dark && Ui.Gamesense && Ui.ThemeName == "gamesense" &&
-                    Ui.Accent == Color.FromArgb(90, 255, 140) && !Ui.Holiday);
+                    Ui.Accent == Color.FromArgb(88, 178, 124) && !Ui.Holiday);
                 Check("gamesense rainbow",
                     Ui.Rainbow(0.0, 0.8, 1.0).R > 200 &&
                     Ui.Rainbow(1.0 / 3.0, 0.8, 1.0).G > 200 &&

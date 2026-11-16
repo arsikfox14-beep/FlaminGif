@@ -676,6 +676,12 @@ namespace Video2Gif
             Ui.ApplyTitleBar(Handle);
         }
 
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            base.OnPaintBackground(e);
+            if (Ui.Gamesense) Ui.DrawCarbon(e.Graphics, ClientRectangle);
+        }
+
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (working || preparing)
