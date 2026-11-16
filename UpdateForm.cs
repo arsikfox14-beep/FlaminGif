@@ -131,8 +131,21 @@ namespace Video2Gif
 
             bar.Value = 100;
             percentLabel.Text = "100%";
+            // Снимаем блокировку закрытия: иначе Application.Exit не закроет окно
+            // и установщик не сможет заменить exe.
+            working = false;
+            updateButton.Enabled = false;
+            closeButton.Enabled = false;
             SetStatus("Готово. Программа перезапустится с новой версией.", false);
-            Updater.ApplyAndRestart(task.Result);
+            try
+            {
+                Updater.ApplyAndRestart(task.Result);
+            }
+            catch (Exception ex)
+            {
+                closeButton.Enabled = true;
+                SetStatus("Не удалось запустить установку: " + ex.Message, true);
+            }
         }
 
         private void SetStatus(string text, bool error)

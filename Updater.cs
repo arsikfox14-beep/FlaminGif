@@ -329,15 +329,18 @@ namespace Video2Gif
                 "@echo off",
                 "setlocal",
                 "set tries=0",
-                ":wait",
                 "ping 127.0.0.1 -n 2 >nul",
+                "taskkill /f /im \"Video2Gif.exe\" >nul 2>&1",
+                ":wait",
                 "del /f /q \"" + target + "\" >nul 2>&1",
                 "if not exist \"" + target + "\" goto swap",
                 "set /a tries+=1",
                 "if %tries% GEQ 30 goto failed",
+                "ping 127.0.0.1 -n 2 >nul",
                 "goto wait",
                 ":swap",
                 "move /y \"" + downloaded + "\" \"" + target + "\" >nul 2>&1",
+                "if not exist \"" + target + "\" copy /y \"" + downloaded + "\" \"" + target + "\" >nul 2>&1",
                 "start \"\" \"" + target + "\"",
                 "exit /b 0",
                 ":failed",
@@ -346,16 +349,24 @@ namespace Video2Gif
             };
             File.WriteAllText(script, string.Join("\r\n", lines), Encoding.Default);
 
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            try
             {
-                FileName = "cmd.exe",
-                Arguments = "/c \"" + script + "\"",
-                CreateNoWindow = true,
-                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
-                UseShellExecute = false
-            });
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = "/c \"" + script + "\"",
+                    CreateNoWindow = true,
+                    WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden,
+                    UseShellExecute = false
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new UpdateException("Не удалось запустить установку обновления: " + ex.Message);
+            }
 
-            Application.Exit();
+            // Завершаем процесс жёстко, чтобы установщик смог удалить и заменить exe.
+            Environment.Exit(0);
         }
 
         /* -------------------------------------------------------------- JSON */
