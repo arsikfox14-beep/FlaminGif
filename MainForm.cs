@@ -51,32 +51,79 @@ namespace Video2Gif
         protected override void OnPaintBackground(PaintEventArgs e)
         {
             base.OnPaintBackground(e);
-            if (!Ui.Gta6) return;
+            Graphics g = e.Graphics;
 
-            Rectangle glow = new Rectangle(0, 0, ClientSize.Width, Ui.P(66));
-            using (LinearGradientBrush brush = new LinearGradientBrush(
-                glow,
-                Color.FromArgb(0, 255, 79, 163),
-                Color.FromArgb(28, 255, 79, 163),
-                0f))
+            if (Ui.Gta6)
             {
-                ColorBlend blend = new ColorBlend(3);
-                blend.Colors = new Color[]
+                Rectangle glow = new Rectangle(0, 0, ClientSize.Width, Ui.P(66));
+                using (LinearGradientBrush brush = new LinearGradientBrush(
+                    glow,
+                    Color.FromArgb(0, 255, 79, 163),
+                    Color.FromArgb(28, 255, 79, 163),
+                    0f))
                 {
-                    Color.FromArgb(0, 96, 92, 240),
-                    Color.FromArgb(16, 255, 79, 163),
-                    Color.FromArgb(30, 255, 158, 66)
-                };
-                blend.Positions = new float[] { 0f, 0.55f, 1f };
-                brush.InterpolationColors = blend;
-                e.Graphics.FillRectangle(brush, glow);
+                    ColorBlend blend = new ColorBlend(3);
+                    blend.Colors = new Color[]
+                    {
+                        Color.FromArgb(0, 96, 92, 240),
+                        Color.FromArgb(16, 255, 79, 163),
+                        Color.FromArgb(30, 255, 158, 66)
+                    };
+                    blend.Positions = new float[] { 0f, 0.55f, 1f };
+                    brush.InterpolationColors = blend;
+                    g.FillRectangle(brush, glow);
+                }
+
+                Rectangle line = new Rectangle(0, 0, ClientSize.Width, Math.Max(2, Ui.P(2)));
+                using (LinearGradientBrush brush = Ui.GtaGradient(line, 0f))
+                {
+                    g.FillRectangle(brush, line);
+                }
             }
 
-            Rectangle line = new Rectangle(0, 0, ClientSize.Width, Math.Max(2, Ui.P(2)));
-            using (LinearGradientBrush brush = Ui.GtaGradient(line, 0f))
+            if (Ui.Holiday) DrawHolidayDecorations(g);
+        }
+
+        /// <summary>Сезонные украшения в свободной части шапки.</summary>
+        private void DrawHolidayDecorations(Graphics g)
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            if (Ui.NewYear)
             {
-                e.Graphics.FillRectangle(brush, line);
+                Ui.DrawSnowflake(g, Ui.P(390), Ui.P(18), Ui.P(9),
+                    Color.FromArgb(118, Ui.Accent), Math.Max(1.2f, Ui.P(1.4)));
+                Ui.DrawSnowflake(g, Ui.P(430), Ui.P(46), Ui.P(12),
+                    Color.FromArgb(124, Ui.Accent), Math.Max(1.3f, Ui.P(1.5)));
+                Ui.DrawSnowflake(g, Ui.P(470), Ui.P(16), Ui.P(7),
+                    Color.FromArgb(100, Ui.Accent), Math.Max(1.1f, Ui.P(1.2)));
+                Ui.DrawSnowflake(g, Ui.P(520), Ui.P(52), Ui.P(9),
+                    Color.FromArgb(106, Ui.Accent), Math.Max(1.1f, Ui.P(1.3)));
+                Ui.DrawSnowflake(g, Ui.P(570), Ui.P(20), Ui.P(8),
+                    Color.FromArgb(96, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
+                Ui.DrawSnowflake(g, Ui.P(620), Ui.P(48), Ui.P(10),
+                    Color.FromArgb(108, Ui.Accent), Math.Max(1.2f, Ui.P(1.3)));
+                Ui.DrawSnowflake(g, Ui.P(666), Ui.P(14), Ui.P(7),
+                    Color.FromArgb(92, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                return;
             }
+
+            Rectangle pumpkin = new Rectangle(
+                Ui.P(398), Ui.P(8), Ui.P(30), Ui.P(26));
+            Ui.DrawPumpkin(g, pumpkin,
+                Color.FromArgb(140, Ui.Accent), Ui.Bg);
+            Ui.DrawLeaf(g, Ui.P(442), Ui.P(44), Ui.P(14),
+                Color.FromArgb(126, Ui.Accent), -28f);
+            Ui.DrawLeaf(g, Ui.P(488), Ui.P(16), Ui.P(11),
+                Color.FromArgb(112, Ui.Accent), 40f);
+            Ui.DrawLeaf(g, Ui.P(534), Ui.P(44), Ui.P(12),
+                Color.FromArgb(120, Ui.Accent), 18f);
+            Ui.DrawLeaf(g, Ui.P(580), Ui.P(18), Ui.P(9),
+                Color.FromArgb(104, Ui.Accent), 56f);
+            Ui.DrawLeaf(g, Ui.P(626), Ui.P(44), Ui.P(10),
+                Color.FromArgb(110, Ui.Accent), -64f);
+            Ui.DrawLeaf(g, Ui.P(668), Ui.P(16), Ui.P(8),
+                Color.FromArgb(96, Ui.Accent), 20f);
         }
 
         /* --------------------------------------------------------------- Тема */
