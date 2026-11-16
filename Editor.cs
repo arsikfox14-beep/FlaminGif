@@ -302,32 +302,65 @@ namespace Video2Gif
         }
     }
 
-    /// <summary>Полоса перемотки с перетаскиваемым бегунком.</summary>
-    internal sealed class SeekBar : Control
+    /// <summary>Один ползунок с двумя бегунками: начало и конец обрезки.</summary>
+    internal sealed class RangeBar : Control
     {
-        private double value;
-        private bool dragging;
+        private double start;
+        private double end = 1;
+        private int dragging; // 0 — нет, 1 — начало, 2 — конец
+        private int lastHandle = 1;
 
-        public event EventHandler ValueChanged;
+        public double MinGap = 0.002;
+
+        public event EventHandler Changed;
         public event EventHandler Committed;
 
-        public double Value
+        public double Start
         {
-            get { return value; }
-            set
-            {
-                double next = Math.Max(0, Math.Min(1, value));
-                if (Math.Abs(next - this.value) < 0.0001) return;
-                this.value = next;
-                Invalidate();
-            }
+            get { return start; }
         }
 
-        public SeekBar()
+        public double End
+        {
+            get { return end; }
+        }
+
+        public int LastHandle
+        {
+            get { return lastHandle; }
+        }
+
+        public RangeBar()
         {
             SetStyle(ControlStyles.SupportsTransparentBackColor, true);
             DoubleBuffered = true;
             BackColor = Color.Transparent;
+        }
+
+        public void SetRange(double from, double to)
+        {
+            start = Math.Max(0, Math.Min(1, from));
+            end = Math.Max(0, Math.Min(1, to));
+            if (start > end)
+            {
+                double swap = start;
+                start = end;
+                end = swap;
+            }
+            if (end - start < MinGap) end = Math.Min(1, start + MinGap);
+            if (start > end)
+            {
+                start = end;
+                end = Math.Min(1, start + MinGap);
+            }
+            Invalidate();
+        }
+
+        public void Reset()
+        {
+            start = 0;
+            end = 1;
+            Invalidate();
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -335,39 +368,51 @@ namespace Video2Gif
             Graphics g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            int left = Ui.P(10);
-            int right = Width - Ui.P(10);
+            int left = Ui.P(12);
+            int right = Width - Ui.P(12);
             int center = Height / 2;
-            int thickness = Math.Max(3, Ui.P(4));
+            int xs = ValueToX(start);
+            int xe = ValueToX(end);
 
-            using (Pen pen = new Pen(Ui.Track, thickness))
+            using (Pen pen = new Pen(Ui.Track, Math.Max(4, Ui.P(5))))
             {
                 pen.StartCap = LineCap.Round;
                 pen.EndCap = LineCap.Round;
                 g.DrawLine(pen, left, center, right, center);
             }
 
-            int x = left + (int)Math.Round((right - left) * value);
-            if (x > left)
+            if (xe > xs)
             {
-                using (Pen pen = new Pen(Ui.Accent, thickness))
+                using (Pen pen = new Pen(Ui.Accent, Math.Max(4, Ui.P(5))))
                 {
                     pen.StartCap = LineCap.Round;
                     pen.EndCap = LineCap.Round;
-                    g.DrawLine(pen, left, center, x, center);
+                    g.DrawLine(pen, xs, center, xe, center);
                 }
             }
 
-            int radius = Math.Max(5, Ui.P(7));
+            int handleW = Math.Max(8, Ui.P(10));
+            int handleH = Math.Max(16, Ui.P(22));
+            DrawHandle(g, xs, center, handleW, handleH);
+            DrawHandle(g, xe, center, handleW, handleH);
+        }
+
+        private void DrawHandle(Graphics g, int x, int center, int width, int height)
+        {
+            Rectangle r = new Rectangle(x - width / 2, center - height / 2,
+                width, height);
+            using (GraphicsPath path = Ui.Round(r, width / 2))
             using (SolidBrush brush = new SolidBrush(Ui.Accent))
             {
-                g.FillEllipse(brush, x - radius, center - radius,
-                    radius * 2, radius * 2);
+                g.FillPath(brush, path);
             }
-            using (SolidBrush brush = new SolidBrush(Ui.OnAccent))
+            using (Pen pen = new Pen(Ui.OnAccent, Math.Max(1.4f, Ui.P(1.5))))
             {
-                g.FillEllipse(brush, x - radius / 2, center - radius / 2,
-                    radius, radius);
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
+                int inset = Math.Max(2, Ui.P(3));
+                g.DrawLine(pen, x, center - height / 2 + inset,
+                    x, center + height / 2 - inset);
             }
         }
 
@@ -375,31 +420,58 @@ namespace Video2Gif
         {
             base.OnMouseDown(e);
             if (e.Button != MouseButtons.Left) return;
-            dragging = true;
-            SetFromMouse(e.X);
+            double click = XToValue(e.X);
+            double toStart = Math.Abs(click - start);
+            double toEnd = Math.Abs(click - end);
+            dragging = toStart <= toEnd ? 1 : 2;
+            lastHandle = dragging;
+            MoveHandle(click);
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            if (dragging) SetFromMouse(e.X);
+            if (dragging == 0) return;
+            MoveHandle(XToValue(e.X));
         }
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
-            if (!dragging) return;
-            dragging = false;
+            if (dragging == 0) return;
+            dragging = 0;
             if (Committed != null) Committed(this, EventArgs.Empty);
         }
 
-        private void SetFromMouse(int x)
+        private void MoveHandle(double value)
         {
-            int left = Ui.P(10);
-            int right = Width - Ui.P(10);
-            double next = (double)(x - left) / Math.Max(1, right - left);
-            Value = next;
-            if (ValueChanged != null) ValueChanged(this, EventArgs.Empty);
+            double next = Math.Max(0, Math.Min(1, value));
+            if (dragging == 1)
+            {
+                start = Math.Min(next, end - MinGap);
+                if (start < 0) start = 0;
+            }
+            else if (dragging == 2)
+            {
+                end = Math.Max(next, start + MinGap);
+                if (end > 1) end = 1;
+            }
+            Invalidate();
+            if (Changed != null) Changed(this, EventArgs.Empty);
+        }
+
+        private int ValueToX(double value)
+        {
+            int left = Ui.P(12);
+            int right = Width - Ui.P(12);
+            return left + (int)Math.Round((right - left) * value);
+        }
+
+        private double XToValue(int x)
+        {
+            int left = Ui.P(12);
+            int right = Width - Ui.P(12);
+            return (double)(x - left) / Math.Max(1, right - left);
         }
     }
 
@@ -407,18 +479,14 @@ namespace Video2Gif
     internal sealed class EditorForm : Form
     {
         private EditorPreview preview;
-        private SeekBar seek;
-        private FlatInput startInput;
-        private FlatInput endInput;
-        private Label startLabel;
-        private Label endLabel;
-        private Label timeLabel;
+        private RangeBar range;
+        private Label rangeStartLabel;
+        private Label rangeEndLabel;
+        private Label rangeInfoLabel;
         private Label selectionLabel;
         private Label hintLabel;
         private Label statusLabel;
         private PillButton openButton;
-        private PillButton startHereButton;
-        private PillButton endHereButton;
         private PillButton resetButton;
         private PillButton saveButton;
         private PillButton closeButton;
@@ -472,57 +540,32 @@ namespace Video2Gif
             preview.SetBounds(Ui.P(24), Ui.P(80), Ui.P(672), Ui.P(304));
             Controls.Add(preview);
 
-            hintLabel = MakeLabel("Ползунок — кадр предпросмотра. Отметьте начало и конец обрезки.",
+            hintLabel = MakeLabel("Потяните ползунки: левый — начало, правый — конец обрезки.",
                 Ui.Tiny, Ui.Faint, 24, 390, 672, 18);
             Controls.Add(hintLabel);
 
-            seek = new SeekBar();
-            seek.SetBounds(Ui.P(24), Ui.P(414), Ui.P(672), Ui.P(24));
-            seek.ValueChanged += delegate { UpdateTimeLabel(); };
-            seek.Committed += delegate { RequestFrame(seek.Value * Duration()); };
-            Controls.Add(seek);
-
-            timeLabel = MakeLabel("", Ui.Tiny, Ui.Muted, 24, 438, 672, 18);
-            timeLabel.TextAlign = ContentAlignment.MiddleRight;
-            Controls.Add(timeLabel);
-
-            startLabel = MakeLabel("Начало, с", Ui.Small, Ui.Muted, 24, 464, 120, 18);
-            Controls.Add(startLabel);
-            endLabel = MakeLabel("Конец, с", Ui.Small, Ui.Muted, 156, 464, 120, 18);
-            Controls.Add(endLabel);
-
-            startInput = new FlatInput();
-            startInput.SetBounds(Ui.P(24), Ui.P(484), Ui.P(120), Ui.P(34));
-            startInput.Value = "0";
-            Controls.Add(startInput);
-
-            endInput = new FlatInput();
-            endInput.SetBounds(Ui.P(156), Ui.P(484), Ui.P(120), Ui.P(34));
-            Controls.Add(endInput);
-
-            startHereButton = new PillButton();
-            startHereButton.Ghost = true;
-            startHereButton.Text = "Начало здесь";
-            startHereButton.Font = Ui.Small;
-            startHereButton.SetBounds(Ui.P(288), Ui.P(484), Ui.P(120), Ui.P(34));
-            startHereButton.Click += delegate
+            range = new RangeBar();
+            range.SetBounds(Ui.P(24), Ui.P(410), Ui.P(672), Ui.P(32));
+            range.Changed += delegate { UpdateRange(); };
+            range.Committed += delegate
             {
-                startInput.Value = Fmt.Num(seek.Value * Duration());
-                UpdateSelection();
+                RequestFrame((range.LastHandle == 1 ? range.Start : range.End) * Duration());
             };
-            Controls.Add(startHereButton);
+            Controls.Add(range);
 
-            endHereButton = new PillButton();
-            endHereButton.Ghost = true;
-            endHereButton.Text = "Конец здесь";
-            endHereButton.Font = Ui.Small;
-            endHereButton.SetBounds(Ui.P(416), Ui.P(484), Ui.P(120), Ui.P(34));
-            endHereButton.Click += delegate
-            {
-                endInput.Value = Fmt.Num(seek.Value * Duration());
-                UpdateSelection();
-            };
-            Controls.Add(endHereButton);
+            rangeStartLabel = MakeLabel("Начало: 0,0 с", Ui.Small, Ui.Muted,
+                24, 448, 200, 18);
+            Controls.Add(rangeStartLabel);
+
+            rangeInfoLabel = MakeLabel("Выбрано: 0,0 с", Ui.Small, Ui.Muted,
+                248, 448, 200, 18);
+            rangeInfoLabel.TextAlign = ContentAlignment.MiddleCenter;
+            Controls.Add(rangeInfoLabel);
+
+            rangeEndLabel = MakeLabel("Конец: 0,0 с", Ui.Small, Ui.Muted,
+                472, 448, 224, 18);
+            rangeEndLabel.TextAlign = ContentAlignment.MiddleRight;
+            Controls.Add(rangeEndLabel);
 
             resetButton = new PillButton();
             resetButton.Ghost = true;
@@ -651,15 +694,16 @@ namespace Video2Gif
                 {
                     Bitmap bitmap = EditorCore.LoadBitmap(file);
                     preview.SetImage(bitmap, true);
-                    seek.Value = 0;
                 }
                 else
                 {
                     preview.SetImage(null, false);
-                    seek.Value = 0;
-                    startInput.Value = "0";
-                    endInput.Value = Fmt.Num(Duration());
-                    UpdateTimeLabel();
+                    double duration = Duration();
+                    range.MinGap = duration > 0
+                        ? Math.Max(0.001, Math.Min(0.2, 0.05 / duration))
+                        : 0.002;
+                    range.SetRange(0, 1);
+                    UpdateRange();
                     RequestFrame(0);
                 }
 
@@ -679,53 +723,45 @@ namespace Video2Gif
         private void ApplyMode()
         {
             bool photo = isImage;
-            seek.Visible = !photo;
-            timeLabel.Visible = !photo;
-            startLabel.Visible = !photo;
-            endLabel.Visible = !photo;
-            startInput.Visible = !photo;
-            endInput.Visible = !photo;
-            startHereButton.Visible = !photo;
-            endHereButton.Visible = !photo;
+            range.Visible = !photo;
+            rangeStartLabel.Visible = !photo;
+            rangeEndLabel.Visible = !photo;
+            rangeInfoLabel.Visible = !photo;
+            selectionLabel.Visible = photo;
             resetButton.Visible = photo;
             saveButton.Text = photo ? "Сохранить фото" : "Сохранить видео";
             hintLabel.Text = photo
                 ? "Выделите область мышью на фото. Двойной клик — весь кадр."
-                : "Ползунок — кадр предпросмотра. Отметьте начало и конец обрезки.";
-            saveButton.Enabled = preview.Image != null && !working;
+                : "Потяните ползунки: левый — начало, правый — конец обрезки.";
+            saveButton.Enabled = !working && CanSave();
         }
 
-        private void UpdateTimeLabel()
+        private bool CanSave()
+        {
+            return isImage ? preview.Image != null : path.Length > 0;
+        }
+
+        private void UpdateRange()
         {
             if (isImage || info == null) return;
             double duration = Duration();
-            timeLabel.Text = Fmt.Time(seek.Value * duration) + " / " + Fmt.Time(duration);
+            rangeStartLabel.Text = "Начало: " + Fmt.Time(range.Start * duration);
+            rangeEndLabel.Text = "Конец: " + Fmt.Time(range.End * duration);
+            rangeInfoLabel.Text = "Выбрано: " +
+                Fmt.Time(Math.Max(0, (range.End - range.Start) * duration));
         }
 
         private void UpdateSelection()
         {
-            if (isImage)
+            if (!isImage) return;
+            if (preview.Image == null)
             {
-                if (preview.Image == null)
-                {
-                    selectionLabel.Text = "";
-                    return;
-                }
-                Rectangle crop = preview.CropPixels();
-                selectionLabel.Text = "Кадр:\n" + preview.Image.Width + "×" + preview.Image.Height +
-                    "\nВыбрано: " + crop.Width + "×" + crop.Height;
+                selectionLabel.Text = "";
                 return;
             }
-
-            double start;
-            double end;
-            if (!Fmt.TryNum(startInput.Value, out start) ||
-                !Fmt.TryNum(endInput.Value, out end) || end <= start)
-            {
-                selectionLabel.Text = "Выбрано:\n—";
-                return;
-            }
-            selectionLabel.Text = "Выбрано:\n" + Fmt.Time(end - start);
+            Rectangle crop = preview.CropPixels();
+            selectionLabel.Text = "Кадр:\n" + preview.Image.Width + "×" + preview.Image.Height +
+                "\nВыбрано: " + crop.Width + "×" + crop.Height;
         }
 
         private void RequestFrame(double position)
@@ -747,7 +783,11 @@ namespace Video2Gif
                 return bitmap;
             }).ContinueWith(delegate(Task<Bitmap> task)
             {
-                if (IsDisposed) return;
+                if (IsDisposed)
+                {
+                    if (!task.IsFaulted) task.Result.Dispose();
+                    return;
+                }
                 try
                 {
                     BeginInvoke((MethodInvoker)delegate
@@ -763,7 +803,7 @@ namespace Video2Gif
                             return;
                         }
                         preview.SetImage(task.Result, false);
-                        saveButton.Enabled = !working;
+                        saveButton.Enabled = !working && CanSave();
                     });
                 }
                 catch { }
@@ -779,29 +819,23 @@ namespace Video2Gif
 
         private void SaveVideo()
         {
-            double start;
-            double end;
-            if (!Fmt.TryNum(startInput.Value, out start) || start < 0)
-            {
-                MessageBox.Show(this, "Начало должно быть числом от 0.", Program.AppName,
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            if (!Fmt.TryNum(endInput.Value, out end) || end <= 0)
-            {
-                MessageBox.Show(this, "Укажите конец обрезки в секундах.", Program.AppName,
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            if (path.Length == 0) return;
             double duration = Duration();
-            if (duration > 0 && end > duration) end = duration;
+            if (duration <= 0)
+            {
+                MessageBox.Show(this, "Не удалось определить длительность видео.",
+                    Program.AppName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            double start = range.Start * duration;
+            double end = range.End * duration;
             if (end - start < 0.05)
             {
-                MessageBox.Show(this, "Конец должен быть больше начала.", Program.AppName,
+                MessageBox.Show(this, "Выберите более длинный фрагмент.", Program.AppName,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (path.Length == 0) return;
 
             using (SaveFileDialog dialog = new SaveFileDialog())
             {
@@ -889,13 +923,9 @@ namespace Video2Gif
         {
             working = busy;
             openButton.Enabled = !busy;
-            startHereButton.Enabled = !busy;
-            endHereButton.Enabled = !busy;
             resetButton.Enabled = !busy;
-            startInput.Enabled = !busy;
-            endInput.Enabled = !busy;
-            seek.Enabled = !busy;
-            saveButton.Enabled = !busy && preview.Image != null;
+            range.Enabled = !busy;
+            saveButton.Enabled = !busy && CanSave();
             statusLabel.Text = status;
             UseWaitCursor = busy;
         }
