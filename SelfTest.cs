@@ -525,6 +525,14 @@ namespace Video2Gif
                         Check("ui credits tooltip",
                             creditsTip != null && infoBadge != null &&
                             creditsTip.GetToolTip(infoBadge).IndexOf("Coders") >= 0);
+                        Check("ui credits badge size",
+                            infoBadge != null && infoBadge.Width >= Ui.P(28));
+
+                        Invoke(form, "ShowCredits");
+                        Application.DoEvents();
+                        CreditsForm creditsForm = GetField(form, "credits") as CreditsForm;
+                        Check("ui credits opens", creditsForm != null && creditsForm.Visible);
+                        if (creditsForm != null) creditsForm.Close();
                         Check("ui social buttons in header",
                             discord != null && donate != null && settings != null &&
                             discord.Left > settings.Left && donate.Left > discord.Left &&
