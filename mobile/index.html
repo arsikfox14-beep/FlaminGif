@@ -37,6 +37,140 @@
     --err: #c62f2f;
     --shadow: 0 12px 34px rgba(24,40,80,.12);
   }
+  html[data-theme="snow"] {
+    --bg: #091526;
+    --bg2: #0c1b30;
+    --card: #102238;
+    --card2: #142a44;
+    --line: #1f3956;
+    --text: #f0f7ff;
+    --muted: #9db5ce;
+    --muted2: #6f8ba8;
+    --accent: #7ec8ff;
+    --accent2: #4aa8ef;
+    --ok: #7ee0b0;
+    --err: #ff8a8a;
+    --shadow: 0 12px 40px rgba(0,0,0,.4);
+  }
+  html[data-theme="halloween"] {
+    --bg: #120c18;
+    --bg2: #170f20;
+    --card: #1d1326;
+    --card2: #261a32;
+    --line: #362644;
+    --text: #f6eeff;
+    --muted: #b4a0c6;
+    --muted2: #846f96;
+    --accent: #ff8c42;
+    --accent2: #e86e26;
+    --ok: #76e0a0;
+    --err: #ff5c5c;
+    --shadow: 0 12px 40px rgba(0,0,0,.42);
+  }
+  html[data-theme="gta6"] {
+    --bg: #0a090c;
+    --bg2: #0d0b11;
+    --card: #16111b;
+    --card2: #1d1524;
+    --line: #2d2337;
+    --text: #faf7fc;
+    --muted: #bea0cd;
+    --muted2: #846f90;
+    --accent: #ff4fa3;
+    --accent2: #ff7a54;
+    --ok: #4ade80;
+    --err: #ff6b6b;
+    --shadow: 0 12px 40px rgba(0,0,0,.45);
+  }
+  html[data-theme="gamesense"] {
+    --bg: #121214;
+    --bg2: #0d0d0f;
+    --card: #18181b;
+    --card2: #1e1e22;
+    --line: #323237;
+    --text: #ebebed;
+    --muted: #a8a8ad;
+    --muted2: #7e7e84;
+    --accent: #58b27c;
+    --accent2: #3f9363;
+    --ok: #58b27c;
+    --err: #e86a6a;
+    --shadow: 0 10px 30px rgba(0,0,0,.5);
+    --radius: 6px;
+  }
+  html[data-theme="snow"] body {
+    background:
+      radial-gradient(800px 450px at 80% -10%, rgba(126,200,255,.16), transparent 60%),
+      radial-gradient(600px 380px at -10% 10%, rgba(126,200,255,.10), transparent 60%),
+      radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.5px) 0 0 / 38px 38px,
+      var(--bg);
+  }
+  html[data-theme="halloween"] body {
+    background:
+      radial-gradient(800px 450px at 80% -10%, rgba(255,140,66,.16), transparent 60%),
+      radial-gradient(600px 380px at -10% 10%, rgba(160,80,255,.12), transparent 60%),
+      var(--bg);
+  }
+  html[data-theme="gta6"] body {
+    background:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,79,163,.22), transparent 60%),
+      radial-gradient(700px 420px at -10% 10%, rgba(96,92,240,.18), transparent 60%),
+      var(--bg);
+  }
+  html[data-theme="gamesense"] body {
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.018) 0 1px, transparent 1px 6px),
+      repeating-linear-gradient(-45deg, rgba(0,0,0,.16) 0 1px, transparent 1px 6px),
+      var(--bg);
+  }
+  body::before {
+    content: ""; display: none; position: fixed; top: 0; left: 0; right: 0;
+    height: 4px; z-index: 100; pointer-events: none;
+  }
+  html[data-theme="gta6"] body::before {
+    display: block;
+    background: linear-gradient(90deg,#605cf0,#9630f5,#ff4fa3,#ff7a54,#ff9e42);
+  }
+  html[data-theme="gamesense"] body::before {
+    display: block;
+    background: linear-gradient(90deg,#5affa0,#4ad7ff,#7a6bff,#ff5ad1,#ffcf5a,#5affa0);
+    background-size: 200% 100%;
+    animation: v2gRainbow 4s linear infinite;
+  }
+  @keyframes v2gRainbow {
+    from { background-position: 0 0; }
+    to { background-position: 200% 0; }
+  }
+  html[data-theme="gta6"] .mark {
+    background: linear-gradient(135deg,#605cf0,#ff4fa3,#ff9e42); color: #fff;
+  }
+  html[data-theme="gta6"] button.primary {
+    background: linear-gradient(90deg,#605cf0,#9630f5,#ff4fa3,#ff7a54,#ff9e42);
+    border-color: transparent; color: #fff;
+  }
+  html[data-theme="gta6"] .drop {
+    background:
+      linear-gradient(100deg, rgba(8,6,12,.88) 0%, rgba(8,6,12,.42) 55%, rgba(255,79,163,.24) 100%),
+      linear-gradient(90deg,#605cf0,#9630f5,#ff4fa3,#ff7a54,#ff9e42);
+    border-color: rgba(255,79,163,.55);
+  }
+  html[data-theme="gamesense"] .mark {
+    background: var(--accent); color: #0a0d0a;
+  }
+  html[data-theme="gamesense"] button.primary {
+    background: linear-gradient(180deg,#6fce92,#4aa46e);
+    border-color: transparent; color: #0a0d0a;
+  }
+  html[data-theme="gamesense"] button,
+  html[data-theme="gamesense"] input,
+  html[data-theme="gamesense"] select,
+  html[data-theme="gamesense"] .card,
+  html[data-theme="gamesense"] .drop-icon,
+  html[data-theme="gamesense"] .preview-box {
+    border-radius: 5px;
+  }
+  html[data-theme="snow"] .mark { background: var(--accent); color: #071426; }
+  html[data-theme="halloween"] .mark { background: var(--accent); color: #1a0f08; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body {
@@ -111,7 +245,7 @@
   .field.wide { grid-column: 1 / -1; }
   .field label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
   .field .hint { color: var(--muted2); font-size: 11px; margin-top: 4px; }
-  input[type="number"], select {
+  input[type="number"], input[type="url"], input[type="text"], select {
     width: 100%; font: inherit; font-size: 16px; color: var(--text);
     background: var(--bg2); border: 1px solid var(--line); border-radius: 11px;
     padding: 11px 12px; outline: none; appearance: none; -webkit-appearance: none;
@@ -121,8 +255,8 @@
     background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
     background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 34px;
   }
-  input[type="number"]:focus, select:focus { border-color: var(--accent); }
-  input[type="number"]:disabled, select:disabled { opacity: .45; }
+  input[type="number"]:focus, input[type="url"]:focus, input[type="text"]:focus, select:focus { border-color: var(--accent); }
+  input[type="number"]:disabled, input[type="url"]:disabled, input[type="text"]:disabled, select:disabled { opacity: .45; }
   .switch {
     display: flex; align-items: center; gap: 11px; padding: 4px 0 2px;
     grid-column: 1 / -1; color: var(--text); font-size: 14.5px; user-select: none;
@@ -162,6 +296,9 @@
   .result-actions button { flex: 1 1 0; padding: 12px; }
   .note { color: var(--muted2); font-size: 12px; line-height: 1.5; padding: 2px 4px 0; }
   .note b { color: var(--muted); font-weight: 600; }
+  .note.ok { color: var(--ok); }
+  .note.err { color: var(--err); }
+  .note a { color: var(--accent); text-decoration: underline; }
   footer.credits { color: var(--muted2); font-size: 11.5px; text-align: center; margin-top: 18px; }
   .is-image .video-only { opacity: .5; }
   @media (max-width: 360px) {
@@ -182,7 +319,6 @@
     </div>
     <div class="spacer"></div>
     <div class="ver">2.7 · mobile</div>
-    <button id="themeBtn" class="ghost" type="button" style="padding:9px 12px;font-size:13px">Светлая</button>
   </header>
 
   <section class="card drop" id="pickCard" role="button" tabindex="0" aria-label="Выбрать видео или картинку">
@@ -197,6 +333,19 @@
     </div>
     <div class="choose">Выбрать</div>
     <input id="fileInput" type="file" accept="video/*,image/*,.mp4,.mov,.m4v,.webm,.mkv,.avi,.png,.jpg,.jpeg,.webp,.bmp,.gif,.avif" hidden>
+  </section>
+
+  <section class="card" aria-labelledby="downloadTitle">
+    <h2 id="downloadTitle">Скачать видео</h2>
+    <div class="field wide">
+      <label for="mediaUrl">Ссылка на TikTok или прямое видео</label>
+      <input id="mediaUrl" type="url" inputmode="url" placeholder="https://www.tiktok.com/@…/video/…">
+    </div>
+    <div class="actions" style="margin-top:10px;margin-bottom:8px">
+      <button id="tiktokBtn" type="button">Скачать TikTok</button>
+      <button id="directBtn" type="button">Скачать по ссылке</button>
+    </div>
+    <div class="note" id="downloadStatus" aria-live="polite" style="min-height:18px;padding:0">TikTok — через открытый API; YouTube и Spotify — в Windows-версии.</div>
   </section>
 
   <section class="card" aria-labelledby="settingsTitle">
@@ -220,6 +369,18 @@
         <label for="fpsInput">Кадров в секунду</label>
         <input id="fpsInput" type="number" min="1" max="60" step="1" value="30" inputmode="numeric">
         <div class="hint">1–60 · 30 — по умолчанию</div>
+      </div>
+      <div class="field wide">
+        <label for="themeSelect">Тема оформления</label>
+        <select id="themeSelect">
+          <option value="auto">Авто (по дате)</option>
+          <option value="light">Светлая</option>
+          <option value="dark">Тёмная</option>
+          <option value="snow">Снежная</option>
+          <option value="halloween">Хэллоуин</option>
+          <option value="gta6">GTA 6</option>
+          <option value="gamesense">Gamesense</option>
+        </select>
       </div>
       <div class="field wide">
         <label for="ditherSelect">Сглаживание переходов</label>
@@ -262,7 +423,7 @@
   <p class="note">
     <b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются.
     Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM.
-    Скачивание TikTok, YouTube и Spotify доступно только в Windows‑версии <b>Video2Gif.exe</b>.
+    TikTok и прямые ссылки на видео можно скачать здесь; YouTube и Spotify — в Windows‑версии <b>Video2Gif.exe</b>.
   </p>
 
   <footer class="credits">by DeepSeek v4.1 flash &amp; arsikfox14 &amp; dismasdismavich</footer>
@@ -317,7 +478,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     resultMeta: $("resultMeta"),
     download: $("downloadBtn"),
     share: $("shareBtn"),
-    theme: $("themeBtn")
+    themeSelect: $("themeSelect")
   };
 
   var state = {
@@ -977,15 +1138,46 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     download();
   }
 
+  var THEME_KEYS = ["auto", "light", "dark", "snow", "halloween", "gta6", "gamesense"];
+  function themeDate(year, month, day, hour, minute) {
+    return new Date(year, month - 1, day, hour || 0, minute || 0, 0, 0);
+  }
+  function autoTheme() {
+    var now = new Date();
+    if (now >= themeDate(2026, 11, 18, 15, 0) && now < themeDate(2026, 11, 20, 0, 0)) {
+      return "gta6";
+    }
+    var m = now.getMonth();
+    var d = now.getDate();
+    if (m === 9 || (m === 10 && d === 1)) return "halloween";
+    if (m === 11 || (m === 0 && d === 1)) return "snow";
+    return "dark";
+  }
   function applyTheme(theme) {
-    document.documentElement.setAttribute("data-theme", theme);
-    el.theme.textContent = theme === "light" ? "Тёмная" : "Светлая";
+    if (THEME_KEYS.indexOf(theme) < 0) theme = "auto";
+    var resolved = theme === "auto" ? autoTheme() : theme;
+    document.documentElement.setAttribute("data-theme", resolved);
+    if (el.themeSelect) el.themeSelect.value = theme;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      var bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+      if (bg) meta.setAttribute("content", bg);
+    }
     try { localStorage.setItem("video2gif-mobile-theme", theme); } catch (e) {}
   }
   function initTheme() {
-    var t = "dark";
-    try { t = localStorage.getItem("video2gif-mobile-theme") || "dark"; } catch (e) {}
+    var q = null;
+    try { q = new URLSearchParams(window.location.search).get("theme"); } catch (e) {}
+    if (q && THEME_KEYS.indexOf(q) >= 0) {
+      applyTheme(q);
+      return;
+    }
+    var t = "auto";
+    try { t = localStorage.getItem("video2gif-mobile-theme") || "auto"; } catch (e) {}
     applyTheme(t);
+    window.setInterval(function () {
+      if (el.themeSelect && el.themeSelect.value === "auto") applyTheme("auto");
+    }, 60000);
   }
 
   function saveSettings() {
@@ -1010,9 +1202,11 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
   el.cancel.addEventListener("click", cancel);
   el.download.addEventListener("click", download);
   el.share.addEventListener("click", share);
-  el.theme.addEventListener("click", function () {
-    applyTheme(document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light");
-  });
+  if (el.themeSelect) {
+    el.themeSelect.addEventListener("change", function () {
+      applyTheme(el.themeSelect.value);
+    });
+  }
   [el.width, el.fps, el.dither, el.loop].forEach(function (node) {
     node.addEventListener("change", saveSettings);
   });
@@ -1022,6 +1216,311 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
   setBusy(false);
   applyKind(null);
   status("Выберите файл, чтобы начать.");
+})();
+</script>
+<script>
+(function () {
+  var input = document.getElementById("mediaUrl");
+  var tiktokBtn = document.getElementById("tiktokBtn");
+  var directBtn = document.getElementById("directBtn");
+  var statusEl = document.getElementById("downloadStatus");
+  if (!input || !tiktokBtn || !directBtn || !statusEl) return;
+
+  function setStatus(text, kind, link) {
+    statusEl.textContent = text;
+    statusEl.className = "note" + (kind ? " " + kind : "");
+    if (link) {
+      var a = document.createElement("a");
+      a.href = link;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = " Открыть видео";
+      statusEl.appendChild(a);
+    }
+  }
+  function makeName(text) {
+    var name = String(text || "video").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+    name = name.replace(/\.(mp4|mov|webm|m4v|mkv)$/i, "");
+    if (name.length > 60) name = name.slice(0, 60);
+    return (name || "video") + ".mp4";
+  }
+  function saveBlob(blob, name) {
+    var a = document.createElement("a");
+    var url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = name;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+      if (a.parentNode) a.parentNode.removeChild(a);
+    }, 1500);
+  }
+  function openLink(url, name) {
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 1000);
+  }
+  var PROXIES = [
+    function (u) { return "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u); },
+    function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
+    function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); }
+  ];
+  async function request(url, options, ms) {
+    var opt = options || {};
+    if (typeof AbortController !== "function") return await fetch(url, opt);
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, ms || 12000);
+    opt.signal = ctrl.signal;
+    try {
+      return await fetch(url, opt);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  function unescapeUrl(value) {
+    return String(value || "")
+      .replace(/\\u002F/gi, "/")
+      .replace(/\\\//g, "/")
+      .replace(/&amp;/g, "&");
+  }
+  function asVideoUrl(value) {
+    var s = unescapeUrl(value).trim();
+    if (!/^https?:\/\//i.test(s)) return "";
+    if (/\.(mp4|m4v|webm)(\?|#|$)/i.test(s)) return s;
+    if (/(tiktokcdn|byteoversea|akamaized\.net|ibytedtos|\/video\/tos-)/i.test(s)) return s;
+    return "";
+  }
+  var VIDEO_KEYS = ["hdplay", "hdPlay", "noWatermark", "nowm", "play", "playAddr", "play_addr",
+    "downloadAddr", "download_addr", "wmplay", "download", "video", "url"];
+  function collectVideos(node, out, depth) {
+    if (node === null || node === undefined || depth > 8 || out.length > 60) return;
+    if (typeof node === "string") {
+      var v = asVideoUrl(node);
+      if (v && out.indexOf(v) < 0) out.push(v);
+      return;
+    }
+    if (Array.isArray(node)) {
+      for (var i = 0; i < node.length; i++) collectVideos(node[i], out, depth + 1);
+      return;
+    }
+    if (typeof node !== "object") return;
+    var i2;
+    for (i2 = 0; i2 < VIDEO_KEYS.length; i2++) {
+      if (Object.prototype.hasOwnProperty.call(node, VIDEO_KEYS[i2])) {
+        collectVideos(node[VIDEO_KEYS[i2]], out, depth + 1);
+      }
+    }
+    var names = Object.keys(node);
+    for (i2 = 0; i2 < names.length; i2++) {
+      if (VIDEO_KEYS.indexOf(names[i2]) < 0) collectVideos(node[names[i2]], out, depth + 1);
+    }
+  }
+  async function fetchText(url) {
+    var tried = [];
+    try {
+      var r = await request(url, { cache: "no-store", credentials: "omit" });
+      if (r.ok) return await r.text();
+      tried.push("HTTP " + r.status);
+    } catch (e) {
+      tried.push("сеть");
+    }
+    for (var i = 0; i < PROXIES.length; i++) {
+      try {
+        var r2 = await request(PROXIES[i](url), { cache: "no-store", credentials: "omit" });
+        if (r2.ok) {
+          var text = await r2.text();
+          if (text && text.length > 20) return text;
+          tried.push("пусто");
+          continue;
+        }
+        tried.push("HTTP " + r2.status);
+      } catch (e2) {
+        tried.push("сеть");
+      }
+    }
+    throw new Error("источник недоступен (" + tried.join(", ") + ")");
+  }
+  async function fetchJsonDirect(url) {
+    var r = await request(url, { cache: "no-store", credentials: "omit" }, 12000);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    var text = await r.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      throw new Error("не JSON");
+    }
+  }
+  function videosFromHtml(html) {
+    var text = unescapeUrl(html);
+    var out = [];
+    var re = /"(?:playAddr|play_addr|downloadAddr|download_addr|playApi)"\s*:\s*(?:"([^"]+)"|\{[\s\S]{0,2000}?\})/g;
+    var m;
+    while ((m = re.exec(text)) && out.length < 20) {
+      if (m[1]) {
+        var direct = asVideoUrl(m[1]);
+        if (direct && out.indexOf(direct) < 0) out.push(direct);
+        continue;
+      }
+      var block = text.slice(m.index, m.index + 1500);
+      var urls = block.match(/https?:\/\/[^"'\\\s]+/g) || [];
+      for (var i = 0; i < urls.length; i++) {
+        var v = asVideoUrl(urls[i]);
+        if (v && out.indexOf(v) < 0) out.push(v);
+      }
+    }
+    return out;
+  }
+  function apiCandidates(url) {
+    var enc = encodeURIComponent(url);
+    var raw = [
+      "https://tikwm.com/api/?url=" + enc + "&hd=1",
+      "https://api.tiklydown.eu.org/api/download?url=" + enc
+    ];
+    var list = [];
+    for (var i = 0; i < raw.length; i++) {
+      list.push(raw[i]);
+      for (var j = 0; j < PROXIES.length; j++) list.push(PROXIES[j](raw[i]));
+    }
+    return list;
+  }
+  function raceFirst(tasks) {
+    return new Promise(function (resolve, reject) {
+      var left = tasks.length;
+      var done = false;
+      if (!left) {
+        reject(new Error("нет источников"));
+        return;
+      }
+      tasks.forEach(function (task) {
+        function fail() {
+          if (done) return;
+          left--;
+          if (left <= 0) {
+            done = true;
+            reject(new Error("нет ответа"));
+          }
+        }
+        Promise.resolve()
+          .then(task)
+          .then(function (value) {
+            if (done) return;
+            if (value) {
+              done = true;
+              resolve(value);
+              return;
+            }
+            fail();
+          }, fail);
+      });
+    });
+  }
+  async function resolveTikTok(url) {
+    var candidates = apiCandidates(url);
+    try {
+      var hit = await raceFirst(candidates.map(function (endpoint) {
+        return async function () {
+          var data = await fetchJsonDirect(endpoint);
+          var found = [];
+          collectVideos(data, found, 0);
+          if (!found.length) return null;
+          var title = "";
+          if (typeof data.title === "string") title = data.title;
+          else if (data.data && typeof data.data.title === "string") title = data.data.title;
+          return { video: found[0], title: title };
+        };
+      }));
+      if (hit) return hit;
+    } catch (e) {}
+    try {
+      var html = await fetchText(url);
+      var fromPage = videosFromHtml(html);
+      if (fromPage.length) return { video: fromPage[0], title: "" };
+    } catch (e2) {}
+    return null;
+  }
+  async function saveUrl(url, name) {
+    try {
+      var r = await request(url, { mode: "cors", cache: "no-store" }, 30000);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      var type = (r.headers.get("content-type") || "").toLowerCase();
+      if (type && type.indexOf("video/") < 0 && type.indexOf("application/octet-stream") < 0) {
+        throw new Error("это не прямая ссылка на видео");
+      }
+      var blob = await r.blob();
+      if (blob.size < 1000) throw new Error("пустой файл");
+      saveBlob(blob, name);
+      setStatus("Готово: " + name + " — сохраните из загрузок браузера.", "ok");
+    } catch (e) {
+      openLink(url, name);
+      setStatus("Браузер не дал сохранить файл — откройте видео и удерживайте его:", "", url);
+    }
+  }
+  async function downloadTikTok() {
+    var url = input.value.trim();
+    if (!/(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/i.test(url)) {
+      setStatus("Вставьте ссылку TikTok.", "err");
+      return;
+    }
+    tiktokBtn.disabled = true;
+    setStatus("Получаем ссылку TikTok… Это может занять до минуты.", "");
+    try {
+      var resolved = await resolveTikTok(url);
+      if (!resolved) {
+        openLink(url, "tiktok");
+        setStatus("Сервис TikTok не ответил — откройте видео и сохраните через меню браузера:", "", url);
+        return;
+      }
+      await saveUrl(resolved.video, makeName(resolved.title || "tiktok"));
+    } catch (e) {
+      setStatus("TikTok: " + (e && e.message ? e.message : "ошибка") + ". Попробуйте ещё раз или другую ссылку.", "err");
+    } finally {
+      tiktokBtn.disabled = false;
+    }
+  }
+  async function downloadDirect() {
+    var url = input.value.trim();
+    if (!/^https?:\/\//i.test(url)) {
+      setStatus("Вставьте ссылку на видео.", "err");
+      return;
+    }
+    if (/(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/i.test(url)) {
+      await downloadTikTok();
+      return;
+    }
+    if (/(youtube\.com|youtu\.be)/i.test(url)) {
+      setStatus("YouTube — только в Windows-версии.", "err");
+      return;
+    }
+    if (/open\.spotify\.com|spotify\.link/i.test(url)) {
+      setStatus("Spotify — только в Windows-версии.", "err");
+      return;
+    }
+    directBtn.disabled = true;
+    setStatus("Скачиваем видео…", "");
+    var clean = url.split("?")[0];
+    var base = clean.split("/").pop() || "video";
+    try {
+      await saveUrl(url, makeName(base));
+    } finally {
+      directBtn.disabled = false;
+    }
+  }
+  tiktokBtn.addEventListener("click", downloadTikTok);
+  directBtn.addEventListener("click", downloadDirect);
+  input.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    if (/(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/i.test(input.value.trim())) downloadTikTok();
+    else downloadDirect();
+  });
 })();
 </script>
 </body>

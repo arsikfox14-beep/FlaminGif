@@ -74,8 +74,10 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 Можно открыть локально на Android или разместить на статическом хостинге
 и добавить на экран «Домой» на iPhone.
 
-Скачивание TikTok, YouTube и Spotify остаётся только в Windows-версии:
-браузер не может обходить ограничения сайтов. Подробности — в `mobile/README.txt`.
+Темы те же, что в Windows-версии: авто по дате, светлая, тёмная, снежная,
+хэллоуин, GTA 6 и Gamesense. TikTok и прямые ссылки на видео можно скачать
+прямо в мобильной версии; YouTube и Spotify остаются только в
+Windows-версии `Video2Gif.exe`. Подробности — в `mobile/README.txt`.
 
 ## Возможности
 
