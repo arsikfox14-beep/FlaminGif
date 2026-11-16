@@ -376,22 +376,26 @@ namespace Video2Gif
                 g.DrawEllipse(pen, r);
             }
 
-            // Чёткий «!» без сглаживания шрифта.
-            float cx = Width / 2f;
-            float barWidth = Math.Max(1.8f, Width * 0.11f);
-            float barTop = Height * 0.28f;
-            float barBottom = Height * 0.66f;
+            // Чёткий и ровно отцентрованный «!».
+            float cx = r.X + r.Width / 2f;
+            float barWidth = Math.Max(1.8f, Width * 0.10f);
+            float dot = Math.Max(1.6f, Width * 0.09f);
+            float gap = Math.Max(1.2f, Width * 0.06f);
+            float barLength = Math.Max(6f, Width * 0.34f);
+            float total = barLength + gap + dot;
+            float top = r.Y + r.Height / 2f - total / 2f;
+
             using (Pen mark = new Pen(color, barWidth))
             {
                 mark.StartCap = LineCap.Round;
                 mark.EndCap = LineCap.Round;
-                g.DrawLine(mark, cx, barTop, cx, barBottom);
+                g.DrawLine(mark, cx, top + barWidth / 2f,
+                    cx, top + barLength - barWidth / 2f);
             }
-            float dot = Math.Max(1.8f, Width * 0.105f);
             using (SolidBrush brush = new SolidBrush(color))
             {
-                g.FillEllipse(brush, cx - dot / 2f,
-                    Height * 0.78f - dot / 2f, dot, dot);
+                float dotY = top + barLength + gap + dot / 2f;
+                g.FillEllipse(brush, cx - dot / 2f, dotY - dot / 2f, dot, dot);
             }
         }
     }
