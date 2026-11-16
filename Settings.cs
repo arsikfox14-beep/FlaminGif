@@ -103,6 +103,22 @@ namespace Video2Gif
                     }
                 }
             }
+            else if (ThemeKey == "gamesense")
+            {
+                Rectangle swatch = new Rectangle(x + Ui.P(38), y, d, d);
+                using (GraphicsPath path = new GraphicsPath())
+                {
+                    path.AddEllipse(swatch);
+                    using (LinearGradientBrush brush = Ui.RainbowBrush(swatch, 0.08, 7))
+                    {
+                        g.FillPath(brush, path);
+                    }
+                    using (Pen pen = new Pen(Ui.Border, 1f))
+                    {
+                        g.DrawPath(pen, path);
+                    }
+                }
+            }
             else
             {
                 DrawSwatch(g, new Rectangle(x + Ui.P(38), y, d, d), SwatchAccent, Ui.Border);
@@ -150,6 +166,7 @@ namespace Video2Gif
         private readonly ThemeTile newYearTile;
         private readonly ThemeTile halloweenTile;
         private readonly ThemeTile gtaTile;
+        private readonly ThemeTile gamesenseTile;
         private PillButton updateButton;
         private Label updateStatus;
         private bool checking;
@@ -161,7 +178,7 @@ namespace Video2Gif
             Text = "Настройки — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(428), Ui.P(448));
+            ClientSize = new Size(Ui.P(428), Ui.P(508));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -229,33 +246,41 @@ namespace Video2Gif
             gtaTile.Click += delegate { Choose("gta6"); };
             Controls.Add(gtaTile);
 
+            gamesenseTile = MakeTile("gamesense", "Gamesense");
+            gamesenseTile.SwatchBg = Color.FromArgb(7, 7, 8);
+            gamesenseTile.SwatchCard = Color.FromArgb(14, 14, 15);
+            gamesenseTile.SwatchAccent = Color.FromArgb(90, 255, 140);
+            gamesenseTile.SetBounds(Ui.P(154), Ui.P(208), Ui.P(120), Ui.P(64));
+            gamesenseTile.Click += delegate { Choose("gamesense"); };
+            Controls.Add(gamesenseTile);
+
             Controls.Add(Lbl("Авто по дате: Хэллоуин 1 окт–1 ноя, Снежная 1 дек–1 янв,\n" +
                 "GTA 6 — 18 ноября 22:00 – 20 ноября 00:00.", Ui.Tiny, Ui.Faint,
-                24, 208, 380, 32));
+                24, 280, 380, 32));
 
             Controls.Add(Lbl("Тема применяется сразу и запоминается.", Ui.Tiny, Ui.Faint,
-                24, 242, 380, 18));
+                24, 316, 380, 18));
 
-            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 276, 300, 24));
+            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 352, 300, 24));
             Controls.Add(Lbl("Версия " + Program.Version + " · GitHub: " + Updater.Repo,
-                Ui.Tiny, Ui.Faint, 24, 302, 380, 18));
+                Ui.Tiny, Ui.Faint, 24, 378, 380, 18));
 
             updateButton = new PillButton();
             updateButton.Ghost = true;
             updateButton.Text = "Проверить обновления";
             updateButton.Font = Ui.Small;
-            updateButton.SetBounds(Ui.P(24), Ui.P(328), Ui.P(208), Ui.P(36));
+            updateButton.SetBounds(Ui.P(24), Ui.P(404), Ui.P(208), Ui.P(36));
             updateButton.Click += delegate { CheckUpdates(); };
             Controls.Add(updateButton);
 
-            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 244, 328, 160, 36);
+            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 244, 404, 160, 36);
             Controls.Add(updateStatus);
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(300), Ui.P(396), Ui.P(104), Ui.P(36));
+            done.SetBounds(Ui.P(300), Ui.P(448), Ui.P(104), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 
@@ -288,6 +313,7 @@ namespace Video2Gif
             newYearTile.Active = !Ui.AutoTheme && current == "newyear";
             halloweenTile.Active = !Ui.AutoTheme && current == "halloween";
             gtaTile.Active = !Ui.AutoTheme && current == "gta6";
+            gamesenseTile.Active = !Ui.AutoTheme && current == "gamesense";
         }
 
         /* ---------------------------------------------------------- Обновления */

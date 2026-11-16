@@ -218,6 +218,15 @@ namespace Video2Gif
                     Ui.Dark && Ui.Gta6 && Ui.ThemeName == "gta6" &&
                     Ui.Accent == Color.FromArgb(255, 79, 163) && !Ui.Holiday);
 
+                Ui.SetTheme("gamesense");
+                Check("theme gamesense",
+                    Ui.Dark && Ui.Gamesense && Ui.ThemeName == "gamesense" &&
+                    Ui.Accent == Color.FromArgb(90, 255, 140) && !Ui.Holiday);
+                Check("gamesense rainbow",
+                    Ui.Rainbow(0.0, 0.8, 1.0).R > 200 &&
+                    Ui.Rainbow(1.0 / 3.0, 0.8, 1.0).G > 200 &&
+                    Ui.Rainbow(0.0, 0.8, 1.0) != Ui.Rainbow(0.5, 0.8, 1.0));
+
                 ColorBlend gtaBlend = Ui.GtaBlend();
                 Check("theme gta 6 gradient",
                     gtaBlend.Colors.Length == 5 &&
@@ -627,12 +636,14 @@ namespace Video2Gif
                         ThemeTile newYearTile = GetField(dialog, "newYearTile") as ThemeTile;
                         ThemeTile halloweenTile = GetField(dialog, "halloweenTile") as ThemeTile;
                         ThemeTile gtaTile = GetField(dialog, "gtaTile") as ThemeTile;
+                        ThemeTile gamesenseTile = GetField(dialog, "gamesenseTile") as ThemeTile;
                         ThemeTile darkTile = GetField(dialog, "darkTile") as ThemeTile;
                         Check("settings theme tiles",
                             autoTile != null && autoTile.ThemeKey == "auto" &&
                             newYearTile != null && newYearTile.ThemeKey == "newyear" &&
                             halloweenTile != null && halloweenTile.ThemeKey == "halloween" &&
                             gtaTile != null && gtaTile.ThemeKey == "gta6" &&
+                            gamesenseTile != null && gamesenseTile.ThemeKey == "gamesense" &&
                             darkTile != null && darkTile.Active);
 
                         newYearTile.Pick();
@@ -660,6 +671,15 @@ namespace Video2Gif
                         SaveShot(dialog, gtaSettings);
                         Check("settings gta 6 screenshot",
                             File.Exists(gtaSettings) && new FileInfo(gtaSettings).Length > 2000);
+
+                        gamesenseTile.Pick();
+                        Application.DoEvents();
+                        Check("settings choose gamesense",
+                            Ui.ThemeName == "gamesense" && gamesenseTile.Active && !gtaTile.Active);
+                        string gsSettings = Path.Combine(work, "ui-settings-gamesense.png");
+                        SaveShot(dialog, gsSettings);
+                        Check("settings gamesense screenshot",
+                            File.Exists(gsSettings) && new FileInfo(gsSettings).Length > 2000);
 
                         autoTile.Pick();
                         Application.DoEvents();
