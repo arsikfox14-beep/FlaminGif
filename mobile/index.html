@@ -336,16 +336,15 @@
   </section>
 
   <section class="card" aria-labelledby="downloadTitle">
-    <h2 id="downloadTitle">Скачать видео</h2>
+    <h2 id="downloadTitle">Скачать видео или фото</h2>
     <div class="field wide">
-      <label for="mediaUrl">Ссылка на TikTok или прямое видео</label>
+      <label for="mediaUrl">Ссылка на TikTok или прямая ссылка</label>
       <input id="mediaUrl" type="url" inputmode="url" placeholder="https://www.tiktok.com/@…/video/…">
     </div>
     <div class="actions" style="margin-top:10px;margin-bottom:8px">
-      <button id="tiktokBtn" type="button">Скачать TikTok</button>
-      <button id="directBtn" type="button">Скачать по ссылке</button>
+      <button id="downloadLinkBtn" type="button">Скачать</button>
     </div>
-    <div class="note" id="downloadStatus" aria-live="polite" style="min-height:18px;padding:0">TikTok — через открытый API; YouTube и Spotify — в Windows-версии.</div>
+    <div class="note" id="downloadStatus" aria-live="polite" style="min-height:18px;padding:0">Вставьте ссылку TikTok, видео или картинки. YouTube и Spotify — в Windows-версии.</div>
   </section>
 
   <section class="card" aria-labelledby="settingsTitle">
@@ -799,88 +798,123 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     ctx.drawImage(source, 0, 0, w, h);
   }
 
-  async function captureBySeek(video, start, dur, fps, w, h, onProgress, isCancelled) {
+  async function samplePalette(video, start, dur, w, h) {
+    var sampleW = Math.min(w, 180);
+    var sampleH = Math.max(1, Math.round(h * sampleW / w));
     var canvas = document.createElement("canvas");
-    canvas.width = w; canvas.height = h;
-    var ctx = canvas.getContext("2d", { alpha: false });
-    var total = Math.max(1, Math.floor(dur * fps));
-    var blobs = [];
-    for (var i = 0; i < total; i++) {
-      if (isCancelled()) throw new Error("cancelled");
-      await seekTo(video, start + i / fps);
-      drawTo(ctx, video, w, h);
-      blobs.push(await canvasToBlob(canvas, "image/jpeg", 0.86));
-      onProgress((i + 1) / total * 100);
+    canvas.width = sampleW; canvas.height = sampleH;
+    var ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
+    var points = dur > 0.25 ? [0, 0.35, 0.7, 0.98] : [0];
+    var parts = [];
+    var total = 0;
+    for (var i = 0; i < points.length; i++) {
+      await seekTo(video, start + dur * points[i]);
+      drawTo(ctx, video, sampleW, sampleH);
+      var frame = ctx.getImageData(0, 0, sampleW, sampleH);
+      var copy = new Uint8Array(frame.data.length);
+      copy.set(frame.data);
+      parts.push(copy);
+      total += copy.length;
     }
-    return blobs;
+    var all = new Uint8Array(total);
+    var offset = 0;
+    for (var j = 0; j < parts.length; j++) {
+      all.set(parts[j], offset);
+      offset += parts[j].length;
+    }
+    return quantize(all, 256, { format: "rgb565" });
   }
 
-  async function captureFrames(video, start, dur, fps, w, h, onProgress, isCancelled) {
-    var canvas = document.createElement("canvas");
-    canvas.width = w; canvas.height = h;
-    var ctx = canvas.getContext("2d", { alpha: false });
+  function indicesFor(rgba, w, h, palette, dither) {
+    if (dither === "bayer") return applyBayer(rgba, w, h, palette);
+    if (dither === "sierra") return applySierra(rgba, w, h, palette);
+    return applyPalette(rgba, palette, "rgb565");
+  }
+
+  // Кадры кодируются сразу во время проигрывания: без JPEG-промежутка
+  // и с одной общей палитрой на весь GIF — это в разы быстрее.
+  async function encodeVideoGif(video, start, dur, fps, w, h, dither, loop, onProgress, isCancelled) {
     var total = Math.max(1, Math.floor(dur * fps));
-    var blobs = [];
-    var last = -1;
-    var played = true;
-
-    await seekTo(video, start);
-    try {
-      await video.play();
-    } catch (e) {
-      played = false;
-    }
-
-    if (!played) {
-      return captureBySeek(video, start, dur, fps, w, h, onProgress, isCancelled);
-    }
-
-    var startedAt = Date.now();
-    var firstAt = 0;
-
-    while (blobs.length < total && !isCancelled()) {
-      await nextVideoFrame(video);
-      if (isCancelled()) break;
-      if (!firstAt) firstAt = Date.now();
-
-      var t = video.currentTime - start;
-      if (t < -0.05) {
-        if (video.ended) break;
-        continue;
-      }
-      var target = Math.floor(t * fps);
-      if (target >= total) target = total - 1;
-
-      if (target > last) {
-        while (last < target && blobs.length < total) {
-          drawTo(ctx, video, w, h);
-          blobs.push(await canvasToBlob(canvas, "image/jpeg", 0.86));
-          last++;
-          onProgress(blobs.length / total * 100);
-        }
-      }
-
-      if (video.ended) break;
-      if (Date.now() - startedAt > (dur + 10) * 1000) break;
-
-      // If playback is blocked (no time movement), fall back to seeking.
-      if (blobs.length === 0 && firstAt && Date.now() - firstAt > 2500) {
-        try { video.pause(); } catch (e) {}
-        return captureBySeek(video, start, dur, fps, w, h, onProgress, isCancelled);
-      }
-    }
-
-    try { video.pause(); } catch (e) {}
-
+    var delays = frameDelays(total, fps);
+    var palette = await samplePalette(video, start, dur, w, h);
     if (isCancelled()) throw new Error("cancelled");
 
-    // Pad if the video ended a little early.
-    while (blobs.length < total) {
-      drawTo(ctx, video, w, h);
-      blobs.push(await canvasToBlob(canvas, "image/jpeg", 0.86));
-      onProgress(blobs.length / total * 100);
+    var canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    var ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
+    var enc = GIFEncoder();
+    var written = 0;
+
+    function writeFrame() {
+      var img = ctx.getImageData(0, 0, w, h);
+      var rgba = new Uint8Array(img.data.buffer);
+      var indices = indicesFor(rgba, w, h, palette, dither);
+      enc.writeFrame(indices, w, h, {
+        palette: written === 0 ? palette : null,
+        delay: delays[written] || 100,
+        repeat: loop ? 0 : -1,
+        dispose: 1
+      });
+      written++;
+      onProgress(written / total * 100);
     }
-    return blobs;
+
+    async function seekPass() {
+      for (var i = 0; i < total; i++) {
+        if (isCancelled()) throw new Error("cancelled");
+        await seekTo(video, start + i / fps);
+        drawTo(ctx, video, w, h);
+        writeFrame();
+        await yieldFrame();
+      }
+    }
+
+    await seekTo(video, start);
+    var played = true;
+    try { await video.play(); } catch (e) { played = false; }
+
+    if (!played) {
+      await seekPass();
+    } else {
+      var startedAt = Date.now();
+      var last = -1;
+      while (written < total && !isCancelled()) {
+        await nextVideoFrame(video);
+        if (isCancelled()) break;
+        var t = video.currentTime - start;
+        if (t < -0.05) {
+          if (video.ended) break;
+          continue;
+        }
+        var target = Math.min(total - 1, Math.floor(t * fps));
+        if (target > last) {
+          while (last < target && written < total) {
+            drawTo(ctx, video, w, h);
+            writeFrame();
+            last++;
+          }
+        }
+        if (video.ended) break;
+        if (Date.now() - startedAt > (dur + 10) * 1000) break;
+        if (written === 0 && Date.now() - startedAt > 2500) break;
+      }
+      try { video.pause(); } catch (e) {}
+
+      if (isCancelled()) throw new Error("cancelled");
+      if (written === 0) {
+        await seekPass();
+      } else {
+        while (written < total) {
+          if (isCancelled()) throw new Error("cancelled");
+          drawTo(ctx, video, w, h);
+          writeFrame();
+        }
+      }
+    }
+
+    if (isCancelled()) throw new Error("cancelled");
+    enc.finish();
+    return new Blob([enc.bytes()], { type: "image/gif" });
   }
 
   function decodeBlob(blob) {
@@ -992,42 +1026,6 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     return out;
   }
 
-  async function encodeGif(blobs, w, h, delays, dither, loop, onProgress, isCancelled) {
-    var canvas = document.createElement("canvas");
-    canvas.width = w; canvas.height = h;
-    var ctx = canvas.getContext("2d", { willReadFrequently: true });
-    var enc = GIFEncoder();
-
-    for (var i = 0; i < blobs.length; i++) {
-      if (isCancelled()) throw new Error("cancelled");
-      var src = await decodeBlob(blobs[i]);
-      ctx.clearRect(0, 0, w, h);
-      drawTo(ctx, src, w, h);
-      releaseSource(src);
-
-      var img = ctx.getImageData(0, 0, w, h);
-      var rgba = new Uint8Array(img.data.buffer);
-      var palette = quantize(rgba, 256, { format: "rgb565" });
-      var indices;
-      if (dither === "bayer") indices = applyBayer(rgba, w, h, palette);
-      else if (dither === "sierra") indices = applySierra(rgba, w, h, palette);
-      else indices = applyPalette(rgba, palette, "rgb565");
-
-      enc.writeFrame(indices, w, h, {
-        palette: palette,
-        delay: delays[i] || 100,
-        repeat: loop ? 0 : -1,
-        dispose: 1
-      });
-
-      onProgress((i + 1) / blobs.length * 100);
-      await yieldFrame();
-    }
-
-    enc.finish();
-    return new Blob([enc.bytes()], { type: "image/gif" });
-  }
-
   async function convert() {
     if (!state.file || state.busy) return;
     var opts = readOptions();
@@ -1037,7 +1035,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     setProgress(0, "Готовлю…");
 
     try {
-      var blobs, w, h, delays, frameCount;
+      var w, h, frameCount, blob;
 
       if (state.kind === "image") {
         w = opts.width > 0 ? Math.min(opts.width, state.width) : state.width;
@@ -1045,15 +1043,25 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
         h = Math.max(1, Math.round(state.height * w / state.width));
         var canvas = document.createElement("canvas");
         canvas.width = w; canvas.height = h;
-        var ctx = canvas.getContext("2d", { alpha: false });
+        var ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, w, h);
         drawTo(ctx, state.bitmap, w, h);
-        var still = await canvasToBlob(canvas, "image/png");
-        blobs = [still];
-        delays = [100];
+        setProgress(30, "Кодирую GIF…");
+        var img = ctx.getImageData(0, 0, w, h);
+        var rgba = new Uint8Array(img.data.buffer);
+        var palette = quantize(rgba, 256, { format: "rgb565" });
+        var indices = indicesFor(rgba, w, h, palette, opts.dither);
+        var enc = GIFEncoder();
+        enc.writeFrame(indices, w, h, {
+          palette: palette,
+          delay: 100,
+          repeat: opts.loop ? 0 : -1,
+          dispose: 1
+        });
+        enc.finish();
+        blob = new Blob([enc.bytes()], { type: "image/gif" });
         frameCount = 1;
-        setProgress(10, "Кодирую GIF…");
       } else {
         var video = state.video;
         if (!video) throw new Error("Видео не открыто. Выберите файл заново.");
@@ -1072,17 +1080,11 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
           throw new Error("Слишком много кадров (" + frameCount + "). Уменьшите длительность или FPS — максимум " + MAX_FRAMES + ".");
         }
 
-        setProgress(1, "Записываю кадры… 0%");
-        blobs = await captureFrames(video, start, dur, opts.fps, w, h, function (p) {
-          setProgress(Math.round(p * 0.45), "Записываю кадры… " + Math.round(p) + "%");
+        setProgress(2, "Подбираю палитру…");
+        blob = await encodeVideoGif(video, start, dur, opts.fps, w, h, opts.dither, opts.loop, function (p) {
+          setProgress(Math.round(p * 100), "Кодирую GIF… " + Math.round(p) + "%");
         }, function () { return state.cancelled; });
-        delays = frameDelays(frameCount, opts.fps);
-        setProgress(46, "Кодирую GIF…");
       }
-
-      var blob = await encodeGif(blobs, w, h, delays, opts.dither, opts.loop, function (p) {
-        setProgress(46 + Math.round(p * 0.54), "Кодирую GIF… " + Math.round(p) + "%");
-      }, function () { return state.cancelled; });
 
       state.resultBlob = blob;
       state.resultUrl = URL.createObjectURL(blob);
@@ -1221,10 +1223,9 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
 <script>
 (function () {
   var input = document.getElementById("mediaUrl");
-  var tiktokBtn = document.getElementById("tiktokBtn");
-  var directBtn = document.getElementById("directBtn");
+  var downloadBtn = document.getElementById("downloadLinkBtn");
   var statusEl = document.getElementById("downloadStatus");
-  if (!input || !tiktokBtn || !directBtn || !statusEl) return;
+  if (!input || !downloadBtn || !statusEl) return;
 
   function setStatus(text, kind, link) {
     statusEl.textContent = text;
@@ -1238,11 +1239,23 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
       statusEl.appendChild(a);
     }
   }
-  function makeName(text) {
-    var name = String(text || "video").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
-    name = name.replace(/\.(mp4|mov|webm|m4v|mkv)$/i, "");
+  function makeName(text, fallbackExt) {
+    var name = String(text || "file").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
     if (name.length > 60) name = name.slice(0, 60);
-    return (name || "video") + ".mp4";
+    if (/\.(mp4|m4v|mov|webm|gif|png|jpe?g|webp)$/i.test(name)) return name;
+    return (name || "file") + (fallbackExt || ".mp4");
+  }
+  function withExt(name, mime) {
+    if (/\.(mp4|m4v|mov|webm|gif|png|jpe?g|webp)$/i.test(name)) return name;
+    var type = String(mime || "").toLowerCase();
+    if (type.indexOf("image/gif") === 0) return name + ".gif";
+    if (type.indexOf("image/png") === 0) return name + ".png";
+    if (type.indexOf("image/jpeg") === 0) return name + ".jpg";
+    if (type.indexOf("image/jpg") === 0) return name + ".jpg";
+    if (type.indexOf("image/webp") === 0) return name + ".webp";
+    if (type.indexOf("video/webm") === 0) return name + ".webm";
+    if (type.indexOf("video/quicktime") === 0) return name + ".mov";
+    return name + ".mp4";
   }
   function saveBlob(blob, name) {
     var a = document.createElement("a");
@@ -1451,48 +1464,27 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
       var r = await request(url, { mode: "cors", cache: "no-store" }, 30000);
       if (!r.ok) throw new Error("HTTP " + r.status);
       var type = (r.headers.get("content-type") || "").toLowerCase();
-      if (type && type.indexOf("video/") < 0 && type.indexOf("application/octet-stream") < 0) {
-        throw new Error("это не прямая ссылка на видео");
+      if (type && type.indexOf("video/") < 0 && type.indexOf("image/") < 0 &&
+          type.indexOf("application/octet-stream") < 0) {
+        throw new Error("это не прямая ссылка на файл");
       }
       var blob = await r.blob();
       if (blob.size < 1000) throw new Error("пустой файл");
-      saveBlob(blob, name);
-      setStatus("Готово: " + name + " — сохраните из загрузок браузера.", "ok");
+      var fileName = withExt(name, blob.type || type);
+      saveBlob(blob, fileName);
+      setStatus("Готово: " + fileName, "ok");
     } catch (e) {
       openLink(url, name);
-      setStatus("Браузер не дал сохранить файл — откройте видео и удерживайте его:", "", url);
+      setStatus("Не удалось сохранить автоматически — откройте файл и удерживайте его:", "", url);
     }
   }
-  async function downloadTikTok() {
-    var url = input.value.trim();
-    if (!/(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/i.test(url)) {
-      setStatus("Вставьте ссылку TikTok.", "err");
-      return;
-    }
-    tiktokBtn.disabled = true;
-    setStatus("Получаем ссылку TikTok… Это может занять до минуты.", "");
-    try {
-      var resolved = await resolveTikTok(url);
-      if (!resolved) {
-        openLink(url, "tiktok");
-        setStatus("Сервис TikTok не ответил — откройте видео и сохраните через меню браузера:", "", url);
-        return;
-      }
-      await saveUrl(resolved.video, makeName(resolved.title || "tiktok"));
-    } catch (e) {
-      setStatus("TikTok: " + (e && e.message ? e.message : "ошибка") + ". Попробуйте ещё раз или другую ссылку.", "err");
-    } finally {
-      tiktokBtn.disabled = false;
-    }
+  function isTikTok(url) {
+    return /(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/i.test(url);
   }
-  async function downloadDirect() {
+  async function downloadLink() {
     var url = input.value.trim();
     if (!/^https?:\/\//i.test(url)) {
-      setStatus("Вставьте ссылку на видео.", "err");
-      return;
-    }
-    if (/(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/i.test(url)) {
-      await downloadTikTok();
+      setStatus("Вставьте ссылку TikTok, видео или картинки.", "err");
       return;
     }
     if (/(youtube\.com|youtu\.be)/i.test(url)) {
@@ -1503,23 +1495,34 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
       setStatus("Spotify — только в Windows-версии.", "err");
       return;
     }
-    directBtn.disabled = true;
-    setStatus("Скачиваем видео…", "");
-    var clean = url.split("?")[0];
-    var base = clean.split("/").pop() || "video";
+    downloadBtn.disabled = true;
     try {
+      if (isTikTok(url)) {
+        setStatus("Получаем ссылку TikTok… Это может занять до минуты.", "");
+        var resolved = await resolveTikTok(url);
+        if (!resolved) {
+          openLink(url, "tiktok");
+          setStatus("Сервис TikTok не ответил — откройте видео и сохраните через меню браузера:", "", url);
+          return;
+        }
+        await saveUrl(resolved.video, makeName(resolved.title || "tiktok"));
+        return;
+      }
+      setStatus("Скачиваем файл…", "");
+      var clean = url.split("?")[0];
+      var base = clean.split("/").pop() || "file";
       await saveUrl(url, makeName(base));
+    } catch (e) {
+      setStatus("Не удалось скачать: " + (e && e.message ? e.message : "ошибка"), "err");
     } finally {
-      directBtn.disabled = false;
+      downloadBtn.disabled = false;
     }
   }
-  tiktokBtn.addEventListener("click", downloadTikTok);
-  directBtn.addEventListener("click", downloadDirect);
+  downloadBtn.addEventListener("click", downloadLink);
   input.addEventListener("keydown", function (e) {
     if (e.key !== "Enter") return;
     e.preventDefault();
-    if (/(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/i.test(input.value.trim())) downloadTikTok();
-    else downloadDirect();
+    downloadLink();
   });
 })();
 </script>
