@@ -4,7 +4,7 @@
 
 **by DeepSeek v4.1 flash & arsikfox14 & dismasdismavich**
 
-Версия **3.9**: одна сборка **Video2Gif.exe** — с TikTok, YouTube,
+Версия **4.0**: одна сборка **Video2Gif.exe** — с TikTok, YouTube,
 Spotify и другими сайтами.
 
 Установка не нужна: FFmpeg и yt-dlp находятся внутри exe.
@@ -28,6 +28,14 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 <img width="990" height="620" alt="Video2Gif" src="https://github.com/user-attachments/assets/1fefafc7-0939-407d-8c49-283a4217252b" />
 
 <img width="950" height="602" alt="Video2Gif" src="https://github.com/user-attachments/assets/7c5fe19e-5b17-486f-802b-321d1ab136b1" />
+
+## Что нового в 4.0
+
+- Сердечко **Donate** стало заметно крупнее и по-прежнему стоит точно
+  по центру кнопки.
+- Логотип **Discord** выровнен ровно по центру своего квадратика.
+- Тема **GTA 6** продолжает включаться сама с 18 ноября 22:00
+  по 20 ноября 00:00 (2026).
 
 ## Что нового в 3.9
 
@@ -242,7 +250,7 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 Для работы автообновления релиз на GitHub должен содержать файл
 `Video2Gif.exe` (подойдёт и `Video2Gif-3.x.zip` — программа достанет exe
 из архива), а тег релиза должен быть новее установленной версии,
-например `v3.9`.
+например `v4.0`.
 
 ## Сборка из исходников
 
@@ -292,6 +300,8 @@ Video2Gif.exe --selftest
 
 ## История версий
 
+- **4.0** — сердечко Donate крупнее, логотип Discord ровно по центру
+  кнопки; автоокно GTA 6 осталось прежним.
 - **3.9** — логотип Discord чуть левее, сердечко точно по центру;
   тема GTA 6 включается сама с 18 ноября 22:00 по 20 ноября 00:00.
 - **3.8** — ровное симметричное сердечко; в кнопку Discord вставлен
