@@ -906,37 +906,86 @@ namespace Video2Gif
                 g.DrawPath(pen, path);
             }
 
-            if (Ui.Holiday && !Selected)
+            if (Ui.Holiday)
             {
                 if (Ui.NewYear)
                 {
-                    int x = Width - Ui.P(18);
-                    Ui.DrawSnowflake(g, x - Ui.P(34), Height / 2f, Ui.P(22),
-                        Color.FromArgb(100, Ui.Accent), Math.Max(1.2f, Ui.P(1.6)));
-                    Ui.DrawSnowflake(g, x - Ui.P(128), Height * 0.30f, Ui.P(12),
-                        Color.FromArgb(85, Ui.Accent), Math.Max(1.1f, Ui.P(1.4)));
-                    Ui.DrawSnowflake(g, x - Ui.P(196), Height * 0.74f, Ui.P(9),
-                        Color.FromArgb(75, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
-                    Ui.DrawSnowflake(g, x - Ui.P(74), Ui.P(15), Ui.P(7),
-                        Color.FromArgb(70, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                    // Крупные полупрозрачные снежинки по всей карточке.
+                    Ui.DrawSnowflake(g, Width * 0.40f, Height * 0.30f, Ui.P(24),
+                        Color.FromArgb(54, Ui.Accent), Math.Max(1.4f, Ui.P(1.7)));
+                    Ui.DrawSnowflake(g, Width * 0.54f, Height * 0.74f, Ui.P(18),
+                        Color.FromArgb(46, Ui.Accent), Math.Max(1.3f, Ui.P(1.5)));
+                    Ui.DrawSnowflake(g, Width * 0.31f, Height * 0.80f, Ui.P(12),
+                        Color.FromArgb(40, Ui.Accent), Math.Max(1.1f, Ui.P(1.3)));
+
+                    if (!Selected)
+                    {
+                        int x = Width - Ui.P(18);
+                        Ui.DrawSnowflake(g, x - Ui.P(34), Height / 2f, Ui.P(22),
+                            Color.FromArgb(100, Ui.Accent), Math.Max(1.2f, Ui.P(1.6)));
+                        Ui.DrawSnowflake(g, x - Ui.P(128), Height * 0.30f, Ui.P(12),
+                            Color.FromArgb(85, Ui.Accent), Math.Max(1.1f, Ui.P(1.4)));
+                        Ui.DrawSnowflake(g, x - Ui.P(196), Height * 0.74f, Ui.P(9),
+                            Color.FromArgb(75, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
+                        Ui.DrawSnowflake(g, x - Ui.P(74), Ui.P(15), Ui.P(7),
+                            Color.FromArgb(70, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                    }
+                    else
+                    {
+                        Ui.DrawSnowflake(g, Width * 0.36f, Ui.P(10), Ui.P(9),
+                            Color.FromArgb(120, Ui.Accent), Math.Max(1.1f, Ui.P(1.2)));
+                        Ui.DrawSnowflake(g, Width * 0.44f, Ui.P(12), Ui.P(7),
+                            Color.FromArgb(110, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                        Ui.DrawSnowflake(g, Width * 0.50f, Ui.P(9), Ui.P(8),
+                            Color.FromArgb(115, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
+                        Ui.DrawSnowflake(g, Width * 0.33f, Height - Ui.P(10), Ui.P(8),
+                            Color.FromArgb(110, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
+                        Ui.DrawSnowflake(g, Width * 0.42f, Height - Ui.P(12), Ui.P(6),
+                            Color.FromArgb(100, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                        Ui.DrawSnowflake(g, Width * 0.49f, Height - Ui.P(9), Ui.P(7),
+                            Color.FromArgb(105, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+                    }
                 }
                 else
                 {
-                    Rectangle pumpkin = new Rectangle(
-                        Width - Ui.P(84), (Height - Ui.P(46)) / 2, Ui.P(46), Ui.P(40));
-                    Ui.DrawPumpkin(g, pumpkin, Color.FromArgb(110, Ui.Accent), Ui.Card);
-                    Ui.DrawLeaf(g, Width - Ui.P(122), Height * 0.28f, Ui.P(24),
-                        Color.FromArgb(125, Ui.Accent), 28f);
-                    Ui.DrawLeaf(g, Width - Ui.P(152), Height * 0.72f, Ui.P(18),
-                        Color.FromArgb(110, Ui.Accent), -34f);
-                    Ui.DrawLeaf(g, Width - Ui.P(204), Ui.P(17), Ui.P(15),
-                        Color.FromArgb(95, Ui.Accent), 52f);
-                    Ui.DrawLeaf(g, Width - Ui.P(56), Ui.P(22), Ui.P(12),
-                        Color.FromArgb(90, Ui.Accent), -18f);
-                    Ui.DrawLeaf(g, Width - Ui.P(100), Height * 0.88f, Ui.P(14),
-                        Color.FromArgb(95, Ui.Accent), -108f);
-                    Ui.DrawLeaf(g, Width - Ui.P(254), Height * 0.20f, Ui.P(11),
-                        Color.FromArgb(85, Ui.Accent), 68f);
+                    if (!Selected)
+                    {
+                        Rectangle pumpkin = new Rectangle(
+                            Width - Ui.P(84), (Height - Ui.P(46)) / 2, Ui.P(46), Ui.P(40));
+                        Ui.DrawPumpkin(g, pumpkin, Color.FromArgb(110, Ui.Accent), Ui.Card);
+                        Ui.DrawLeaf(g, Width - Ui.P(122), Height * 0.28f, Ui.P(24),
+                            Color.FromArgb(125, Ui.Accent), 28f);
+                        Ui.DrawLeaf(g, Width - Ui.P(152), Height * 0.72f, Ui.P(18),
+                            Color.FromArgb(110, Ui.Accent), -34f);
+                        Ui.DrawLeaf(g, Width - Ui.P(204), Ui.P(17), Ui.P(15),
+                            Color.FromArgb(95, Ui.Accent), 52f);
+                        Ui.DrawLeaf(g, Width - Ui.P(56), Ui.P(22), Ui.P(12),
+                            Color.FromArgb(90, Ui.Accent), -18f);
+                        Ui.DrawLeaf(g, Width - Ui.P(100), Height * 0.88f, Ui.P(14),
+                            Color.FromArgb(95, Ui.Accent), -108f);
+                        Ui.DrawLeaf(g, Width - Ui.P(254), Height * 0.20f, Ui.P(11),
+                            Color.FromArgb(85, Ui.Accent), 68f);
+                    }
+                    else
+                    {
+                        // Лёгкая листва по краям и в глубине карточки.
+                        Ui.DrawLeaf(g, Width * 0.40f, Height * 0.26f, Ui.P(22),
+                            Color.FromArgb(40, Ui.Accent), 24f);
+                        Ui.DrawLeaf(g, Width * 0.53f, Height * 0.76f, Ui.P(17),
+                            Color.FromArgb(34, Ui.Accent), -40f);
+                        Ui.DrawLeaf(g, Width * 0.36f, Ui.P(11), Ui.P(11),
+                            Color.FromArgb(120, Ui.Accent), 30f);
+                        Ui.DrawLeaf(g, Width * 0.45f, Ui.P(9), Ui.P(9),
+                            Color.FromArgb(110, Ui.Accent), -50f);
+                        Ui.DrawLeaf(g, Width * 0.52f, Ui.P(12), Ui.P(10),
+                            Color.FromArgb(115, Ui.Accent), 60f);
+                        Ui.DrawLeaf(g, Width * 0.34f, Height - Ui.P(11), Ui.P(9),
+                            Color.FromArgb(110, Ui.Accent), -20f);
+                        Ui.DrawLeaf(g, Width * 0.43f, Height - Ui.P(9), Ui.P(8),
+                            Color.FromArgb(100, Ui.Accent), 40f);
+                        Ui.DrawLeaf(g, Width * 0.51f, Height - Ui.P(12), Ui.P(10),
+                            Color.FromArgb(105, Ui.Accent), -60f);
+                    }
                 }
             }
 
