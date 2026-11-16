@@ -95,7 +95,7 @@ namespace Video2Gif
             Controls.Add(Lbl("видео и картинки → GIF",
                 Ui.Small, Ui.Muted, 71, 36, 300, 18));
             Controls.Add(Lbl("v" + Program.Version + " · локально", Ui.Tiny, Ui.Faint,
-                480, 24, 240, 18, ContentAlignment.MiddleRight));
+                536, 24, 204, 18, ContentAlignment.MiddleRight));
 
             gameButton = new IconButton(IconKind.Mouse);
             gameButton.SetBounds(Ui.P(744), Ui.P(16), Ui.P(32), Ui.P(32));
