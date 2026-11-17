@@ -169,6 +169,8 @@ namespace Video2Gif
         private readonly ThemeTile gamesenseTile;
         private PillButton updateButton;
         private Label updateStatus;
+        private PillButton customButton;
+        private PillButton customDeleteButton;
         private bool checking;
 
         public SettingsForm(Action<string> pickTheme)
@@ -178,7 +180,7 @@ namespace Video2Gif
             Text = "Настройки — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(428), Ui.P(540));
+            ClientSize = new Size(Ui.P(428), Ui.P(610));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -279,29 +281,56 @@ namespace Video2Gif
             ruButton.Accent = !Loc.IsEnglish;
             enButton.Accent = Loc.IsEnglish;
 
-            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 414, 300, 24));
+            Controls.Add(Lbl("Свои темы", Ui.Small, Ui.Muted, 24, 414, 220, 18));
+
+            customButton = new PillButton();
+            customButton.Ghost = true;
+            customButton.Font = Ui.Small;
+            customButton.Text = "— свои темы —";
+            customButton.SetBounds(Ui.P(24), Ui.P(435), Ui.P(218), Ui.P(30));
+            customButton.Click += delegate { ShowCustomMenu(); };
+            Controls.Add(customButton);
+
+            PillButton addCustom = new PillButton();
+            addCustom.Ghost = true;
+            addCustom.Text = "Создать…";
+            addCustom.Font = Ui.Small;
+            addCustom.SetBounds(Ui.P(252), Ui.P(435), Ui.P(84), Ui.P(30));
+            addCustom.Click += delegate { CreateCustom(); };
+            Controls.Add(addCustom);
+
+            customDeleteButton = new PillButton();
+            customDeleteButton.Ghost = true;
+            customDeleteButton.Text = "Удалить";
+            customDeleteButton.Font = Ui.Small;
+            customDeleteButton.SetBounds(Ui.P(344), Ui.P(435), Ui.P(84), Ui.P(30));
+            customDeleteButton.Click += delegate { DeleteCustom(); };
+            Controls.Add(customDeleteButton);
+
+            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 484, 300, 24));
             Controls.Add(Lbl("Версия " + Program.Version + " · GitHub: " + Updater.Repo,
-                Ui.Tiny, Ui.Faint, 24, 440, 380, 18));
+                Ui.Tiny, Ui.Faint, 24, 510, 380, 18));
 
             updateButton = new PillButton();
             updateButton.Ghost = true;
             updateButton.Text = "Проверить обновления";
             updateButton.Font = Ui.Small;
-            updateButton.SetBounds(Ui.P(24), Ui.P(480), Ui.P(208), Ui.P(36));
+            updateButton.SetBounds(Ui.P(24), Ui.P(550), Ui.P(208), Ui.P(36));
             updateButton.Click += delegate { CheckUpdates(); };
             Controls.Add(updateButton);
 
-            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 458, 380, 18);
+            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 528, 380, 18);
             Controls.Add(updateStatus);
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(300), Ui.P(480), Ui.P(104), Ui.P(36));
+            done.SetBounds(Ui.P(300), Ui.P(550), Ui.P(104), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 
+            RefreshCustomThemes();
             RefreshActive();
         }
 
@@ -333,6 +362,72 @@ namespace Video2Gif
             }
         }
 
+        private void RefreshCustomThemes()
+        {
+            if (customButton == null) return;
+            customButton.Text = string.IsNullOrEmpty(Ui.CustomName)
+                ? "— свои темы —"
+                : Ui.CustomName;
+            if (customDeleteButton != null)
+            {
+                customDeleteButton.Enabled = CustomThemes.All.Count > 0;
+            }
+        }
+
+        private void ShowCustomMenu()
+        {
+            ContextMenuStrip menu = new ContextMenuStrip();
+            menu.BackColor = Ui.Card;
+            menu.ForeColor = Ui.Text;
+            menu.Font = Ui.Small;
+            menu.Closed += delegate { menu.Dispose(); };
+
+            bool any = false;
+            foreach (CustomTheme theme in CustomThemes.All)
+            {
+                string name = theme.Name;
+                ToolStripMenuItem item = new ToolStripMenuItem(name);
+                item.Click += delegate { Choose("custom:" + name); };
+                menu.Items.Add(item);
+                any = true;
+            }
+            if (!any)
+            {
+                ToolStripMenuItem empty = new ToolStripMenuItem("— нет своих тем —");
+                empty.Enabled = false;
+                menu.Items.Add(empty);
+            }
+            menu.Show(customButton, new Point(0, customButton.Height));
+        }
+
+        private void CreateCustom()
+        {
+            using (CustomThemeForm dialog = new CustomThemeForm("", true,
+                Color.FromArgb(122, 167, 255)))
+            {
+                if (dialog.ShowDialog(this) != DialogResult.OK) return;
+                CustomThemes.Save(new CustomTheme
+                {
+                    Name = dialog.ThemeName,
+                    Dark = dialog.DarkBase,
+                    Accent = dialog.AccentColor
+                });
+                RefreshCustomThemes();
+                Choose("custom:" + dialog.ThemeName);
+            }
+        }
+
+        private void DeleteCustom()
+        {
+            string name = Ui.CustomName;
+            if (string.IsNullOrEmpty(name)) return;
+            if (MessageBox.Show(this, "Удалить тему «" + name + "»?", Program.AppName,
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+            CustomThemes.Remove(name);
+            RefreshCustomThemes();
+            Choose("dark");
+        }
+
         private void RefreshActive()
         {
             string current = Ui.ThemeName;
@@ -343,6 +438,13 @@ namespace Video2Gif
             halloweenTile.Active = !Ui.AutoTheme && current == "halloween";
             gtaTile.Active = !Ui.AutoTheme && current == "gta6";
             gamesenseTile.Active = !Ui.AutoTheme && current == "gamesense";
+
+            if (customButton != null)
+            {
+                customButton.Text = string.IsNullOrEmpty(Ui.CustomName)
+                    ? "— свои темы —"
+                    : Ui.CustomName;
+            }
         }
 
         /* ---------------------------------------------------------- Обновления */

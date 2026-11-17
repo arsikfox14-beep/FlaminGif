@@ -211,7 +211,16 @@ namespace Video2Gif
                 { "Готово.", "Done." },
                 { "Ошибка", "Error" },
                 { "Проверьте ссылку.", "Check the link." },
-                { "Вставьте ссылку.", "Paste a link." }
+                { "Вставьте ссылку.", "Paste a link." },
+                { "Свои темы", "Custom themes" },
+                { "— свои темы —", "— custom themes —" },
+                { "— нет своих тем —", "— no custom themes —" },
+                { "Создать…", "Create…" },
+                { "Удалить", "Delete" },
+                { "Название", "Name" },
+                { "Основа", "Base" },
+                { "Цвет акцента", "Accent color" },
+                { "Введите название темы.", "Enter a theme name." }
             };
 
         private static readonly KeyValuePair<string, string>[] Prefixes =
@@ -235,6 +244,8 @@ namespace Video2Gif
             new KeyValuePair<string, string>("Готово: ", "Done: "),
             new KeyValuePair<string, string>("Ошибка: ", "Error: "),
             new KeyValuePair<string, string>("Скачано файлов: ", "Files downloaded: "),
+            new KeyValuePair<string, string>("Своя тема — ", "Custom theme — "),
+            new KeyValuePair<string, string>("Удалить тему «", "Delete theme “"),
             new KeyValuePair<string, string>("Видеоредактор — ", "Video editor — "),
             new KeyValuePair<string, string>("GIF-инструменты — ", "GIF tools — "),
             new KeyValuePair<string, string>("Текст и поверх — ", "Text and overlay — "),
@@ -247,7 +258,8 @@ namespace Video2Gif
             new KeyValuePair<string, string>(" — видео и картинки в GIF", " — video and images to GIF"),
             new KeyValuePair<string, string>(" · локально", " · local"),
             new KeyValuePair<string, string>("   ·   доступно: ", "   ·   available: "),
-            new KeyValuePair<string, string>(" файл(ов).", " file(s).")
+            new KeyValuePair<string, string>(" файл(ов).", " file(s)."),
+            new KeyValuePair<string, string>("»?", "”?")
         };
         public static string Language { get; private set; }
 

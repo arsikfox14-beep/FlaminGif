@@ -22,6 +22,7 @@ namespace Video2Gif
 
         public static bool Dark;
         public static ThemeKind Theme = ThemeKind.Dark;
+        public static string CustomName = "";
 
         /// <summary>Тема выбирается автоматически по дате Windows.</summary>
         public static bool AutoTheme;
@@ -55,6 +56,7 @@ namespace Video2Gif
         {
             get
             {
+                if (!string.IsNullOrEmpty(CustomName)) return "custom:" + CustomName;
                 if (Theme == ThemeKind.Light) return "light";
                 if (Theme == ThemeKind.NewYear) return "newyear";
                 if (Theme == ThemeKind.Halloween) return "halloween";
@@ -189,6 +191,11 @@ namespace Video2Gif
             ThemeKind kind = ThemeKind.Dark;
             string value = (name ?? "").Trim().ToLowerInvariant();
             if (value == "auto") { SetThemeAuto(DateTime.Now); return; }
+            if (value.StartsWith("custom:", StringComparison.Ordinal))
+            {
+                CustomTheme custom = CustomThemes.Find(value.Substring(7));
+                if (custom != null) { ApplyCustomTheme(custom); return; }
+            }
             if (value == "light") kind = ThemeKind.Light;
             else if (value == "newyear" || value == "new-year" || value == "ny") kind = ThemeKind.NewYear;
             else if (value == "halloween" || value == "spooky") kind = ThemeKind.Halloween;
@@ -201,11 +208,13 @@ namespace Video2Gif
         public static void SetTheme(ThemeKind kind)
         {
             AutoTheme = false;
+            CustomName = "";
             ApplyTheme(kind);
         }
 
         public static void SetThemeAuto(DateTime now)
         {
+            CustomName = "";
             ApplyTheme(SeasonalTheme(now));
             AutoTheme = true;
         }
@@ -249,9 +258,53 @@ namespace Video2Gif
 
         private static void ApplyTheme(ThemeKind kind)
         {
+            CustomName = "";
             Theme = kind;
             Dark = kind != ThemeKind.Light;
             ApplyColors(kind);
+        }
+
+        /// <summary>Своя тема: база (тёмная/светлая) + цвет акцента.</summary>
+        public static void ApplyCustomTheme(CustomTheme theme)
+        {
+            if (theme == null) return;
+            AutoTheme = false;
+            Theme = theme.Dark ? ThemeKind.Dark : ThemeKind.Light;
+            Dark = theme.Dark;
+            ApplyColors(Theme);
+
+            Color accent = theme.Accent;
+            Accent = accent;
+            AccentInk = accent;
+            AccentDark = Shade(accent, 0.78);
+            AccentSoft = Mix(accent, Bg, theme.Dark ? 0.84 : 0.9);
+            AccentLine = Mix(accent, Bg, theme.Dark ? 0.6 : 0.52);
+            AccentWash = Mix(accent, Bg, 0.92);
+            OnAccent = Luminance(accent) > 0.62 ? Color.Black : Color.White;
+            CustomName = theme.Name;
+        }
+
+        private static Color Mix(Color first, Color second, double secondAmount)
+        {
+            double a = Math.Max(0, Math.Min(1, secondAmount));
+            return Color.FromArgb(
+                (int)Math.Round(first.R * (1 - a) + second.R * a),
+                (int)Math.Round(first.G * (1 - a) + second.G * a),
+                (int)Math.Round(first.B * (1 - a) + second.B * a));
+        }
+
+        private static Color Shade(Color color, double factor)
+        {
+            factor = Math.Max(0, Math.Min(1, factor));
+            return Color.FromArgb(
+                (int)Math.Round(color.R * factor),
+                (int)Math.Round(color.G * factor),
+                (int)Math.Round(color.B * factor));
+        }
+
+        private static double Luminance(Color color)
+        {
+            return (0.2126 * color.R + 0.7152 * color.G + 0.0722 * color.B) / 255.0;
         }
 
         public static void SetDark(bool dark)
