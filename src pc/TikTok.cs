@@ -546,7 +546,7 @@ namespace Video2Gif
         {
             string message;
             if (ex.Status == WebExceptionStatus.TrustFailure)
-                message = "Не удалось проверить сертификат TikTok.";
+                message = "Не удалось проверить защищённое соединение TikTok.";
             else if (ex.Status == WebExceptionStatus.Timeout)
                 message = "TikTok не ответил вовремя. Попробуйте ещё раз.";
             else if (ex.Status == WebExceptionStatus.NameResolutionFailure ||

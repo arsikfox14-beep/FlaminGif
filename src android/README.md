@@ -62,7 +62,7 @@ FFmpeg, только WebView-страница и небольшой Java-сло�
 ```
 AndroidManifest.xml        манифест, разрешения, версия
 src/…/MainActivity.java    WebView, выбор файлов, сеть, сохранение
-assets/index.html          интерфейс (копия src/web/index.html)
+assets/index.html          интерфейс (копия src web/index.html)
 assets/android-bridge.js   мост JS ↔ Java
 res/                       строки, цвета, тема, иконки
 tools/make-icons.ps1       перегенерация иконок
