@@ -392,7 +392,7 @@
     <input id="fileInput" type="file" accept="video/*,image/*,.mp4,.mov,.m4v,.webm,.mkv,.avi,.png,.jpg,.jpeg,.webp,.bmp,.gif,.avif" hidden>
   </section>
 
-  <section class="card" aria-labelledby="downloadTitle">
+  <section class="card" id="downloadCard" hidden aria-labelledby="downloadTitle">
     <h2 id="downloadTitle">Скачать видео или фото</h2>
     <div class="field wide">
       <label for="mediaUrl">Прямая ссылка на видео или картинку</label>
@@ -1421,19 +1421,29 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
 </script>
 <script>
 (function () {
+  var card = document.getElementById("downloadCard");
+  var androidApp = !!window.AndroidBridge;
+  var note = document.getElementById("webNote");
+  if (!androidApp) {
+    if (card && card.parentNode) card.parentNode.removeChild(card);
+    if (note) {
+      note.innerHTML = "<b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются. Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM. Скачивание видео и картинок — в Android‑приложении и Windows‑версии <b>Video2Gif.exe</b>. YouTube и Spotify — только в Windows.";
+    }
+    return;
+  }
+
   var input = document.getElementById("mediaUrl");
   var downloadBtn = document.getElementById("downloadLinkBtn");
   var statusEl = document.getElementById("downloadStatus");
   if (!input || !downloadBtn || !statusEl) return;
+  if (card) card.hidden = false;
 
-  var androidApp = !!window.AndroidBridge;
-  if (androidApp) {
-    var linkLabel = document.querySelector('label[for="mediaUrl"]');
-    if (linkLabel) linkLabel.textContent = "Ссылка на TikTok или прямая ссылка";
-    input.placeholder = "https://www.tiktok.com/@…/video/…";
-    statusEl.textContent = "Вставьте ссылку TikTok, видео или картинки. YouTube и Spotify — в Windows-версии.";
-  } else {
-    input.placeholder = "https://…/video.mp4";
+  var linkLabel = document.querySelector('label[for="mediaUrl"]');
+  if (linkLabel) linkLabel.textContent = "Ссылка на TikTok или прямая ссылка";
+  input.placeholder = "https://www.tiktok.com/@…/video/…";
+  statusEl.textContent = "Вставьте ссылку TikTok, видео или картинки. YouTube и Spotify — в Windows-версии.";
+  if (note) {
+    note.innerHTML = "<b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются. Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM. Прямые ссылки и TikTok можно скачать здесь; YouTube и Spotify — в Windows‑версии <b>Video2Gif.exe</b>.";
   }
 
   function setStatus(text, kind, link) {
