@@ -181,6 +181,18 @@ namespace Video2Gif
         public static Color Bad;
         public static Color OnAccent;
 
+        /// <summary>Прозрачность серых карточек и плиток (0.3–1.0).</summary>
+        public static double SurfaceAlpha = 1.0;
+
+        public static Color SurfaceColor(Color color)
+        {
+            double value = SurfaceAlpha;
+            if (value >= 0.999) return color;
+            if (value < 0.3) value = 0.3;
+            int alpha = (int)Math.Round(255 * value);
+            return Color.FromArgb(alpha, color);
+        }
+
         static Ui()
         {
             ApplyColors(ThemeKind.Dark);
@@ -895,9 +907,10 @@ namespace Video2Gif
     {
         public Card()
         {
-            BackColor = Ui.Card;
+            BackColor = Color.Transparent;
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint |
-                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw, true);
+                     ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw |
+                     ControlStyles.SupportsTransparentBackColor, true);
             Font = Ui.Base;
         }
 
@@ -915,7 +928,11 @@ namespace Video2Gif
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-            e.Graphics.Clear(Ui.Card);
+            base.OnPaintBackground(e);
+            using (SolidBrush brush = new SolidBrush(Ui.SurfaceColor(Ui.Card)))
+            {
+                e.Graphics.FillRectangle(brush, ClientRectangle);
+            }
             if (Ui.Gamesense) Ui.DrawCarbon(e.Graphics, ClientRectangle);
         }
 
@@ -1173,7 +1190,7 @@ namespace Video2Gif
             }
             else
             {
-                Ui.FillRound(g, r, radius, Ui.Card);
+                Ui.FillRound(g, r, radius, Ui.SurfaceColor(Ui.Card));
             }
 
             if (Ui.Gamesense)

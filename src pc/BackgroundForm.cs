@@ -16,7 +16,7 @@ namespace Video2Gif
             BackColor = Ui.Bg;
             ForeColor = Ui.Text;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(400), Ui.P(220));
+            ClientSize = new Size(Ui.P(400), Ui.P(290));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -63,19 +63,47 @@ namespace Video2Gif
             reset.Click += delegate { BackgroundSettings.Clear(); UpdateStatus(); };
             Controls.Add(reset);
 
+            Label opacityLabel = new Label();
+            opacityLabel.Font = Ui.Small;
+            opacityLabel.ForeColor = Ui.Muted;
+            opacityLabel.BackColor = Color.Transparent;
+            opacityLabel.SetBounds(Ui.P(24), Ui.P(132), Ui.P(352), Ui.P(18));
+            Controls.Add(opacityLabel);
+
+            TrackBar opacityBar = new TrackBar();
+            opacityBar.Minimum = 30;
+            opacityBar.Maximum = 100;
+            opacityBar.TickStyle = TickStyle.None;
+            opacityBar.BackColor = Ui.Bg;
+            opacityBar.ForeColor = Ui.Text;
+            opacityBar.Value = (int)Math.Round(BackgroundSettings.SurfaceOpacity * 100.0);
+            opacityBar.SetBounds(Ui.P(20), Ui.P(150), Ui.P(360), Ui.P(40));
+            Controls.Add(opacityBar);
+
+            Action refreshOpacity = delegate
+            {
+                opacityLabel.Text = "Прозрачность карточек: " + opacityBar.Value + "%";
+            };
+            opacityBar.ValueChanged += delegate
+            {
+                BackgroundSettings.SetSurfaceOpacity(opacityBar.Value / 100.0);
+                refreshOpacity();
+            };
+            refreshOpacity();
+
             Label hint = new Label();
             hint.Text = "Фон виден за карточками. GIF анимируется.";
             hint.Font = Ui.Tiny;
             hint.ForeColor = Ui.Faint;
             hint.BackColor = Color.Transparent;
-            hint.SetBounds(Ui.P(24), Ui.P(132), Ui.P(352), Ui.P(18));
+            hint.SetBounds(Ui.P(24), Ui.P(196), Ui.P(352), Ui.P(18));
             Controls.Add(hint);
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(24), Ui.P(166), Ui.P(352), Ui.P(36));
+            done.SetBounds(Ui.P(24), Ui.P(236), Ui.P(352), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 
