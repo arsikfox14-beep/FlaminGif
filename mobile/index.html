@@ -1593,7 +1593,9 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     var enc = encodeURIComponent(url);
     var raw = [
       "https://tikwm.com/api/?url=" + enc + "&hd=1",
-      "https://api.tiklydown.eu.org/api/download?url=" + enc
+      "https://www.tikwm.com/api/?url=" + enc + "&hd=1",
+      "https://api.tiklydown.eu.org/api/download?url=" + enc,
+      "https://api.douyin.wtf/api?url=" + enc
     ];
     var list = [];
     for (var i = 0; i < raw.length; i++) {
@@ -1676,11 +1678,26 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
       setStatus("Не удалось сохранить автоматически — откройте файл и удерживайте его:", "", url);
     }
   }
+  function normalizeUrl(value) {
+    var url = String(value || "").trim();
+    if (!url) return "";
+    if (/^\/\//.test(url)) url = "https:" + url;
+    else if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(url)) url = "https://" + url.replace(/^\/+/, "");
+    if (/^https?:\/\/tiktok\.com\//i.test(url)) {
+      url = url.replace(/^https?:\/\/tiktok\.com/i, "https://www.tiktok.com");
+    }
+    return url;
+  }
   function isTikTok(url) {
     return /(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/i.test(url);
   }
   async function downloadLink() {
-    var url = input.value.trim();
+    var url = normalizeUrl(input.value);
+    if (!url) {
+      setStatus("Вставьте ссылку TikTok, видео или картинки.", "err");
+      return;
+    }
+    input.value = url;
     if (!/^https?:\/\//i.test(url)) {
       setStatus("Вставьте ссылку TikTok, видео или картинки.", "err");
       return;
@@ -1700,7 +1717,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
         var resolved = await resolveTikTok(url);
         if (!resolved) {
           openLink(url, "tiktok");
-          setStatus("Сервис TikTok не ответил — откройте видео и сохраните через меню браузера:", "", url);
+          setStatus("TikTok не ответил — в браузере это зависит от доступности API. Откройте видео и сохраните вручную:", "", url);
           return;
         }
         await saveUrl(resolved.video, makeName(resolved.title || "tiktok"));
