@@ -69,7 +69,7 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 
 ## Мобильная версия
 
-`mobile/index.html` — отдельная версия для iPhone и Android: видео и картинки
+`src/web/index.html` — отдельная версия для iPhone и Android: видео и картинки
 → GIF прямо в браузере, без установки и без загрузки файлов на сервер.
 Можно открыть локально на Android или разместить на статическом хостинге
 и добавить на экран «Домой» на iPhone.
@@ -77,7 +77,7 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 Темы те же, что в Windows-версии: авто по дате, светлая, тёмная, снежная,
 хэллоуин, GTA 6 и Gamesense. В браузере — только конвертация в GIF;
 скачивание видео и TikTok есть в Android-приложении и Windows-версии,
-YouTube и Spotify — только в Windows. Подробности — в `mobile/README.txt`.
+YouTube и Spotify — только в Windows. Подробности — в `src/web/README.txt`.
 
 ## Возможности
 
@@ -171,7 +171,7 @@ YouTube и Spotify — только в Windows. Подробности — в `m
 2. Запустить:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File src\build.ps1
+powershell -ExecutionPolicy Bypass -File src\pc\build.ps1
 ```
 
 Собирается `Video2Gif.exe` в корне проекта.
@@ -187,25 +187,39 @@ Video2Gif.exe --selftest
 
 Результат пишется в `%TEMP%\video2gif-selftest.log`.
 
+Android-версия собирается отдельно, SDK скачивается один раз:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File src\android\setup-sdk.ps1
+powershell -ExecutionPolicy Bypass -File src\android\build.ps1
+```
+
+Веб-версия — один файл `src/web/index.html`, собирать не нужно.
+
 ## Файлы
 
-- `src/Program.cs` — запуск, версия, имя сборки;
-- `src/MainForm.cs`, `src/MainForm.UI.cs` — главное окно;
-- `src/Theme.cs`, `src/Controls.cs` — темы, значки и элементы интерфейса;
-- `src/Settings.cs` — окно настроек с плитками тем и проверкой обновлений;
-- `src/Updater.cs`, `src/UpdateForm.cs` — автообновление с GitHub и окно обновления;
-- `src/Core.cs` — FFmpeg, yt-dlp, конвертация;
-- `src/MediaDownloader.cs` — загрузчик, Spotify, поиск на YouTube;
-- `src/MediaDownloadForm.cs` — окно скачивания;
-- `src/TikTok.cs`, `src/TikTokForm.cs` — скачивание TikTok;
-- `src/Editor.cs`, `src/OverlayForm.cs` — видеоредактор, текст и картинка поверх;
-- `src/GifTools.cs` — GIF-инструменты: кадры и сборка;
-- `src/SelfTest.cs` — самопроверка;
-- `src/Snake.cs` — мини-игра «Змейка»;
-- `src/build.ps1` — сборка;
-- `src/app.ico`, `src/app.manifest` — иконка и манифест;
-- `src/discord.png` — оригинальный логотип Discord, встроенный в exe;
-- `mobile/index.html` — мобильная веб-версия для iPhone и Android.
+- `src/pc/Program.cs` — запуск, версия, имя сборки;
+- `src/pc/MainForm.cs`, `src/pc/MainForm.UI.cs` — главное окно;
+- `src/pc/Theme.cs`, `src/pc/Controls.cs` — темы, значки и элементы интерфейса;
+- `src/pc/Settings.cs` — окно настроек с плитками тем, языком и обновлениями;
+- `src/pc/Loc.cs` — русский и английский интерфейс;
+- `src/pc/Updater.cs`, `src/pc/UpdateForm.cs` — автообновление с GitHub и окно обновления;
+- `src/pc/Core.cs` — FFmpeg, yt-dlp, конвертация;
+- `src/pc/MediaDownloader.cs` — загрузчик, Spotify, поиск на YouTube;
+- `src/pc/MediaDownloadForm.cs` — окно скачивания;
+- `src/pc/TikTok.cs`, `src/pc/TikTokForm.cs` — скачивание TikTok;
+- `src/pc/Editor.cs`, `src/pc/OverlayForm.cs` — видеоредактор, текст и картинка поверх;
+- `src/pc/GifTools.cs` — GIF-инструменты: кадры и сборка;
+- `src/pc/SelfTest.cs` — самопроверка;
+- `src/pc/Snake.cs` — мини-игра «Змейка»;
+- `src/pc/CertificateTrust.cs` — сертификат подписи внутри exe;
+- `src/pc/build.ps1` — сборка;
+- `src/pc/app.ico`, `src/pc/app.manifest` — иконка и манифест;
+- `src/pc/discord.png` — оригинальный логотип Discord, встроенный в exe;
+- `src/web/index.html` — мобильная веб-версия для iPhone и Android;
+- `src/web/README.txt` — инструкция к веб-версии;
+- `src/android/` — Android-проект: `AndroidManifest.xml`, `assets/`, `res/`,
+  `src/`, `build.ps1`, `setup-sdk.ps1`.
 
 ## Благодарности и лицензии
 

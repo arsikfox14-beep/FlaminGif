@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<script src="android-bridge.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1116">
+<title>video2gif — видео и картинки в GIF</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --bg2: #0b0d11;
+    --card: #171b22;
+    --card2: #1d222b;
+    --line: #262c37;
+    --text: #eef1f5;
+    --muted: #8b94a3;
+    --muted2: #6f7887;
+    --accent: #7aa7ff;
+    --accent2: #4d7dff;
+    --ok: #6dd49a;
+    --err: #ff8a8a;
+    --shadow: 0 12px 40px rgba(0,0,0,.35);
+    --radius: 16px;
+  }
+  html[data-theme="light"] {
+    --bg: #f3f5f9;
+    --bg2: #e9edf4;
+    --card: #ffffff;
+    --card2: #f6f8fc;
+    --line: #dfe5ef;
+    --text: #161a21;
+    --muted: #5f6a7a;
+    --muted2: #7b8696;
+    --accent: #2f63e0;
+    --accent2: #1f4fc4;
+    --ok: #178a4c;
+    --err: #c62f2f;
+    --shadow: 0 12px 34px rgba(24,40,80,.12);
+  }
+  html[data-theme="snow"] {
+    --bg: #091526;
+    --bg2: #0c1b30;
+    --card: #102238;
+    --card2: #142a44;
+    --line: #1f3956;
+    --text: #f0f7ff;
+    --muted: #9db5ce;
+    --muted2: #6f8ba8;
+    --accent: #7ec8ff;
+    --accent2: #4aa8ef;
+    --ok: #7ee0b0;
+    --err: #ff8a8a;
+    --shadow: 0 12px 40px rgba(0,0,0,.4);
+  }
+  html[data-theme="halloween"] {
+    --bg: #120c18;
+    --bg2: #170f20;
+    --card: #1d1326;
+    --card2: #261a32;
+    --line: #362644;
+    --text: #f6eeff;
+    --muted: #b4a0c6;
+    --muted2: #846f96;
+    --accent: #ff8c42;
+    --accent2: #e86e26;
+    --ok: #76e0a0;
+    --err: #ff5c5c;
+    --shadow: 0 12px 40px rgba(0,0,0,.42);
+  }
+  html[data-theme="gta6"] {
+    --bg: #0a090c;
+    --bg2: #0d0b11;
+    --card: #16111b;
+    --card2: #1d1524;
+    --line: #2d2337;
+    --text: #faf7fc;
+    --muted: #bea0cd;
+    --muted2: #846f90;
+    --accent: #ff4fa3;
+    --accent2: #ff7a54;
+    --ok: #4ade80;
+    --err: #ff6b6b;
+    --shadow: 0 12px 40px rgba(0,0,0,.45);
+  }
+  html[data-theme="gamesense"] {
+    --bg: #121214;
+    --bg2: #0d0d0f;
+    --card: #18181b;
+    --card2: #1e1e22;
+    --line: #323237;
+    --text: #ebebed;
+    --muted: #a8a8ad;
+    --muted2: #7e7e84;
+    --accent: #58b27c;
+    --accent2: #3f9363;
+    --ok: #58b27c;
+    --err: #e86a6a;
+    --shadow: 0 10px 30px rgba(0,0,0,.5);
+    --radius: 6px;
+  }
+  html[data-theme="snow"] body {
+    background:
+      radial-gradient(800px 450px at 80% -10%, rgba(126,200,255,.16), transparent 60%),
+      radial-gradient(600px 380px at -10% 10%, rgba(126,200,255,.10), transparent 60%),
+      radial-gradient(rgba(255,255,255,.10) 1px, transparent 1.5px) 0 0 / 38px 38px,
+      var(--bg);
+  }
+  html[data-theme="halloween"] body {
+    background:
+      radial-gradient(800px 450px at 80% -10%, rgba(255,140,66,.16), transparent 60%),
+      radial-gradient(600px 380px at -10% 10%, rgba(160,80,255,.12), transparent 60%),
+      var(--bg);
+  }
+  html[data-theme="gta6"] body {
+    background:
+      radial-gradient(900px 500px at 80% -10%, rgba(255,79,163,.22), transparent 60%),
+      radial-gradient(700px 420px at -10% 10%, rgba(96,92,240,.18), transparent 60%),
+      var(--bg);
+  }
+  html[data-theme="gamesense"] body {
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.018) 0 1px, transparent 1px 6px),
+      repeating-linear-gradient(-45deg, rgba(0,0,0,.16) 0 1px, transparent 1px 6px),
+      var(--bg);
+  }
+  body::before {
+    content: ""; display: none; position: fixed; top: 0; left: 0; right: 0;
+    height: 4px; z-index: 100; pointer-events: none;
+  }
+  html[data-theme="gta6"] body::before {
+    display: block;
+    background: linear-gradient(90deg,#605cf0,#9630f5,#ff4fa3,#ff7a54,#ff9e42);
+  }
+  html[data-theme="gamesense"] body::before {
+    display: block;
+    background: linear-gradient(90deg,#5affa0,#4ad7ff,#7a6bff,#ff5ad1,#ffcf5a,#5affa0);
+    background-size: 200% 100%;
+    animation: v2gRainbow 4s linear infinite;
+  }
+  @keyframes v2gRainbow {
+    from { background-position: 0 0; }
+    to { background-position: 200% 0; }
+  }
+  html[data-theme="gta6"] .mark {
+    background: linear-gradient(135deg,#605cf0,#ff4fa3,#ff9e42); color: #fff;
+  }
+  html[data-theme="gta6"] button.primary {
+    background: linear-gradient(90deg,#605cf0,#9630f5,#ff4fa3,#ff7a54,#ff9e42);
+    border-color: transparent; color: #fff;
+  }
+  html[data-theme="gta6"] .drop {
+    background:
+      linear-gradient(100deg, rgba(8,6,12,.88) 0%, rgba(8,6,12,.42) 55%, rgba(255,79,163,.24) 100%),
+      linear-gradient(90deg,#605cf0,#9630f5,#ff4fa3,#ff7a54,#ff9e42);
+    border-color: rgba(255,79,163,.55);
+  }
+  html[data-theme="gamesense"] .mark {
+    background: var(--accent); color: #0a0d0a;
+  }
+  html[data-theme="gamesense"] button.primary {
+    background: linear-gradient(180deg,#6fce92,#4aa46e);
+    border-color: transparent; color: #0a0d0a;
+  }
+  html[data-theme="gamesense"] button,
+  html[data-theme="gamesense"] input,
+  html[data-theme="gamesense"] select,
+  html[data-theme="gamesense"] .card,
+  html[data-theme="gamesense"] .drop-icon,
+  html[data-theme="gamesense"] .preview-box {
+    border-radius: 5px;
+  }
+  html[data-theme="snow"] .mark { background: var(--accent); color: #071426; }
+  html[data-theme="halloween"] .mark { background: var(--accent); color: #1a0f08; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(900px 500px at 80% -10%, rgba(90,130,255,.13), transparent 60%),
+      radial-gradient(700px 420px at -10% 10%, rgba(90,130,255,.08), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap { width: 100%; max-width: 760px; margin: 0 auto; padding: 18px 14px 34px; }
+  header.top {
+    display: flex; align-items: center; gap: 12px; padding: 6px 2px 18px;
+  }
+  .mark {
+    width: 46px; height: 46px; flex: 0 0 46px; border-radius: 13px;
+    background: var(--text); color: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow);
+  }
+  .mark svg { width: 24px; height: 24px; display: block; }
+  .brand h1 { margin: 0; font-size: 22px; letter-spacing: -.02em; line-height: 1.1; }
+  .brand p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
+  .top .spacer { flex: 1 1 auto; }
+  .ver {
+    display: none; color: var(--muted2); font-size: 12px; white-space: nowrap;
+  }
+  @media (min-width: 430px) { .ver { display: block; } }
+  button {
+    font: inherit; color: inherit; cursor: pointer; border: 1px solid var(--line);
+    background: var(--card2); border-radius: 12px; padding: 10px 14px;
+    transition: background .15s ease, border-color .15s ease, transform .06s ease, opacity .15s ease;
+  }
+  button:active { transform: scale(.985); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary {
+    background: linear-gradient(180deg, var(--accent), var(--accent2));
+    border-color: transparent; color: #fff; font-weight: 650;
+    box-shadow: 0 8px 22px rgba(70,110,255,.28);
+  }
+  button.ghost { background: transparent; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow);
+  }
+  .drop {
+    display: flex; align-items: center; gap: 14px; cursor: pointer;
+    border-style: dashed; border-color: #313a49; background: linear-gradient(180deg, var(--card), var(--card2));
+  }
+  .drop.dragover { border-color: var(--accent); background: var(--card2); }
+  .drop-icon {
+    width: 46px; height: 46px; flex: 0 0 46px; border-radius: 12px;
+    background: var(--card2); border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center; color: var(--muted);
+  }
+  .drop-icon svg { width: 22px; height: 22px; }
+  .drop-main { min-width: 0; flex: 1 1 auto; }
+  .drop-main b { display: block; font-size: 15.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drop-main span { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .drop .choose {
+    flex: 0 0 auto; font-size: 13px; color: var(--text); border: 1px solid var(--line);
+    background: var(--card2); border-radius: 10px; padding: 9px 12px;
+  }
+  .drop.has-file .drop-icon { color: var(--accent); border-color: rgba(122,167,255,.45); }
+  h2 { margin: 0 0 12px; font-size: 17px; letter-spacing: -.01em; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+  .field { min-width: 0; }
+  .field.wide { grid-column: 1 / -1; }
+  .field label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+  .field .hint { color: var(--muted2); font-size: 11px; margin-top: 4px; }
+  input[type="number"], input[type="url"], input[type="text"], select {
+    width: 100%; font: inherit; font-size: 16px; color: var(--text);
+    background: var(--bg2); border: 1px solid var(--line); border-radius: 11px;
+    padding: 11px 12px; outline: none; appearance: none; -webkit-appearance: none;
+  }
+  select {
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
+    background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 34px;
+  }
+  input[type="number"]:focus, input[type="url"]:focus, input[type="text"]:focus, select:focus { border-color: var(--accent); }
+  input[type="number"]:disabled, input[type="url"]:disabled, input[type="text"]:disabled, select:disabled { opacity: .45; }
+  .switch {
+    display: flex; align-items: center; gap: 11px; padding: 4px 0 2px;
+    grid-column: 1 / -1; color: var(--text); font-size: 14.5px; user-select: none;
+  }
+  .switch input { position: absolute; opacity: 0; pointer-events: none; }
+  .switch .track {
+    width: 46px; height: 27px; flex: 0 0 46px; border-radius: 999px; background: #2b3340;
+    border: 1px solid var(--line); position: relative; transition: background .15s ease;
+  }
+  html[data-theme="light"] .switch .track { background: #d7deea; }
+  .switch .track::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 21px; height: 21px;
+    border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.35); transition: transform .15s ease;
+  }
+  .switch input:checked + .track { background: var(--accent2); border-color: transparent; }
+  .switch input:checked + .track::after { transform: translateX(19px); }
+  .actions { display: flex; gap: 10px; margin-bottom: 12px; }
+  .actions button { flex: 1 1 0; padding: 13px 14px; font-size: 15px; }
+  .progress-wrap { display: none; margin-top: 4px; }
+  .progress-wrap.on { display: block; }
+  .bar { height: 9px; border-radius: 999px; background: var(--bg2); border: 1px solid var(--line); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .18s ease; }
+  .status { margin-top: 9px; color: var(--muted); font-size: 13px; min-height: 19px; }
+  .status.err { color: var(--err); }
+  .status.ok { color: var(--ok); }
+  .result { display: none; }
+  .result.on { display: block; }
+  .preview-box {
+    border: 1px solid var(--line); border-radius: 13px; background:
+      repeating-conic-gradient(var(--bg2) 0% 25%, var(--card2) 0% 50%) 50% / 20px 20px;
+    padding: 10px; display: flex; align-items: center; justify-content: center; min-height: 120px;
+    overflow: hidden;
+  }
+  .preview-box img { max-width: 100%; max-height: 45vh; border-radius: 8px; display: block; }
+  .result-meta { color: var(--muted); font-size: 12.5px; margin: 10px 0 12px; }
+  .result-actions { display: flex; gap: 10px; }
+  .result-actions button { flex: 1 1 0; padding: 12px; }
+  .note { color: var(--muted2); font-size: 12px; line-height: 1.5; padding: 2px 4px 0; }
+  .note b { color: var(--muted); font-weight: 600; }
+  .note.ok { color: var(--ok); }
+  .note.err { color: var(--err); }
+  .note a { color: var(--accent); text-decoration: underline; }
+  footer.credits { color: var(--muted2); font-size: 11.5px; text-align: center; margin-top: 18px; }
+  .social { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .social a {
+    display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px;
+    border-radius: 999px; border: 1px solid var(--line); background: var(--card);
+    color: var(--text); text-decoration: none; font-size: 13px; font-weight: 600;
+  }
+  .social a svg { width: 16px; height: 16px; display: block; }
+  .social a.donate { color: #ff7a90; border-color: rgba(255,90,120,.4); }
+  .social a.discord { color: #8ea1ff; border-color: rgba(120,140,255,.35); }
+  .social a:active { transform: scale(.98); }
+  button.icon-btn {
+    width: 38px; height: 38px; padding: 0; flex: 0 0 auto; border-radius: 11px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; color: var(--muted);
+  }
+  button.icon-btn:hover { color: var(--text); border-color: var(--accent); }
+  button.icon-btn svg { width: 19px; height: 19px; display: block; }
+  .snake-overlay {
+    position: fixed; inset: 0; z-index: 200; display: none; padding: 14px;
+    align-items: center; justify-content: center;
+    background: rgba(4,6,10,.75); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+  .snake-overlay.on { display: flex; }
+  .snake-panel {
+    width: 100%; max-width: 520px; background: var(--card); color: var(--text);
+    border: 1px solid var(--line); border-radius: 18px; padding: 14px;
+    box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px;
+  }
+  .snake-head { display: flex; align-items: center; gap: 10px; }
+  .snake-head h2 { margin: 0; font-size: 18px; }
+  .snake-score { margin-left: auto; display: flex; gap: 12px; font-size: 12.5px; color: var(--muted); }
+  .snake-score b { color: var(--text); }
+  #snakeCanvas {
+    width: 100%; height: auto; display: block; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--bg2); touch-action: none;
+  }
+  .snake-msg { min-height: 18px; text-align: center; font-size: 13px; color: var(--muted); }
+  .snake-msg.err { color: var(--err); }
+  .snake-controls { display: flex; align-items: center; gap: 12px; }
+  .snake-actions { display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; }
+  .snake-actions button { padding: 10px; }
+  .dpad { display: grid; grid-template-columns: repeat(3, 46px); grid-template-rows: repeat(3, 46px); gap: 6px; }
+  .dpad button { padding: 0; font-size: 16px; border-radius: 10px; }
+  .dpad .up { grid-area: 1 / 2; }
+  .dpad .left { grid-area: 2 / 1; }
+  .dpad .right { grid-area: 2 / 3; }
+  .dpad .down { grid-area: 3 / 2; }
+  .snake-hint { margin: 0; font-size: 11px; color: var(--muted2); text-align: center; }
+  .is-image .video-only { opacity: .5; }
+  @media (max-width: 360px) {
+    .grid { grid-template-columns: 1fr; }
+    .drop .choose { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor"/></svg>
+    </div>
+    <div class="brand">
+      <h1>video2gif</h1>
+      <p>видео и картинки → GIF</p>
+    </div>
+    <div class="spacer"></div>
+    <button id="snakeBtn" class="icon-btn" type="button" aria-label="Змейка" title="Змейка">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 8h10a5 5 0 0 1 5 5v1.2a2.8 2.8 0 0 1-5 1.6L15 14H9l-2 1.8a2.8 2.8 0 0 1-5-1.6V13a5 5 0 0 1 5-5Z"/>
+        <path d="M7 11v3M5.5 12.5h3"/>
+        <circle cx="16" cy="11" r=".9" fill="currentColor" stroke="none"/>
+        <circle cx="18" cy="13" r=".9" fill="currentColor" stroke="none"/>
+      </svg>
+    </button>
+    <div class="ver">2.7 · mobile</div>
+  </header>
+
+  <section class="card drop" id="pickCard" role="button" tabindex="0" aria-label="Выбрать видео или картинку">
+    <div class="drop-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 16V4m0 0 4 4m-4-4L8 8"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+      </svg>
+    </div>
+    <div class="drop-main">
+      <b id="fileName">Выбрать видео или картинку</b>
+      <span id="fileMeta">MP4, MOV, WebM · PNG, JPG, WEBP · или перетащите файл</span>
+    </div>
+    <div class="choose">Выбрать</div>
+    <input id="fileInput" type="file" accept="video/*,image/*,.mp4,.mov,.m4v,.webm,.mkv,.avi,.png,.jpg,.jpeg,.webp,.bmp,.gif,.avif" hidden>
+  </section>
+
+  <section class="card" id="downloadCard" hidden aria-labelledby="downloadTitle">
+    <h2 id="downloadTitle">Скачать видео или фото</h2>
+    <div class="field wide">
+      <label for="mediaUrl">Прямая ссылка на видео или картинку</label>
+      <input id="mediaUrl" type="url" inputmode="url" placeholder="https://…/video.mp4">
+    </div>
+    <div class="actions" style="margin-top:10px;margin-bottom:8px">
+      <button id="downloadLinkBtn" type="button">Скачать</button>
+    </div>
+    <div class="note" id="downloadStatus" aria-live="polite" style="min-height:18px;padding:0">Вставьте прямую ссылку на видео или картинку. YouTube и Spotify — в Windows-версии.</div>
+  </section>
+
+  <section class="card" aria-labelledby="settingsTitle">
+    <h2 id="settingsTitle">Настройки</h2>
+    <div class="grid">
+      <div class="field video-only">
+        <label for="startInput">Начало, сек</label>
+        <input id="startInput" type="number" min="0" step="0.1" value="0" inputmode="decimal">
+      </div>
+      <div class="field video-only">
+        <label for="durInput">Длительность, сек</label>
+        <input id="durInput" type="number" min="0" step="0.1" value="0" inputmode="decimal">
+        <div class="hint">0 — до конца</div>
+      </div>
+      <div class="field">
+        <label for="widthInput">Ширина</label>
+        <input id="widthInput" type="number" min="0" step="2" value="480" inputmode="numeric">
+        <div class="hint">0 — оригинальный размер</div>
+      </div>
+      <div class="field">
+        <label for="fpsInput">Кадров в секунду</label>
+        <input id="fpsInput" type="number" min="1" max="60" step="1" value="30" inputmode="numeric">
+        <div class="hint">1–60 · 30 — по умолчанию</div>
+      </div>
+      <div class="field wide">
+        <label for="themeSelect">Тема оформления</label>
+        <select id="themeSelect">
+          <option value="auto">Авто (по дате)</option>
+          <option value="light">Светлая</option>
+          <option value="dark">Тёмная</option>
+          <option value="snow">Снежная</option>
+          <option value="halloween">Хэллоуин</option>
+          <option value="gta6">GTA 6</option>
+          <option value="gamesense">Gamesense</option>
+        </select>
+      </div>
+      <div class="field wide">
+        <label for="ditherSelect">Сглаживание переходов</label>
+        <select id="ditherSelect">
+          <option value="sierra">Sierra — плавнее</option>
+          <option value="bayer">Байер — компактнее</option>
+          <option value="none">Без сглаживания</option>
+        </select>
+      </div>
+      <div class="field wide">
+        <label for="modeSelect">Режим GIF</label>
+        <select id="modeSelect">
+          <option value="fast">Быстро — кадры могут пропускаться</option>
+          <option value="quality">Качественно — все кадры, медленнее</option>
+        </select>
+        <div class="hint">«Быстро» экономит время на слабом телефоне.</div>
+      </div>
+      <label class="switch">
+        <input id="loopCheck" type="checkbox" checked>
+        <span class="track" aria-hidden="true"></span>
+        <span>Бесконечный цикл</span>
+      </label>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button id="convertBtn" class="primary" type="button" disabled>Сделать GIF</button>
+    <button id="cancelBtn" type="button" disabled>Отменить</button>
+  </div>
+
+  <section class="card" id="progressCard" style="padding:14px 16px">
+    <div class="progress-wrap" id="progressWrap">
+      <div class="bar"><i id="progressBar"></i></div>
+    </div>
+    <div class="status" id="statusLine" aria-live="polite">Выберите файл, чтобы начать.</div>
+  </section>
+
+  <section class="card result" id="resultCard">
+    <h2>Результат</h2>
+    <div class="preview-box"><img id="resultImg" alt="Готовый GIF"></div>
+    <div class="result-meta" id="resultMeta"></div>
+    <div class="result-actions">
+      <button id="downloadBtn" class="primary" type="button">Скачать GIF</button>
+      <button id="shareBtn" type="button">Поделиться</button>
+    </div>
+  </section>
+
+  <p class="note" id="webNote">
+    <b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются.
+    Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM.
+    Прямые ссылки на видео и картинки можно скачать здесь; TikTok — в Android‑приложении,
+    YouTube и Spotify — в Windows‑версии <b>Video2Gif.exe</b>.
+  </p>
+
+  <footer class="credits">
+    <div class="social">
+      <a class="donate" href="https://www.donationalerts.com/r/arsikfox16" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 21s-7.1-4.4-9.4-8.1C.5 9.9 1.7 6 5.3 5.2c2-.4 3.9.5 4.9 2 .4.5 1.3.5 1.6 0 1-1.5 2.9-2.4 4.9-2 3.6.8 4.8 4.7 2.7 7.7C19.1 16.6 12 21 12 21Z"/>
+        </svg>
+        Donate
+      </a>
+      <a class="discord" href="https://discord.gg/yMaS9HbjHV" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3c-.2.4-.5.9-.7 1.3a18.3 18.3 0 0 0-5.5 0C9 3.9 8.7 3.4 8.5 3a19.7 19.7 0 0 0-4.9 1.5C.5 9-.3 13.5.1 18a19.9 19.9 0 0 0 6 3c.5-.7.9-1.4 1.3-2.1-.7-.3-1.4-.6-2-1l.5-.4a14.2 14.2 0 0 0 12.1 0l.5.4c-.6.4-1.3.7-2 1 .4.7.8 1.5 1.3 2.1a19.8 19.8 0 0 0 6-3c.5-5.2-.8-9.6-3.5-13.6ZM8 15.3c-1.2 0-2.1-1.1-2.1-2.4S6.8 10.5 8 10.5s2.1 1.1 2.1 2.4S9.2 15.3 8 15.3Zm8 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.1 1.1 2.1 2.4-.9 2.4-2.1 2.4Z"/>
+        </svg>
+        Discord
+      </a>
+    </div>
+    by DeepSeek v4.1 flash &amp; arsikfox14 &amp; dismasdismavich
+  </footer>
+</div>
+
+<div class="snake-overlay" id="snakeOverlay" aria-hidden="true">
+  <div class="snake-panel" role="dialog" aria-modal="true" aria-labelledby="snakeTitle">
+    <div class="snake-head">
+      <h2 id="snakeTitle">Змейка</h2>
+      <div class="snake-score">
+        <span>Счёт: <b id="snakeScore">0</b></span>
+        <span>Рекорд: <b id="snakeBest">0</b></span>
+      </div>
+      <button id="snakeClose" class="icon-btn" type="button" aria-label="Закрыть">✕</button>
+    </div>
+    <canvas id="snakeCanvas" width="480" height="360"></canvas>
+    <div class="snake-msg" id="snakeMsg"></div>
+    <div class="snake-controls">
+      <div class="dpad">
+        <button class="up" data-dir="up" type="button" aria-label="Вверх">▲</button>
+        <button class="left" data-dir="left" type="button" aria-label="Влево">◀</button>
+        <button class="right" data-dir="right" type="button" aria-label="Вправо">▶</button>
+        <button class="down" data-dir="down" type="button" aria-label="Вниз">▼</button>
+      </div>
+      <div class="snake-actions">
+        <button id="snakePause" type="button">Пауза</button>
+        <button id="snakeRestart" type="button">Заново</button>
+      </div>
+    </div>
+    <p class="snake-hint">Свайп по полю, стрелки или кнопки. Пробел — пауза.</p>
+  </div>
+</div>
+
+<script>
+/* gifenc 1.0.3 — MIT — https://github.com/mattdesl/gifenc */
+var exports = {};
+</script>
+<script>
+/**
+ * Minified by jsDelivr using Terser v5.39.0.
+ * Original file: /npm/gifenc@1.0.3/dist/gifenc.js
+ *
+ * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
+ */
+/**
+ * Minified by jsDelivr using Terser v5.39.0.
+ * Original file: /npm/gifenc@1.0.3/dist/gifenc.js
+ *
+ * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
+ */
+var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{value:!0}),__export=(e,t)=>{for(var r in t)__defProp(e,r,{get:t[r],enumerable:!0})};__markAsModule(exports),__export(exports,{GIFEncoder:()=>GIFEncoder,applyPalette:()=>applyPalette,default:()=>src_default,nearestColor:()=>nearestColor,nearestColorIndex:()=>nearestColorIndex,nearestColorIndexWithDistance:()=>nearestColorIndexWithDistance,prequantize:()=>prequantize,quantize:()=>quantize,snapColorsToPalette:()=>snapColorsToPalette});var constants_default={signature:"GIF",version:"89a",trailer:59,extensionIntroducer:33,applicationExtensionLabel:255,graphicControlExtensionLabel:249,imageSeparator:44,signatureSize:3,versionSize:3,globalColorTableFlagMask:128,colorResolutionMask:112,sortFlagMask:8,globalColorTableSizeMask:7,applicationIdentifierSize:8,applicationAuthCodeSize:3,disposalMethodMask:28,userInputFlagMask:2,transparentColorFlagMask:1,localColorTableFlagMask:128,interlaceFlagMask:64,idSortFlagMask:32,localColorTableSizeMask:7};function createStream(e=256){let t=0,r=new Uint8Array(e);return{get buffer(){return r.buffer},reset(){t=0},bytesView:()=>r.subarray(0,t),bytes:()=>r.slice(0,t),writeByte(e){n(t+1),r[t]=e,t++},writeBytes(e,o=0,a=e.length){n(t+a);for(let n=0;n<a;n++)r[t++]=e[n+o]},writeBytesView(e,o=0,a=e.byteLength){n(t+a),r.set(e.subarray(o,o+a),t),t+=a}};function n(e){var n=r.length;if(n>=e)return;e=Math.max(e,n*(n<1048576?2:1.125)>>>0),0!=n&&(e=Math.max(e,256));const o=r;r=new Uint8Array(e),t>0&&r.set(o.subarray(0,t),0)}}var BITS=12,DEFAULT_HSIZE=5003,MASKS=[0,1,3,7,15,31,63,127,255,511,1023,2047,4095,8191,16383,32767,65535];function lzwEncode(e,t,r,n,o=createStream(512),a=new Uint8Array(256),i=new Int32Array(DEFAULT_HSIZE),c=new Int32Array(DEFAULT_HSIZE)){const l=i.length,s=Math.max(2,n);a.fill(0),c.fill(0),i.fill(-1);let f=0,u=0;const w=s+1,d=w;let b=!1,g=d,y=(1<<g)-1;const p=1<<w-1,h=p+1;let B=p+2,_=0,m=r[0],I=0;for(let e=l;e<65536;e*=2)++I;I=8-I,o.writeByte(s),S(p);const A=r.length;for(let e=1;e<A;e++)e:{const t=r[e],n=(t<<BITS)+m;let o=t<<I^m;if(i[o]===n){m=c[o];break e}const a=0===o?1:l-o;for(;i[o]>=0;)if(o-=a,o<0&&(o+=l),i[o]===n){m=c[o];break e}S(m),m=t,B<1<<BITS?(c[o]=B++,i[o]=n):(i.fill(-1),B=p+2,b=!0,S(p))}return S(m),S(h),o.writeByte(0),o.bytesView();function S(e){for(f&=MASKS[u],u>0?f|=e<<u:f=e,u+=g;u>=8;)a[_++]=255&f,_>=254&&(o.writeByte(_),o.writeBytesView(a,0,_),_=0),f>>=8,u-=8;if((B>y||b)&&(b?(g=d,y=(1<<g)-1,b=!1):(++g,y=g===BITS?1<<g:(1<<g)-1)),e==h){for(;u>0;)a[_++]=255&f,_>=254&&(o.writeByte(_),o.writeBytesView(a,0,_),_=0),f>>=8,u-=8;_>0&&(o.writeByte(_),o.writeBytesView(a,0,_),_=0)}}}var lzwEncode_default=lzwEncode;function rgb888_to_rgb565(e,t,r){return e<<8&63488|t<<2&992|r>>3}function rgba8888_to_rgba4444(e,t,r,n){return e>>4|240&t|(240&r)<<4|(240&n)<<8}function rgb888_to_rgb444(e,t,r){return e>>4<<8|240&t|r>>4}function clamp(e,t,r){return e<t?t:e>r?r:e}function sqr(e){return e*e}function find_nn(e,t,r){var n=0,o=1e100;const a=e[t],i=a.cnt,c=a.ac,l=a.rc,s=a.gc,f=a.bc;for(var u=a.fw;0!=u;u=e[u].fw){const t=e[u],a=t.cnt,d=i*a/(i+a);if(!(d>=o)){var w=0;r&&(w+=d*sqr(t.ac-c))>=o||(w+=d*sqr(t.rc-l))>=o||(w+=d*sqr(t.gc-s))>=o||(w+=d*sqr(t.bc-f))>=o||(o=w,n=u)}}a.err=o,a.nn=n}function create_bin(){return{ac:0,rc:0,gc:0,bc:0,cnt:0,nn:0,fw:0,bk:0,tm:0,mtm:0,err:0}}function create_bin_list(e,t){const r=new Array("rgb444"===t?4096:65536),n=e.length;if("rgba4444"===t)for(let t=0;t<n;++t){const n=e[t],o=n>>24&255,a=n>>16&255,i=n>>8&255,c=255&n,l=rgba8888_to_rgba4444(c,i,a,o);let s=l in r?r[l]:r[l]=create_bin();s.rc+=c,s.gc+=i,s.bc+=a,s.ac+=o,s.cnt++}else if("rgb444"===t)for(let t=0;t<n;++t){const n=e[t],o=n>>16&255,a=n>>8&255,i=255&n,c=rgb888_to_rgb444(i,a,o);let l=c in r?r[c]:r[c]=create_bin();l.rc+=i,l.gc+=a,l.bc+=o,l.cnt++}else for(let t=0;t<n;++t){const n=e[t],o=n>>16&255,a=n>>8&255,i=255&n,c=rgb888_to_rgb565(i,a,o);let l=c in r?r[c]:r[c]=create_bin();l.rc+=i,l.gc+=a,l.bc+=o,l.cnt++}return r}function quantize(e,t,r={}){const{format:n="rgb565",clearAlpha:o=!0,clearAlphaColor:a=0,clearAlphaThreshold:i=0,oneBitAlpha:c=!1}=r;if(!e||!e.buffer)throw new Error("quantize() expected RGBA Uint8Array data");if(!(e instanceof Uint8Array||e instanceof Uint8ClampedArray))throw new Error("quantize() expected RGBA Uint8Array data");const l=new Uint32Array(e.buffer);let s=!1!==r.useSqrt;const f="rgba4444"===n,u=create_bin_list(l,n),w=u.length,d=w-1,b=new Uint32Array(w+1);for(var g=0,y=0;y<w;++y){const e=u[y];if(null!=e){var p=1/e.cnt;f&&(e.ac*=p),e.rc*=p,e.gc*=p,e.bc*=p,u[g++]=e}}sqr(t)/g<.022&&(s=!1);var h,B,_;for(y=0;y<g-1;++y)u[y].fw=y+1,u[y+1].bk=y,s&&(u[y].cnt=Math.sqrt(u[y].cnt));for(s&&(u[y].cnt=Math.sqrt(u[y].cnt)),y=0;y<g;++y){find_nn(u,y,!1);var m=u[y].err;for(B=++b[0];B>1&&!(u[h=b[_=B>>1]].err<=m);B=_)b[B]=h;b[B]=y}var I=g-t;for(y=0;y<I;){for(var A;;){var S=b[1];if((A=u[S]).tm>=A.mtm&&u[A.nn].mtm<=A.tm)break;A.mtm==d?S=b[1]=b[b[0]--]:(find_nn(u,S,!1),A.tm=y);m=u[S].err;for(B=1;(_=B+B)<=b[0]&&(_<b[0]&&u[b[_]].err>u[b[_+1]].err&&_++,!(m<=u[h=b[_]].err));B=_)b[B]=h;b[B]=S}var x=u[A.nn],C=A.cnt,M=x.cnt;p=1/(C+M);f&&(A.ac=p*(C*A.ac+M*x.ac)),A.rc=p*(C*A.rc+M*x.rc),A.gc=p*(C*A.gc+M*x.gc),A.bc=p*(C*A.bc+M*x.bc),A.cnt+=x.cnt,A.mtm=++y,u[x.bk].fw=x.fw,u[x.fw].bk=x.bk,x.mtm=d}let q=[];var U=0;for(y=0;;++U){let e=clamp(Math.round(u[y].rc),0,255),t=clamp(Math.round(u[y].gc),0,255),r=clamp(Math.round(u[y].bc),0,255),n=255;if(f){if(n=clamp(Math.round(u[y].ac),0,255),c){n=n<=("number"==typeof c?c:127)?0:255}o&&n<=i&&(e=t=r=a,n=0)}const l=f?[e,t,r,n]:[e,t,r];if(existsInPalette(q,l)||q.push(l),0==(y=u[y].fw))break}return q}function existsInPalette(e,t){for(let r=0;r<e.length;r++){const n=e[r];let o=n[0]===t[0]&&n[1]===t[1]&&n[2]===t[2],a=!(n.length>=4&&t.length>=4)||n[3]===t[3];if(o&&a)return!0}return!1}function euclideanDistanceSquared(e,t){var r,n=0;for(r=0;r<e.length;r++){const o=e[r]-t[r];n+=o*o}return n}function roundStep(e,t){return t>1?Math.round(e/t)*t:e}function prequantize(e,{roundRGB:t=5,roundAlpha:r=10,oneBitAlpha:n=null}={}){const o=new Uint32Array(e.buffer);for(let e=0;e<o.length;e++){const a=o[e];let i=a>>24&255,c=a>>16&255,l=a>>8&255,s=255&a;if(i=roundStep(i,r),n){i=i<=("number"==typeof n?n:127)?0:255}s=roundStep(s,t),l=roundStep(l,t),c=roundStep(c,t),o[e]=i<<24|c<<16|l<<8|s}}function applyPalette(e,t,r="rgb565"){if(!e||!e.buffer)throw new Error("quantize() expected RGBA Uint8Array data");if(!(e instanceof Uint8Array||e instanceof Uint8ClampedArray))throw new Error("quantize() expected RGBA Uint8Array data");if(t.length>256)throw new Error("applyPalette() only works with 256 colors or less");const n=new Uint32Array(e.buffer),o=n.length,a="rgb444"===r?4096:65536,i=new Uint8Array(o),c=new Array(a);if("rgba4444"===r)for(let e=0;e<o;e++){const r=n[e],o=r>>24&255,a=r>>16&255,l=r>>8&255,s=255&r,f=rgba8888_to_rgba4444(s,l,a,o),u=f in c?c[f]:c[f]=nearestColorIndexRGBA(s,l,a,o,t);i[e]=u}else{const e="rgb444"===r?rgb888_to_rgb444:rgb888_to_rgb565;for(let r=0;r<o;r++){const o=n[r],a=o>>16&255,l=o>>8&255,s=255&o,f=e(s,l,a),u=f in c?c[f]:c[f]=nearestColorIndexRGB(s,l,a,t);i[r]=u}}return i}function nearestColorIndexRGBA(e,t,r,n,o){let a=0,i=1e100;for(let c=0;c<o.length;c++){const l=o[c];let s=sqr2(l[3]-n);if(s>i)continue;if(s+=sqr2(l[0]-e),s>i)continue;if(s+=sqr2(l[1]-t),s>i)continue;s+=sqr2(l[2]-r),s>i||(i=s,a=c)}return a}function nearestColorIndexRGB(e,t,r,n){let o=0,a=1e100;for(let i=0;i<n.length;i++){const c=n[i];let l=sqr2(c[0]-e);if(l>a)continue;if(l+=sqr2(c[1]-t),l>a)continue;l+=sqr2(c[2]-r),l>a||(a=l,o=i)}return o}function snapColorsToPalette(e,t,r=5){if(!e.length||!t.length)return;const n=e.map((e=>e.slice(0,3))),o=r*r,a=e[0].length;for(let r=0;r<t.length;r++){let i=t[r];i=i.length<a?[i[0],i[1],i[2],255]:i.length>a?i.slice(0,3):i.slice();const c=nearestColorIndexWithDistance(n,i.slice(0,3),euclideanDistanceSquared),l=c[0],s=c[1];s>0&&s<=o&&(e[l]=i)}}function sqr2(e){return e*e}function nearestColorIndex(e,t,r=euclideanDistanceSquared){let n=1/0,o=-1;for(let a=0;a<e.length;a++){const i=r(t,e[a]);i<n&&(n=i,o=a)}return o}function nearestColorIndexWithDistance(e,t,r=euclideanDistanceSquared){let n=1/0,o=-1;for(let a=0;a<e.length;a++){const i=r(t,e[a]);i<n&&(n=i,o=a)}return[o,n]}function nearestColor(e,t,r=euclideanDistanceSquared){return e[nearestColorIndex(e,t,r)]}function GIFEncoder(e={}){const{initialCapacity:t=4096,auto:r=!0}=e,n=createStream(t),o=new Uint8Array(256),a=new Int32Array(5003),i=new Int32Array(5003);let c=!1;return{reset(){n.reset(),c=!1},finish(){n.writeByte(constants_default.trailer)},bytes:()=>n.bytes(),bytesView:()=>n.bytesView(),get buffer(){return n.buffer},get stream(){return n},writeHeader:l,writeFrame(e,t,s,f={}){const{transparent:u=!1,transparentIndex:w=0,delay:d=0,palette:b=null,repeat:g=0,colorDepth:y=8,dispose:p=-1}=f;let h=!1;if(r?c||(h=!0,l(),c=!0):h=Boolean(f.first),t=Math.max(0,Math.floor(t)),s=Math.max(0,Math.floor(s)),h){if(!b)throw new Error("First frame must include a { palette } option");encodeLogicalScreenDescriptor(n,t,s,b,y),encodeColorTable(n,b),g>=0&&encodeNetscapeExt(n,g)}const B=Math.round(d/10);encodeGraphicControlExt(n,p,B,u,w);const _=Boolean(b)&&!h;encodeImageDescriptor(n,t,s,_?b:null),_&&encodeColorTable(n,b),encodePixels(n,e,t,s,y,o,a,i)}};function l(){writeUTFBytes(n,"GIF89a")}}function encodeGraphicControlExt(e,t,r,n,o){var a,i;e.writeByte(33),e.writeByte(249),e.writeByte(4),o<0&&(o=0,n=!1),n?(a=1,i=2):(a=0,i=0),t>=0&&(i=7&t),i<<=2;e.writeByte(i|a),writeUInt16(e,r),e.writeByte(o||0),e.writeByte(0)}function encodeLogicalScreenDescriptor(e,t,r,n,o=8){const a=128|o-1<<4|colorTableSize(n.length)-1;writeUInt16(e,t),writeUInt16(e,r),e.writeBytes([a,0,0])}function encodeNetscapeExt(e,t){e.writeByte(33),e.writeByte(255),e.writeByte(11),writeUTFBytes(e,"NETSCAPE2.0"),e.writeByte(3),e.writeByte(1),writeUInt16(e,t),e.writeByte(0)}function encodeColorTable(e,t){const r=1<<colorTableSize(t.length);for(let n=0;n<r;n++){let r=[0,0,0];n<t.length&&(r=t[n]),e.writeByte(r[0]),e.writeByte(r[1]),e.writeByte(r[2])}}function encodeImageDescriptor(e,t,r,n){if(e.writeByte(44),writeUInt16(e,0),writeUInt16(e,0),writeUInt16(e,t),writeUInt16(e,r),n){const t=0,r=0,o=colorTableSize(n.length)-1;e.writeByte(128|t|r|o)}else e.writeByte(0)}function encodePixels(e,t,r,n,o=8,a,i,c){lzwEncode_default(r,n,t,o,e,a,i,c)}function writeUInt16(e,t){e.writeByte(255&t),e.writeByte(t>>8&255)}function writeUTFBytes(e,t){for(var r=0;r<t.length;r++)e.writeByte(t.charCodeAt(r))}function colorTableSize(e){return Math.max(Math.ceil(Math.log2(e)),1)}var src_default=GIFEncoder;
+//# sourceMappingURL=/sm/5590bec8c781f75f71e4bc269a81f05c96ef356f967ea7a7deadf384c62bffeb.map
+</script>
+<script>
+(function () {
+  "use strict";
+
+  var MAX_FRAMES = 5000;
+  var $ = function (id) { return document.getElementById(id); };
+
+  var el = {
+    fileInput: $("fileInput"),
+    pickCard: $("pickCard"),
+    fileName: $("fileName"),
+    fileMeta: $("fileMeta"),
+    start: $("startInput"),
+    dur: $("durInput"),
+    width: $("widthInput"),
+    fps: $("fpsInput"),
+    dither: $("ditherSelect"),
+    mode: $("modeSelect"),
+    loop: $("loopCheck"),
+    convert: $("convertBtn"),
+    cancel: $("cancelBtn"),
+    progressCard: $("progressCard"),
+    progressWrap: $("progressWrap"),
+    progressBar: $("progressBar"),
+    status: $("statusLine"),
+    resultCard: $("resultCard"),
+    resultImg: $("resultImg"),
+    resultMeta: $("resultMeta"),
+    download: $("downloadBtn"),
+    share: $("shareBtn"),
+    themeSelect: $("themeSelect")
+  };
+
+  var state = {
+    file: null,
+    kind: null,       // "video" | "image"
+    video: null,
+    videoUrl: null,
+    bitmap: null,
+    imageUrl: null,
+    width: 0,
+    height: 0,
+    duration: 0,
+    resultBlob: null,
+    resultUrl: null,
+    busy: false,
+    cancelled: false
+  };
+
+  function fmtSize(n) {
+    if (n < 1024) return n + " Б";
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + " КБ";
+    return (n / 1024 / 1024).toFixed(1) + " МБ";
+  }
+  function num(v, fallback) {
+    var n = parseFloat(String(v).replace(",", "."));
+    return isFinite(n) ? n : fallback;
+  }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+
+  function status(text, kind) {
+    el.status.textContent = text || "";
+    el.status.className = "status" + (kind ? " " + kind : "");
+  }
+  function setProgress(pct, text) {
+    el.progressWrap.classList.add("on");
+    el.progressBar.style.width = clamp(pct, 0, 100) + "%";
+    if (text) status(text);
+  }
+  function setBusy(busy) {
+    state.busy = busy;
+    el.convert.disabled = busy || !state.file;
+    el.cancel.disabled = !busy;
+    el.fileInput.disabled = busy;
+    el.pickCard.style.pointerEvents = busy ? "none" : "";
+    el.pickCard.style.opacity = busy ? ".6" : "";
+    el.start.disabled = busy || state.kind === "image";
+    el.dur.disabled = busy || state.kind === "image";
+    var fields = [el.width, el.fps, el.dither, el.loop];
+    for (var i = 0; i < fields.length; i++) fields[i].disabled = busy;
+  }
+  function resetResult() {
+    if (state.resultUrl) { URL.revokeObjectURL(state.resultUrl); state.resultUrl = null; }
+    state.resultBlob = null;
+    el.resultCard.classList.remove("on");
+    el.resultImg.removeAttribute("src");
+  }
+  function cleanupCurrent() {
+    if (state.video) {
+      try { state.video.pause(); } catch (e) {}
+      try { state.video.removeAttribute("src"); state.video.load(); } catch (e) {}
+      if (state.video.parentNode) state.video.parentNode.removeChild(state.video);
+    }
+    if (state.videoUrl) { URL.revokeObjectURL(state.videoUrl); state.videoUrl = null; }
+    if (state.imageUrl) { URL.revokeObjectURL(state.imageUrl); state.imageUrl = null; }
+    if (state.bitmap && state.bitmap.close) { try { state.bitmap.close(); } catch (e) {} }
+    state.file = null; state.kind = null; state.video = null; state.bitmap = null;
+    state.width = 0; state.height = 0; state.duration = 0;
+  }
+
+  function isImageFile(file) {
+    var t = (file.type || "").toLowerCase();
+    if (t.indexOf("image/") === 0) return true;
+    if (t.indexOf("video/") === 0) return false;
+    return /\.(png|jpe?g|jfif|webp|bmp|gif|avif|heic|heif)$/i.test(file.name || "");
+  }
+
+  function loadVideoElement(file) {
+    return new Promise(function (resolve, reject) {
+      var v = document.createElement("video");
+      v.muted = true;
+      v.defaultMuted = true;
+      v.playsInline = true;
+      v.setAttribute("playsinline", "");
+      v.setAttribute("webkit-playsinline", "");
+      v.preload = "auto";
+      v.style.cssText = "position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none;";
+      document.body.appendChild(v);
+      var url = URL.createObjectURL(file);
+      var done = false;
+      function ok() {
+        if (done) return; done = true;
+        cleanup();
+        resolve({ video: v, url: url });
+      }
+      function fail() {
+        if (done) return; done = true;
+        cleanup();
+        URL.revokeObjectURL(url);
+        try { if (v.parentNode) v.parentNode.removeChild(v); } catch (e) {}
+        reject(new Error("Этот видеофайл не открывается в браузере. Попробуйте MP4/MOV."));
+      }
+      function cleanup() {
+        v.removeEventListener("loadedmetadata", ok);
+        v.removeEventListener("loadeddata", ok);
+        v.removeEventListener("error", fail);
+      }
+      v.addEventListener("loadedmetadata", function () {
+        if (v.videoWidth > 0) ok();
+      });
+      v.addEventListener("loadeddata", ok);
+      v.addEventListener("error", fail);
+      v.src = url;
+      v.load();
+      setTimeout(function () {
+        if (!done && v.videoWidth > 0) ok();
+      }, 2500);
+    });
+  }
+
+  function decodeImage(file) {
+    if (window.createImageBitmap) {
+      return createImageBitmap(file, { imageOrientation: "from-image" }).catch(function () {
+        return decodeImageElement(file);
+      });
+    }
+    return decodeImageElement(file);
+  }
+  function decodeImageElement(file) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function () {
+        img._objectUrl = url;
+        resolve(img);
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error("Эта картинка не открывается в браузере. Попробуйте JPG, PNG или WEBP."));
+      };
+      img.src = url;
+    });
+  }
+  function imageSize(img) {
+    return { w: img.width || img.naturalWidth || 0, h: img.height || img.naturalHeight || 0, url: img._objectUrl || null };
+  }
+
+  function applyKind(kind) {
+    document.body.classList.toggle("is-image", kind === "image");
+    el.start.disabled = kind === "image";
+    el.dur.disabled = kind === "image";
+  }
+
+  function showFileInfo() {
+    if (!state.file) return;
+    el.fileName.textContent = state.file.name;
+    var kind = state.kind === "image" ? "КАРТИНКА" : "ВИДЕО";
+    var extra = state.duration > 0 ? " · " + state.duration.toFixed(1) + " с" : "";
+    el.fileMeta.textContent = kind + " · " + state.width + "×" + state.height + extra + " · " + fmtSize(state.file.size);
+    el.pickCard.classList.add("has-file");
+    applyKind(state.kind);
+  }
+
+  function loadFile(file) {
+    if (!file || state.busy) return;
+    resetResult();
+    cleanupCurrent();
+    state.file = file;
+    status("Открываю файл…");
+
+    if (isImageFile(file)) {
+      decodeImage(file).then(function (img) {
+        var s = imageSize(img);
+        state.kind = "image";
+        state.bitmap = img;
+        state.imageUrl = s.url;
+        state.width = s.w;
+        state.height = s.h;
+        state.duration = 0;
+        if (!s.w || !s.h) throw new Error("Не удалось определить размер картинки.");
+        showFileInfo();
+        el.width.value = "0";
+        el.convert.disabled = false;
+        status("Готово к конвертации.");
+        saveSettings();
+      }).catch(function (e) {
+        cleanupCurrent();
+        el.convert.disabled = true;
+        status(e.message || "Не удалось открыть картинку.", "err");
+      });
+      return;
+    }
+
+    loadVideoElement(file).then(function (res) {
+      state.kind = "video";
+      state.video = res.video;
+      state.videoUrl = res.url;
+      state.width = res.video.videoWidth || 0;
+      state.height = res.video.videoHeight || 0;
+      state.duration = isFinite(res.video.duration) ? res.video.duration : 0;
+      if (!state.width || !state.height) throw new Error("Не удалось определить размер видео.");
+      showFileInfo();
+      var w = parseInt(el.width.value, 10);
+      if (!isFinite(w) || w <= 0) el.width.value = "480";
+      el.start.max = String(Math.max(0, state.duration - 0.1));
+      el.convert.disabled = false;
+      status("Готово к конвертации.");
+      saveSettings();
+    }).catch(function (e) {
+      cleanupCurrent();
+      el.convert.disabled = true;
+      status(e.message || "Не удалось открыть видео.", "err");
+    });
+  }
+
+  function pickFile() { if (!state.busy) el.fileInput.click(); }
+
+  el.pickCard.addEventListener("click", function (e) {
+    if (e.target === el.fileInput) return;
+    pickFile();
+  });
+  el.pickCard.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pickFile(); }
+  });
+  el.fileInput.addEventListener("change", function () {
+    if (el.fileInput.files && el.fileInput.files[0]) loadFile(el.fileInput.files[0]);
+    el.fileInput.value = "";
+  });
+
+  ["dragenter", "dragover"].forEach(function (name) {
+    document.addEventListener(name, function (e) {
+      e.preventDefault();
+      if (!state.busy) el.pickCard.classList.add("dragover");
+    });
+  });
+  ["dragleave", "drop"].forEach(function (name) {
+    document.addEventListener(name, function (e) {
+      e.preventDefault();
+      el.pickCard.classList.remove("dragover");
+    });
+  });
+  document.addEventListener("drop", function (e) {
+    if (state.busy) return;
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) loadFile(f);
+  });
+
+  function readOptions() {
+    var width = Math.round(num(el.width.value, 0));
+    if (width < 0) width = 0;
+    var fps = Math.round(num(el.fps.value, 30));
+    fps = clamp(fps, 1, 60);
+    var start = Math.max(0, num(el.start.value, 0));
+    var dur = Math.max(0, num(el.dur.value, 0));
+    return { width: width, fps: fps, start: start, dur: dur, dither: el.dither.value, loop: el.loop.checked, quality: el.mode.value === "quality" };
+  }
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise(function (resolve, reject) {
+      try {
+        canvas.toBlob(function (b) {
+          if (b) resolve(b);
+          else reject(new Error("Браузер не смог подготовить кадр."));
+        }, type, quality);
+      } catch (e) { reject(e); }
+    });
+  }
+
+  function seekTo(video, t) {
+    return new Promise(function (resolve) {
+      if (Math.abs(video.currentTime - t) < 0.012 && video.readyState >= 2) { resolve(); return; }
+      var done = false;
+      function finish() {
+        if (done) return; done = true;
+        video.removeEventListener("seeked", finish);
+        clearTimeout(timer);
+        resolve();
+      }
+      var timer = setTimeout(finish, 4000);
+      video.addEventListener("seeked", finish);
+      try { video.currentTime = t; } catch (e) { finish(); }
+    });
+  }
+
+  function waitVideoReady(video) {
+    return new Promise(function (resolve) {
+      if (video.readyState >= 2) { resolve(); return; }
+      var done = false;
+      function finish() {
+        if (done) return; done = true;
+        video.removeEventListener("loadeddata", finish);
+        clearTimeout(timer);
+        resolve();
+      }
+      var timer = setTimeout(finish, 4000);
+      video.addEventListener("loadeddata", finish);
+    });
+  }
+
+  function nextVideoFrame(video) {    return new Promise(function (resolve) {
+      var done = false;
+      function finish() {
+        if (done) return; done = true;
+        clearTimeout(timer);
+        resolve();
+      }
+      var timer = setTimeout(finish, 160);
+      if (video.requestVideoFrameCallback) {
+        try { video.requestVideoFrameCallback(finish); } catch (e) { requestAnimationFrame(finish); }
+      } else {
+        requestAnimationFrame(finish);
+      }
+    });
+  }
+
+  function drawTo(ctx, source, w, h) {
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(source, 0, 0, w, h);
+  }
+
+  async function samplePalette(video, start, dur, w, h, quality) {
+    var sampleW = Math.min(w, quality ? 240 : 180);
+    var sampleH = Math.max(1, Math.round(h * sampleW / w));
+    var canvas = document.createElement("canvas");
+    canvas.width = sampleW; canvas.height = sampleH;
+    var ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
+    var points = quality
+      ? [0, 0.14, 0.28, 0.43, 0.57, 0.71, 0.85, 0.99]
+      : (dur > 0.25 ? [0, 0.35, 0.7, 0.98] : [0]);
+    var parts = [];
+    var total = 0;
+    for (var i = 0; i < points.length; i++) {
+      await seekTo(video, start + dur * points[i]);
+      drawTo(ctx, video, sampleW, sampleH);
+      var frame = ctx.getImageData(0, 0, sampleW, sampleH);
+      var copy = new Uint8Array(frame.data.length);
+      copy.set(frame.data);
+      parts.push(copy);
+      total += copy.length;
+    }
+    var all = new Uint8Array(total);
+    var offset = 0;
+    for (var j = 0; j < parts.length; j++) {
+      all.set(parts[j], offset);
+      offset += parts[j].length;
+    }
+    return quantize(all, 256, { format: "rgb565" });
+  }
+
+  function indicesFor(rgba, w, h, palette, lut, dither) {
+    if (dither === "bayer") return applyBayer(rgba, w, h, lut);
+    if (dither === "sierra") return applySierra(rgba, w, h, palette, lut);
+    return applyNone(rgba, w, h, lut);
+  }
+
+  // Кадры кодируются сразу во время проигрывания: без JPEG-промежутка
+  // и с одной общей палитрой на весь GIF — это в разы быстрее.
+  // На слабом телефоне кадров будет меньше, но задержки берутся из времени
+  // видео, поэтому длительность GIF не меняется, а минуты кодирования уходят.
+  async function encodeVideoGif(video, start, dur, fps, w, h, dither, loop, quality, onProgress, isCancelled) {
+    var total = Math.max(1, Math.floor(dur * fps));
+    var delays = frameDelays(total, fps);
+    var palette = await samplePalette(video, start, dur, w, h, quality);
+    var lut = buildLut(palette);
+    if (isCancelled()) throw new Error("cancelled");
+
+    var canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    var ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
+    var enc = GIFEncoder();
+    var written = 0;
+
+    function emit(indices, delay) {
+      enc.writeFrame(indices, w, h, {
+        palette: written === 0 ? palette : null,
+        delay: Math.max(20, Math.round(delay)),
+        repeat: loop ? 0 : -1,
+        dispose: 1
+      });
+      written++;
+    }
+
+    function grab() {
+      var img = ctx.getImageData(0, 0, w, h);
+      var rgba = new Uint8Array(img.data.buffer);
+      return indicesFor(rgba, w, h, palette, lut, dither);
+    }
+
+    function progressByTime(t) {
+      onProgress(Math.max(0, Math.min(99, (t / dur) * 100)));
+    }
+
+    async function seekPass() {
+      for (var i = 0; i < total; i++) {
+        if (isCancelled()) throw new Error("cancelled");
+        await seekTo(video, start + i / fps);
+        drawTo(ctx, video, w, h);
+        emit(grab(), delays[i] || 100);
+        onProgress((i + 1) / total * 100);
+        await yieldFrame();
+      }
+    }
+
+    await seekTo(video, start);
+    var played = true;
+    try { await video.play(); } catch (e) { played = false; }
+
+    if (!played) {
+      await seekPass();
+    } else if (quality) {
+      // Медленно, но качественно: каждый кадр на месте, без пропусков.
+      var qStarted = Date.now();
+      var qLast = -1;
+      while (written < total && !isCancelled()) {
+        await nextVideoFrame(video);
+        if (isCancelled()) break;
+        var qTime = video.currentTime - start;
+        if (qTime < -0.05) {
+          if (video.ended) break;
+          continue;
+        }
+        var qTarget = Math.min(total - 1, Math.floor(qTime * fps));
+        if (qTarget > qLast) {
+          while (qLast < qTarget && written < total) {
+            drawTo(ctx, video, w, h);
+            emit(grab(), delays[written] || 100);
+            qLast++;
+            onProgress(written / total * 100);
+          }
+        }
+        if (video.ended) break;
+        if (Date.now() - qStarted > (dur * 6 + 60) * 1000) break;
+      }
+      try { video.pause(); } catch (e) {}
+
+      if (isCancelled()) throw new Error("cancelled");
+      while (written < total) {
+        if (isCancelled()) throw new Error("cancelled");
+        drawTo(ctx, video, w, h);
+        emit(grab(), delays[written] || 100);
+        onProgress(written / total * 100);
+      }
+    } else {
+      // Быстрый режим: тайминг считаем по индексам кадров, а не по часам.
+      // Маленькие пропуски (1–2 кадра) дублируем, большие — закрываем одним
+      // кадром с длинной задержкой. Поэтому длительность GIF всегда совпадает
+      // с длительностью ролика, даже если телефон не успевает кодировать.
+      var startedAt = Date.now();
+      var lastAdvanceAt = Date.now();
+      var lastIndex = -1;
+      var emittedCs = 0;
+
+      function emitAt(index) {
+        var desired = Math.round((index + 1) * 100 / fps);
+        var delayCs = Math.max(1, desired - emittedCs);
+        emittedCs = desired;
+        drawTo(ctx, video, w, h);
+        emit(grab(), delayCs * 10);
+      }
+
+      while (lastIndex < total - 1 && !isCancelled()) {
+        await nextVideoFrame(video);
+        if (isCancelled()) break;
+        var t = video.currentTime - start;
+        if (t < -0.05) {
+          if (video.ended) break;
+          continue;
+        }
+        var target = Math.min(total - 1, Math.floor(t * fps));
+        if (target > lastIndex) {
+          lastAdvanceAt = Date.now();
+          var gap = target - lastIndex;
+          if (gap <= 2) {
+            while (lastIndex < target) {
+              lastIndex++;
+              emitAt(lastIndex);
+            }
+          } else {
+            lastIndex = target;
+            emitAt(target);
+          }
+          onProgress((lastIndex + 1) / total * 100);
+        }
+        if (video.ended) break;
+        if (Date.now() - startedAt > (dur + 10) * 1000) break;
+        if (Date.now() - lastAdvanceAt > 3000) break;
+      }
+      try { video.pause(); } catch (e) {}
+
+      if (isCancelled()) throw new Error("cancelled");
+      if (lastIndex < 0) {
+        await seekPass();
+      } else if (lastIndex < total - 1) {
+        lastIndex = total - 1;
+        emitAt(lastIndex);
+      }
+    }
+
+    if (isCancelled()) throw new Error("cancelled");
+    enc.finish();
+    onProgress(100);
+    return { blob: new Blob([enc.bytes()], { type: "image/gif" }), frames: written };
+  }
+
+  function decodeBlob(blob) {
+    if (window.createImageBitmap) {
+      return createImageBitmap(blob).catch(function () { return decodeBlobElement(blob); });
+    }
+    return decodeBlobElement(blob);
+  }
+  function decodeBlobElement(blob) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(blob);
+      img.onload = function () { img._objectUrl = url; resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("Не удалось прочитать кадр.")); };
+      img.src = url;
+    });
+  }
+
+  function releaseSource(src) {
+    if (!src) return;
+    if (src.close) { try { src.close(); } catch (e) {} }
+    if (src._objectUrl) { URL.revokeObjectURL(src._objectUrl); }
+  }
+
+  var BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+
+  // Таблица ближайших цветов 32×32×32 считается один раз на весь GIF.
+  // Иначе поиск по палитре выполнялся заново для каждого кадра — это и тормозило.
+  function buildLut(palette) {
+    var count = palette.length;
+    var pr = new Int32Array(count), pg = new Int32Array(count), pb = new Int32Array(count);
+    for (var k = 0; k < count; k++) {
+      var p = palette[k];
+      pr[k] = p[0]; pg[k] = p[1]; pb[k] = p[2];
+    }
+    var lut = new Uint8Array(32768);
+    for (var key = 0; key < 32768; key++) {
+      var r = ((key >> 10) & 31) * 8 + 4;
+      var g = ((key >> 5) & 31) * 8 + 4;
+      var b = (key & 31) * 8 + 4;
+      var best = 0, bestD = 1e9;
+      for (var i = 0; i < count; i++) {
+        var dr = r - pr[i], dg = g - pg[i], db = b - pb[i];
+        var d = dr * dr + dg * dg + db * db;
+        if (d < bestD) { bestD = d; best = i; }
+      }
+      lut[key] = best;
+    }
+    return lut;
+  }
+
+  function applyBayer(rgba, w, h, lut) {
+    var out = new Uint8Array(w * h);
+    var strength = 24;
+    for (var y = 0; y < h; y++) {
+      for (var x = 0; x < w; x++) {
+        var i = (y * w + x) * 4;
+        var m = (BAYER4[(y & 3) * 4 + (x & 3)] / 15 - 0.5) * strength;
+        var r = clamp(rgba[i] + m, 0, 255);
+        var g = clamp(rgba[i + 1] + m, 0, 255);
+        var b = clamp(rgba[i + 2] + m, 0, 255);
+        out[y * w + x] = lut[((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3)];
+      }
+    }
+    return out;
+  }
+
+  function applyNone(rgba, w, h, lut) {
+    var out = new Uint8Array(w * h);
+    for (var i = 0, p = 0; i < out.length; i++, p += 4) {
+      out[i] = lut[((rgba[p] >> 3) << 10) | ((rgba[p + 1] >> 3) << 5) | (rgba[p + 2] >> 3)];
+    }
+    return out;
+  }
+
+  function applySierra(rgba, w, h, palette, lut) {
+    var out = new Uint8Array(w * h);
+    var curR = new Float32Array(w), curG = new Float32Array(w), curB = new Float32Array(w);
+    var nextR = new Float32Array(w), nextG = new Float32Array(w), nextB = new Float32Array(w);
+
+    for (var y = 0; y < h; y++) {
+      nextR.fill(0); nextG.fill(0); nextB.fill(0);
+      for (var x = 0; x < w; x++) {
+        var i = (y * w + x) * 4;
+        var r = clamp(rgba[i] + curR[x], 0, 255);
+        var g = clamp(rgba[i + 1] + curG[x], 0, 255);
+        var b = clamp(rgba[i + 2] + curB[x], 0, 255);
+
+        var idx = lut[((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3)];
+        out[y * w + x] = idx;
+
+        var q = palette[idx];
+        var er = r - q[0], eg = g - q[1], eb = b - q[2];
+        if (x + 1 < w) {
+          curR[x + 1] += er * 0.4375; curG[x + 1] += eg * 0.4375; curB[x + 1] += eb * 0.4375;
+        }
+        if (y + 1 < h) {
+          if (x > 0) {
+            nextR[x - 1] += er * 0.1875; nextG[x - 1] += eg * 0.1875; nextB[x - 1] += eb * 0.1875;
+          }
+          nextR[x] += er * 0.3125; nextG[x] += eg * 0.3125; nextB[x] += eb * 0.3125;
+          if (x + 1 < w) {
+            nextR[x + 1] += er * 0.0625; nextG[x + 1] += eg * 0.0625; nextB[x + 1] += eb * 0.0625;
+          }
+        }
+      }
+      var tr = curR; curR = nextR; nextR = tr;
+      var tg = curG; curG = nextG; nextG = tg;
+      var tb = curB; curB = nextB; nextB = tb;
+    }
+    return out;
+  }
+
+  function yieldFrame() {
+    return new Promise(function (r) { setTimeout(r, 0); });
+  }
+
+  function frameDelays(count, fps) {
+    var out = [];
+    var acc = 0;
+    for (var i = 0; i < count; i++) {
+      var cs = Math.round((i + 1) * 100 / fps) - acc;
+      if (cs < 1) cs = 1;
+      acc += cs;
+      out.push(cs * 10);
+    }
+    return out;
+  }
+
+  async function convert() {
+    if (!state.file || state.busy) return;
+    var opts = readOptions();
+    state.cancelled = false;
+    setBusy(true);
+    resetResult();
+    setProgress(0, "Готовлю…");
+
+    try {
+      var w, h, frameCount, blob;
+
+      if (state.kind === "image") {
+        w = opts.width > 0 ? Math.min(opts.width, state.width) : state.width;
+        w = Math.max(1, Math.round(w));
+        h = Math.max(1, Math.round(state.height * w / state.width));
+        var canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext("2d", { alpha: false, willReadFrequently: true });
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+        drawTo(ctx, state.bitmap, w, h);
+        setProgress(30, "Кодирую GIF…");
+        var img = ctx.getImageData(0, 0, w, h);
+        var rgba = new Uint8Array(img.data.buffer);
+        var palette = quantize(rgba, 256, { format: "rgb565" });
+        var lut = buildLut(palette);
+        var indices = indicesFor(rgba, w, h, palette, lut, opts.dither);
+        var enc = GIFEncoder();
+        enc.writeFrame(indices, w, h, {
+          palette: palette,
+          delay: 100,
+          repeat: opts.loop ? 0 : -1,
+          dispose: 1
+        });
+        enc.finish();
+        blob = new Blob([enc.bytes()], { type: "image/gif" });
+        frameCount = 1;
+      } else {
+        var video = state.video;
+        if (!video) throw new Error("Видео не открыто. Выберите файл заново.");
+        if (video.readyState < 2) await waitVideoReady(video);
+        if (video.readyState < 2) throw new Error("Видео ещё не готово. Попробуйте ещё раз.");
+        var duration = isFinite(video.duration) ? video.duration : state.duration;
+        var start = clamp(opts.start, 0, Math.max(0, duration - 0.05));
+        var dur = opts.dur > 0 ? Math.min(opts.dur, duration - start) : duration - start;
+        if (!(dur > 0.03)) throw new Error("Нечего конвертировать: проверьте начало и длительность.");
+
+        w = opts.width > 0 ? Math.min(opts.width, video.videoWidth) : video.videoWidth;
+        w = Math.max(1, Math.round(w));
+        h = Math.max(1, Math.round(video.videoHeight * w / video.videoWidth));
+        frameCount = Math.max(1, Math.floor(dur * opts.fps));
+        if (frameCount > MAX_FRAMES) {
+          throw new Error("Слишком много кадров (" + frameCount + "). Уменьшите длительность или FPS — максимум " + MAX_FRAMES + ".");
+        }
+
+        setProgress(2, "Подбираю палитру…");
+        var encoded = await encodeVideoGif(video, start, dur, opts.fps, w, h, opts.dither, opts.loop, opts.quality, function (p) {
+          setProgress(Math.round(p * 100), "Кодирую GIF… " + Math.round(p) + "%");
+        }, function () { return state.cancelled; });
+        blob = encoded.blob;
+        frameCount = encoded.frames;
+      }
+
+      state.resultBlob = blob;
+      state.resultUrl = URL.createObjectURL(blob);
+      el.resultImg.src = state.resultUrl;
+      el.resultMeta.textContent = w + "×" + h + " · " + frameCount + " кадр(ов) · " + fmtSize(blob.size);
+      el.resultCard.classList.add("on");
+      el.progressBar.style.width = "100%";
+      status("Готово. GIF можно скачать или отправить.", "ok");
+      setTimeout(function () {
+        try { el.resultCard.scrollIntoView({ behavior: "smooth", block: "nearest" }); } catch (e) {}
+      }, 60);
+    } catch (e) {
+      if (e && e.message === "cancelled") {
+        status("Отменено.", "");
+        el.progressBar.style.width = "0%";
+      } else {
+        status((e && e.message) || "Не удалось сделать GIF.", "err");
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function cancel() {
+    if (!state.busy) return;
+    state.cancelled = true;
+    status("Останавливаю…");
+  }
+
+  function download() {
+    if (!state.resultBlob || !state.resultUrl) return;
+    var a = document.createElement("a");
+    a.href = state.resultUrl;
+    a.download = "video2gif.gif";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 500);
+  }
+
+  async function share() {
+    if (!state.resultBlob) return;
+    try {
+      if (window.File && navigator.canShare) {
+        var f = new File([state.resultBlob], "video2gif.gif", { type: "image/gif" });
+        if (navigator.canShare({ files: [f] })) {
+          await navigator.share({ files: [f], title: "video2gif", text: "GIF из video2gif" });
+          return;
+        }
+      }
+    } catch (e) {
+      if (e && e.name === "AbortError") return;
+    }
+    download();
+  }
+
+  var THEME_KEYS = ["auto", "light", "dark", "snow", "halloween", "gta6", "gamesense"];
+  function themeDate(year, month, day, hour, minute) {
+    return new Date(year, month - 1, day, hour || 0, minute || 0, 0, 0);
+  }
+  function autoTheme() {
+    var now = new Date();
+    if (now >= themeDate(2026, 11, 18, 15, 0) && now < themeDate(2026, 11, 20, 0, 0)) {
+      return "gta6";
+    }
+    var m = now.getMonth();
+    var d = now.getDate();
+    if (m === 9 || (m === 10 && d === 1)) return "halloween";
+    if (m === 11 || (m === 0 && d === 1)) return "snow";
+    return "dark";
+  }
+  function applyTheme(theme) {
+    if (THEME_KEYS.indexOf(theme) < 0) theme = "auto";
+    var resolved = theme === "auto" ? autoTheme() : theme;
+    document.documentElement.setAttribute("data-theme", resolved);
+    if (el.themeSelect) el.themeSelect.value = theme;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      var bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+      if (bg) meta.setAttribute("content", bg);
+    }
+    try { localStorage.setItem("video2gif-mobile-theme", theme); } catch (e) {}
+  }
+  function initTheme() {
+    var q = null;
+    try { q = new URLSearchParams(window.location.search).get("theme"); } catch (e) {}
+    if (q && THEME_KEYS.indexOf(q) >= 0) {
+      applyTheme(q);
+      return;
+    }
+    var t = "auto";
+    try { t = localStorage.getItem("video2gif-mobile-theme") || "auto"; } catch (e) {}
+    applyTheme(t);
+    window.setInterval(function () {
+      if (el.themeSelect && el.themeSelect.value === "auto") applyTheme("auto");
+    }, 60000);
+  }
+
+  function saveSettings() {
+    try {
+      localStorage.setItem("video2gif-mobile-settings", JSON.stringify({
+        width: el.width.value, fps: el.fps.value, dither: el.dither.value,
+        mode: el.mode.value, loop: el.loop.checked
+      }));
+    } catch (e) {}
+  }
+  function loadSettings() {
+    try {
+      var s = JSON.parse(localStorage.getItem("video2gif-mobile-settings") || "null");
+      if (!s) return;
+      if (s.width != null) el.width.value = s.width;
+      if (s.fps != null) el.fps.value = s.fps;
+      if (s.dither) el.dither.value = s.dither;
+      if (s.mode) el.mode.value = s.mode;
+      if (typeof s.loop === "boolean") el.loop.checked = s.loop;
+    } catch (e) {}
+  }
+
+  el.convert.addEventListener("click", convert);
+  el.cancel.addEventListener("click", cancel);
+  el.download.addEventListener("click", download);
+  el.share.addEventListener("click", share);
+  if (el.themeSelect) {
+    el.themeSelect.addEventListener("change", function () {
+      applyTheme(el.themeSelect.value);
+    });
+  }
+  [el.width, el.fps, el.dither, el.mode, el.loop].forEach(function (node) {
+    node.addEventListener("change", saveSettings);
+  });
+
+  initTheme();
+  loadSettings();
+  setBusy(false);
+  applyKind(null);
+  status("Выберите файл, чтобы начать.");
+})();
+</script>
+<script>
+(function () {
+  var card = document.getElementById("downloadCard");
+  var androidApp = !!window.AndroidBridge;
+  var note = document.getElementById("webNote");
+  if (!androidApp) {
+    if (card && card.parentNode) card.parentNode.removeChild(card);
+    if (note) {
+      note.innerHTML = "<b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются. Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM. Скачивание видео и картинок — в Android‑приложении и Windows‑версии <b>Video2Gif.exe</b>. YouTube и Spotify — только в Windows.";
+    }
+    return;
+  }
+
+  var input = document.getElementById("mediaUrl");
+  var downloadBtn = document.getElementById("downloadLinkBtn");
+  var statusEl = document.getElementById("downloadStatus");
+  if (!input || !downloadBtn || !statusEl) return;
+  if (card) card.hidden = false;
+
+  var linkLabel = document.querySelector('label[for="mediaUrl"]');
+  if (linkLabel) linkLabel.textContent = "Ссылка на TikTok или прямая ссылка";
+  input.placeholder = "https://www.tiktok.com/@…/video/…";
+  statusEl.textContent = "Вставьте ссылку TikTok, видео или картинки. YouTube и Spotify — в Windows-версии.";
+  if (note) {
+    note.innerHTML = "<b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются. Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM. Прямые ссылки и TikTok можно скачать здесь; YouTube и Spotify — в Windows‑версии <b>Video2Gif.exe</b>.";
+  }
+
+  function setStatus(text, kind, link) {
+    statusEl.textContent = text;
+    statusEl.className = "note" + (kind ? " " + kind : "");
+    if (link) {
+      var a = document.createElement("a");
+      a.href = link;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = " Открыть видео";
+      statusEl.appendChild(a);
+    }
+  }
+  function makeName(text, fallbackExt) {
+    var name = String(text || "file").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+    if (name.length > 60) name = name.slice(0, 60);
+    if (/\.(mp4|m4v|mov|webm|gif|png|jpe?g|webp)$/i.test(name)) return name;
+    return (name || "file") + (fallbackExt || ".mp4");
+  }
+  function withExt(name, mime) {
+    if (/\.(mp4|m4v|mov|webm|gif|png|jpe?g|webp)$/i.test(name)) return name;
+    var type = String(mime || "").toLowerCase();
+    if (type.indexOf("image/gif") === 0) return name + ".gif";
+    if (type.indexOf("image/png") === 0) return name + ".png";
+    if (type.indexOf("image/jpeg") === 0) return name + ".jpg";
+    if (type.indexOf("image/jpg") === 0) return name + ".jpg";
+    if (type.indexOf("image/webp") === 0) return name + ".webp";
+    if (type.indexOf("video/webm") === 0) return name + ".webm";
+    if (type.indexOf("video/quicktime") === 0) return name + ".mov";
+    return name + ".mp4";
+  }
+  function saveBlob(blob, name) {
+    var a = document.createElement("a");
+    var url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = name;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+      if (a.parentNode) a.parentNode.removeChild(a);
+    }, 1500);
+  }
+  function openLink(url, name) {
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 1000);
+  }
+  var PROXIES = [
+    function (u) { return "https://api.codetabs.com/v1/proxy/?quest=" + encodeURIComponent(u); },
+    function (u) { return "https://api.allorigins.win/raw?url=" + encodeURIComponent(u); },
+    function (u) { return "https://corsproxy.io/?url=" + encodeURIComponent(u); }
+  ];
+  async function request(url, options, ms) {
+    var opt = options || {};
+    if (typeof AbortController !== "function") return await fetch(url, opt);
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, ms || 12000);
+    opt.signal = ctrl.signal;
+    try {
+      return await fetch(url, opt);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  function unescapeUrl(value) {
+    return String(value || "")
+      .replace(/\\u002F/gi, "/")
+      .replace(/\\\//g, "/")
+      .replace(/&amp;/g, "&");
+  }
+  function asVideoUrl(value) {
+    var s = unescapeUrl(value).trim();
+    if (!/^https?:\/\//i.test(s)) return "";
+    if (/\.(mp4|m4v|webm)(\?|#|$)/i.test(s)) return s;
+    if (/(tiktokcdn|byteoversea|akamaized\.net|ibytedtos|\/video\/tos-)/i.test(s)) return s;
+    return "";
+  }
+  var VIDEO_KEYS = ["hdplay", "hdPlay", "noWatermark", "nowm", "play", "playAddr", "play_addr",
+    "downloadAddr", "download_addr", "wmplay", "download", "video", "url"];
+  function collectVideos(node, out, depth) {
+    if (node === null || node === undefined || depth > 8 || out.length > 60) return;
+    if (typeof node === "string") {
+      var v = asVideoUrl(node);
+      if (v && out.indexOf(v) < 0) out.push(v);
+      return;
+    }
+    if (Array.isArray(node)) {
+      for (var i = 0; i < node.length; i++) collectVideos(node[i], out, depth + 1);
+      return;
+    }
+    if (typeof node !== "object") return;
+    var i2;
+    for (i2 = 0; i2 < VIDEO_KEYS.length; i2++) {
+      if (Object.prototype.hasOwnProperty.call(node, VIDEO_KEYS[i2])) {
+        collectVideos(node[VIDEO_KEYS[i2]], out, depth + 1);
+      }
+    }
+    var names = Object.keys(node);
+    for (i2 = 0; i2 < names.length; i2++) {
+      if (VIDEO_KEYS.indexOf(names[i2]) < 0) collectVideos(node[names[i2]], out, depth + 1);
+    }
+  }
+  async function fetchText(url) {
+    var tried = [];
+    try {
+      var r = await request(url, { cache: "no-store", credentials: "omit" });
+      if (r.ok) return await r.text();
+      tried.push("HTTP " + r.status);
+    } catch (e) {
+      tried.push("сеть");
+    }
+    for (var i = 0; i < PROXIES.length; i++) {
+      try {
+        var r2 = await request(PROXIES[i](url), { cache: "no-store", credentials: "omit" });
+        if (r2.ok) {
+          var text = await r2.text();
+          if (text && text.length > 20) return text;
+          tried.push("пусто");
+          continue;
+        }
+        tried.push("HTTP " + r2.status);
+      } catch (e2) {
+        tried.push("сеть");
+      }
+    }
+    throw new Error("источник недоступен (" + tried.join(", ") + ")");
+  }
+  async function fetchJsonDirect(url) {
+    var r = await request(url, { cache: "no-store", credentials: "omit" }, 12000);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    var text = await r.text();
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      throw new Error("не JSON");
+    }
+  }
+  function videosFromHtml(html) {
+    var text = unescapeUrl(html);
+    var out = [];
+    var re = /"(?:playAddr|play_addr|downloadAddr|download_addr|playApi)"\s*:\s*(?:"([^"]+)"|\{[\s\S]{0,2000}?\})/g;
+    var m;
+    while ((m = re.exec(text)) && out.length < 20) {
+      if (m[1]) {
+        var direct = asVideoUrl(m[1]);
+        if (direct && out.indexOf(direct) < 0) out.push(direct);
+        continue;
+      }
+      var block = text.slice(m.index, m.index + 1500);
+      var urls = block.match(/https?:\/\/[^"'\\\s]+/g) || [];
+      for (var i = 0; i < urls.length; i++) {
+        var v = asVideoUrl(urls[i]);
+        if (v && out.indexOf(v) < 0) out.push(v);
+      }
+    }
+    return out;
+  }
+  function apiCandidates(url) {
+    var enc = encodeURIComponent(url);
+    var raw = [
+      "https://tikwm.com/api/?url=" + enc + "&hd=1",
+      "https://www.tikwm.com/api/?url=" + enc + "&hd=1",
+      "https://api.tiklydown.eu.org/api/download?url=" + enc,
+      "https://api.douyin.wtf/api?url=" + enc
+    ];
+    var list = [];
+    for (var i = 0; i < raw.length; i++) {
+      list.push(raw[i]);
+      for (var j = 0; j < PROXIES.length; j++) list.push(PROXIES[j](raw[i]));
+    }
+    return list;
+  }
+  function raceFirst(tasks) {
+    return new Promise(function (resolve, reject) {
+      var left = tasks.length;
+      var done = false;
+      if (!left) {
+        reject(new Error("нет источников"));
+        return;
+      }
+      tasks.forEach(function (task) {
+        function fail() {
+          if (done) return;
+          left--;
+          if (left <= 0) {
+            done = true;
+            reject(new Error("нет ответа"));
+          }
+        }
+        Promise.resolve()
+          .then(task)
+          .then(function (value) {
+            if (done) return;
+            if (value) {
+              done = true;
+              resolve(value);
+              return;
+            }
+            fail();
+          }, fail);
+      });
+    });
+  }
+  async function resolveTikTok(url) {
+    var candidates = apiCandidates(url);
+    try {
+      var hit = await raceFirst(candidates.map(function (endpoint) {
+        return async function () {
+          var data = await fetchJsonDirect(endpoint);
+          var found = [];
+          collectVideos(data, found, 0);
+          if (!found.length) return null;
+          var title = "";
+          if (typeof data.title === "string") title = data.title;
+          else if (data.data && typeof data.data.title === "string") title = data.data.title;
+          return { video: found[0], title: title };
+        };
+      }));
+      if (hit) return hit;
+    } catch (e) {}
+    try {
+      var html = await fetchText(url);
+      var fromPage = videosFromHtml(html);
+      if (fromPage.length) return { video: fromPage[0], title: "" };
+    } catch (e2) {}
+    return null;
+  }
+  async function saveUrl(url, name) {
+    try {
+      var r = await request(url, { mode: "cors", cache: "no-store" }, 30000);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      var type = (r.headers.get("content-type") || "").toLowerCase();
+      if (type && type.indexOf("video/") < 0 && type.indexOf("image/") < 0 &&
+          type.indexOf("application/octet-stream") < 0) {
+        throw new Error("это не прямая ссылка на файл");
+      }
+      var blob = await r.blob();
+      if (blob.size < 1000) throw new Error("пустой файл");
+      var fileName = withExt(name, blob.type || type);
+      saveBlob(blob, fileName);
+      setStatus("Готово: " + fileName, "ok");
+    } catch (e) {
+      openLink(url, name);
+      setStatus("Не удалось сохранить автоматически — откройте файл и удерживайте его:", "", url);
+    }
+  }
+  function normalizeUrl(value) {
+    var url = String(value || "").trim();
+    if (!url) return "";
+    if (/^\/\//.test(url)) url = "https:" + url;
+    else if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(url)) url = "https://" + url.replace(/^\/+/, "");
+    if (/^https?:\/\/tiktok\.com\//i.test(url)) {
+      url = url.replace(/^https?:\/\/tiktok\.com/i, "https://www.tiktok.com");
+    }
+    return url;
+  }
+  function isTikTok(url) {
+    return /(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)/i.test(url);
+  }
+  async function downloadLink() {
+    var url = normalizeUrl(input.value);
+    var emptyText = androidApp
+      ? "Вставьте ссылку TikTok, видео или картинки."
+      : "Вставьте прямую ссылку на видео или картинку.";
+    if (!url) {
+      setStatus(emptyText, "err");
+      return;
+    }
+    input.value = url;
+    if (!/^https?:\/\//i.test(url)) {
+      setStatus(emptyText, "err");
+      return;
+    }
+    if (/(youtube\.com|youtu\.be)/i.test(url)) {
+      setStatus("YouTube — только в Windows-версии.", "err");
+      return;
+    }
+    if (/open\.spotify\.com|spotify\.link/i.test(url)) {
+      setStatus("Spotify — только в Windows-версии.", "err");
+      return;
+    }
+    if (isTikTok(url) && !androidApp) {
+      setStatus("TikTok — в Android-приложении и Windows-версии.", "err");
+      return;
+    }
+    downloadBtn.disabled = true;
+    try {
+      if (isTikTok(url)) {
+        setStatus("Получаем ссылку TikTok… Это может занять до минуты.", "");
+        var resolved = await resolveTikTok(url);
+        if (!resolved) {
+          openLink(url, "tiktok");
+          setStatus("TikTok не ответил — в браузере это зависит от доступности API. Откройте видео и сохраните вручную:", "", url);
+          return;
+        }
+        await saveUrl(resolved.video, makeName(resolved.title || "tiktok"));
+        return;
+      }
+      setStatus("Скачиваем файл…", "");
+      var clean = url.split("?")[0];
+      var base = clean.split("/").pop() || "file";
+      await saveUrl(url, makeName(base));
+    } catch (e) {
+      setStatus("Не удалось скачать: " + (e && e.message ? e.message : "ошибка"), "err");
+    } finally {
+      downloadBtn.disabled = false;
+    }
+  }
+  downloadBtn.addEventListener("click", downloadLink);
+  input.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    downloadLink();
+  });
+})();
+</script>
+<script>
+(function () {
+  var openBtn = document.getElementById("snakeBtn");
+  var overlay = document.getElementById("snakeOverlay");
+  var canvas = document.getElementById("snakeCanvas");
+  if (!openBtn || !overlay || !canvas) return;
+
+  var ctx = canvas.getContext("2d");
+  var COLS = 24, ROWS = 18, CELL = 20;
+  canvas.width = COLS * CELL;
+  canvas.height = ROWS * CELL;
+
+  var scoreEl = document.getElementById("snakeScore");
+  var bestEl = document.getElementById("snakeBest");
+  var msgEl = document.getElementById("snakeMsg");
+  var pauseBtn = document.getElementById("snakePause");
+  var closeBtn = document.getElementById("snakeClose");
+  var restartBtn = document.getElementById("snakeRestart");
+  var BEST_KEY = "video2gif-mobile-snake-best";
+
+  var snake, dir, nextDir, food, score, best, alive, paused, timer;
+  best = 0;
+  try { best = parseInt(localStorage.getItem(BEST_KEY) || "0", 10) || 0; } catch (e) {}
+  bestEl.textContent = best;
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function color(name, fallback) {
+    var value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return value || fallback;
+  }
+
+  function occupied(x, y) {
+    for (var i = 0; i < snake.length; i++) {
+      if (snake[i].x === x && snake[i].y === y) return true;
+    }
+    return false;
+  }
+
+  function placeFood() {
+    var free = [];
+    for (var y = 0; y < ROWS; y++) {
+      for (var x = 0; x < COLS; x++) {
+        if (!occupied(x, y)) free.push({ x: x, y: y });
+      }
+    }
+    food = free.length ? free[Math.floor(Math.random() * free.length)] : null;
+  }
+
+  function speedFor() {
+    return Math.max(70, 145 - score * 3);
+  }
+
+  function restart() {
+    clearInterval(timer);
+    snake = [{ x: 12, y: 9 }, { x: 11, y: 9 }, { x: 10, y: 9 }];
+    dir = { x: 1, y: 0 };
+    nextDir = { x: 1, y: 0 };
+    score = 0;
+    alive = true;
+    paused = false;
+    scoreEl.textContent = "0";
+    msgEl.textContent = "";
+    msgEl.className = "snake-msg";
+    pauseBtn.textContent = "Пауза";
+    placeFood();
+    draw();
+    timer = setInterval(tick, speedFor());
+  }
+
+  function applySpeed() {
+    clearInterval(timer);
+    timer = setInterval(tick, speedFor());
+  }
+
+  function tick() {
+    if (!alive || paused) return;
+    dir = nextDir;
+    var head = snake[0];
+    var nx = head.x + dir.x;
+    var ny = head.y + dir.y;
+    if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) return die();
+    var eating = food && nx === food.x && ny === food.y;
+    var limit = eating ? snake.length : snake.length - 1;
+    for (var i = 0; i < limit; i++) {
+      if (snake[i].x === nx && snake[i].y === ny) return die();
+    }
+    snake.unshift({ x: nx, y: ny });
+    if (eating) {
+      score++;
+      scoreEl.textContent = score;
+      if (score > best) {
+        best = score;
+        bestEl.textContent = best;
+        try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
+      }
+      placeFood();
+      applySpeed();
+    } else {
+      snake.pop();
+    }
+    draw();
+  }
+
+  function die() {
+    alive = false;
+    clearInterval(timer);
+    msgEl.textContent = "Игра окончена. Счёт: " + score;
+    msgEl.className = "snake-msg err";
+    draw();
+  }
+
+  function draw() {
+    var bg = color("--bg2", "#0b0d11");
+    var line = color("--line", "#262c37");
+    var accent = color("--accent", "#7aa7ff");
+    var err = color("--err", "#ff8a8a");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = line;
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 1;
+    for (var x = 0; x <= COLS; x++) {
+      ctx.beginPath();
+      ctx.moveTo(x * CELL + 0.5, 0);
+      ctx.lineTo(x * CELL + 0.5, ROWS * CELL);
+      ctx.stroke();
+    }
+    for (var y = 0; y <= ROWS; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * CELL + 0.5);
+      ctx.lineTo(COLS * CELL, y * CELL + 0.5);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    if (food) {
+      ctx.fillStyle = err;
+      roundRect(food.x * CELL + 4, food.y * CELL + 4, CELL - 8, CELL - 8, 4);
+    }
+
+    for (var i = snake.length - 1; i >= 0; i--) {
+      var s = snake[i];
+      ctx.globalAlpha = i === 0 ? 1 : Math.max(0.35, 1 - i / (snake.length + 4));
+      ctx.fillStyle = accent;
+      roundRect(s.x * CELL + 1.5, s.y * CELL + 1.5, CELL - 3, CELL - 3, 4);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function turn(dx, dy) {
+    if (!alive) return;
+    if (nextDir.x === -dx && nextDir.y === -dy) return;
+    nextDir = { x: dx, y: dy };
+    if (paused) setPaused(false);
+  }
+
+  function setPaused(value) {
+    if (!alive) return;
+    paused = value;
+    pauseBtn.textContent = paused ? "Продолжить" : "Пауза";
+    msgEl.textContent = paused ? "Пауза" : "";
+    msgEl.className = "snake-msg";
+    if (!paused) applySpeed();
+  }
+
+  function openGame() {
+    overlay.classList.add("on");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    restart();
+  }
+
+  function closeGame() {
+    overlay.classList.remove("on");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    clearInterval(timer);
+    alive = false;
+  }
+
+  window.__handleBack = function () {
+    if (overlay.classList.contains("on")) {
+      closeGame();
+      return true;
+    }
+    return false;
+  };
+
+  openBtn.addEventListener("click", openGame);
+  closeBtn.addEventListener("click", closeGame);
+  restartBtn.addEventListener("click", restart);
+  pauseBtn.addEventListener("click", function () { setPaused(!paused); });
+  overlay.addEventListener("click", function (e) {
+    if (e.target === overlay) closeGame();
+  });
+
+  var dirs = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-dir]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var d = dirs[btn.getAttribute("data-dir")];
+      if (d) turn(d[0], d[1]);
+    });
+  });
+
+  var sx = 0, sy = 0, tracking = false;
+  canvas.addEventListener("touchstart", function (e) {
+    var t = e.changedTouches[0];
+    sx = t.clientX;
+    sy = t.clientY;
+    tracking = true;
+  }, { passive: true });
+  canvas.addEventListener("touchmove", function (e) { e.preventDefault(); }, { passive: false });
+  canvas.addEventListener("touchend", function (e) {
+    if (!tracking) return;
+    tracking = false;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - sx;
+    var dy = t.clientY - sy;
+    if (Math.abs(dx) < 16 && Math.abs(dy) < 16) return;
+    if (Math.abs(dx) > Math.abs(dy)) turn(dx > 0 ? 1 : -1, 0);
+    else turn(0, dy > 0 ? 1 : -1);
+  }, { passive: true });
+
+  document.addEventListener("keydown", function (e) {
+    if (!overlay.classList.contains("on")) return;
+    var k = e.key;
+    if (k === "ArrowUp" || k === "w" || k === "W" || k === "ц" || k === "Ц") {
+      turn(0, -1); e.preventDefault();
+    } else if (k === "ArrowDown" || k === "s" || k === "S" || k === "ы" || k === "Ы") {
+      turn(0, 1); e.preventDefault();
+    } else if (k === "ArrowLeft" || k === "a" || k === "A" || k === "ф" || k === "Ф") {
+      turn(-1, 0); e.preventDefault();
+    } else if (k === "ArrowRight" || k === "d" || k === "D" || k === "в" || k === "В") {
+      turn(1, 0); e.preventDefault();
+    } else if (k === " " || k === "Spacebar") {
+      setPaused(!paused); e.preventDefault();
+    } else if (k === "Escape") {
+      closeGame();
+    }
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && overlay.classList.contains("on") && alive && !paused) setPaused(true);
+  });
+})();
+</script>
+</body>
+</html>
