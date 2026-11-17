@@ -158,7 +158,7 @@ namespace Video2Gif
 
     /* ------------------------------------------------------------------ Окно */
 
-    internal sealed class SettingsForm : Form
+    internal sealed class SettingsForm : ThemedForm
     {
         private readonly Action<string> pick;
         private readonly ThemeTile autoTile;

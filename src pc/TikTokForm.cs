@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace Video2Gif
 {
-    internal sealed class TikTokForm : Form
+    internal sealed class TikTokForm : ThemedForm
     {
         private FlatInput urlInput;
         private PillButton pasteButton;

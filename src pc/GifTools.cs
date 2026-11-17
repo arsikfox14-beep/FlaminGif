@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -9,7 +9,7 @@ using System.Windows.Forms;
 namespace Video2Gif
 {
     /// <summary>Разбор GIF на кадры и сборка GIF из папки с картинками.</summary>
-    internal sealed class GifToolsForm : Form
+    internal sealed class GifToolsForm : ThemedForm
     {
         private FlatInput gifInput;
         private FlatInput folderInput;

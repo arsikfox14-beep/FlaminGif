@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -6,7 +6,7 @@ using System.Windows.Forms;
 namespace Video2Gif
 {
     /// <summary>Маленькое окно обновления: скачивает exe с GitHub и перезапускает программу.</summary>
-    internal sealed class UpdateForm : Form
+    internal sealed class UpdateForm : ThemedForm
     {
         private readonly UpdateInfo info;
         private Label statusLabel;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -6,7 +6,7 @@ using System.Windows.Forms;
 namespace Video2Gif
 {
     /// <summary>Настройки подписи и второй картинки поверх кадра/видео.</summary>
-    internal sealed class OverlayForm : Form
+    internal sealed class OverlayForm : ThemedForm
     {
         public string Caption = "";
         public bool CaptionTop;

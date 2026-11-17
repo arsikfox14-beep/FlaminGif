@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace Video2Gif
 {
-    internal sealed class MediaDownloadForm : Form
+    internal sealed class MediaDownloadForm : ThemedForm
     {
         private readonly bool spotify;
         private FlatInput urlInput;

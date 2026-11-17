@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -650,7 +650,7 @@ namespace Video2Gif
     }
 
     /// <summary>Окно «Видеоредактор»: обрезка видео и кадрирование фото.</summary>
-    internal sealed class EditorForm : Form
+    internal sealed class EditorForm : ThemedForm
     {
         private EditorPreview preview;
         private RangeBar range;

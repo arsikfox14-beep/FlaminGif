@@ -6,7 +6,7 @@ using System.Windows.Forms;
 namespace Video2Gif
 {
     /// <summary>Окно выбора фона: цвет, картинка или GIF.</summary>
-    internal sealed class BackgroundForm : Form
+    internal sealed class BackgroundForm : ThemedForm
     {
         private readonly Label status;
 

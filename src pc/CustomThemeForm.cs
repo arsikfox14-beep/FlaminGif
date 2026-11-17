@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace Video2Gif
 {
     /// <summary>Маленькое окно создания своей темы: имя, основа и акцент.</summary>
-    internal sealed class CustomThemeForm : Form
+    internal sealed class CustomThemeForm : ThemedForm
     {
         private readonly TextBox nameInput;
         private readonly PillButton darkButton;
