@@ -182,7 +182,7 @@ namespace Video2Gif
             Text = "Настройки — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(428), Ui.P(660));
+            ClientSize = new Size(Ui.P(428), Ui.P(590));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -258,13 +258,13 @@ namespace Video2Gif
             gamesenseTile.Click += delegate { Choose("gamesense"); };
             Controls.Add(gamesenseTile);
 
-            Controls.Add(Lbl("Свои темы", Ui.Small, Ui.Muted, 24, 286, 220, 18));
+            Controls.Add(Lbl("Свои темы", Ui.Small, Ui.Muted, 24, 280, 220, 18));
 
             customButton = new PillButton();
             customButton.Ghost = true;
             customButton.Font = Ui.Small;
             customButton.Text = "— свои темы —";
-            customButton.SetBounds(Ui.P(24), Ui.P(308), Ui.P(196), Ui.P(30));
+            customButton.SetBounds(Ui.P(24), Ui.P(300), Ui.P(196), Ui.P(30));
             customButton.Click += delegate { ShowCustomMenu(); };
             Controls.Add(customButton);
 
@@ -272,7 +272,7 @@ namespace Video2Gif
             addCustom.Ghost = true;
             addCustom.Text = "Создать…";
             addCustom.Font = Ui.Small;
-            addCustom.SetBounds(Ui.P(228), Ui.P(308), Ui.P(80), Ui.P(30));
+            addCustom.SetBounds(Ui.P(228), Ui.P(300), Ui.P(80), Ui.P(30));
             addCustom.Click += delegate { CreateCustom(); };
             Controls.Add(addCustom);
 
@@ -280,16 +280,16 @@ namespace Video2Gif
             customDeleteButton.Ghost = true;
             customDeleteButton.Text = "Удалить";
             customDeleteButton.Font = Ui.Small;
-            customDeleteButton.SetBounds(Ui.P(316), Ui.P(308), Ui.P(88), Ui.P(30));
+            customDeleteButton.SetBounds(Ui.P(316), Ui.P(300), Ui.P(88), Ui.P(30));
             customDeleteButton.Click += delegate { DeleteCustom(); };
             Controls.Add(customDeleteButton);
 
-            Label backgroundStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 352, 270, 18);
+            Label backgroundStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 340, 280, 18);
             PillButton backgroundButton = new PillButton();
             backgroundButton.Ghost = true;
             backgroundButton.Text = "Фон…";
             backgroundButton.Font = Ui.Small;
-            backgroundButton.SetBounds(Ui.P(306), Ui.P(346), Ui.P(98), Ui.P(30));
+            backgroundButton.SetBounds(Ui.P(316), Ui.P(336), Ui.P(88), Ui.P(30));
             backgroundButton.Click += delegate
             {
                 using (BackgroundForm dialog = new BackgroundForm())
@@ -304,51 +304,47 @@ namespace Video2Gif
             Controls.Add(backgroundButton);
             RefreshBackgroundStatus(backgroundStatus);
 
-            Controls.Add(Lbl("Авто по дате: Хэллоуин 1 окт–1 ноя, Снежная 1 дек–1 янв,\n" +
-                "GTA 6 — 18 ноя 15:00 – 20 ноя 00:00.", Ui.Tiny, Ui.Faint,
-                24, 388, 380, 32));
-
             Controls.Add(Lbl("Тема применяется сразу и запоминается.", Ui.Tiny, Ui.Faint,
-                24, 422, 380, 18));
+                24, 378, 380, 18));
 
-            Controls.Add(Lbl("Язык интерфейса", Ui.Small, Ui.Muted, 24, 452, 220, 18));
+            Controls.Add(Lbl("Язык интерфейса", Ui.Small, Ui.Muted, 24, 404, 220, 18));
 
             PillButton ruButton = new PillButton();
             ruButton.Text = "Русский";
             ruButton.Font = Ui.Small;
-            ruButton.SetBounds(Ui.P(24), Ui.P(476), Ui.P(104), Ui.P(32));
+            ruButton.SetBounds(Ui.P(24), Ui.P(428), Ui.P(104), Ui.P(32));
             ruButton.Click += delegate { ChooseLanguage(Loc.Russian); };
             Controls.Add(ruButton);
 
             PillButton enButton = new PillButton();
             enButton.Text = "English";
             enButton.Font = Ui.Small;
-            enButton.SetBounds(Ui.P(136), Ui.P(476), Ui.P(104), Ui.P(32));
+            enButton.SetBounds(Ui.P(136), Ui.P(428), Ui.P(104), Ui.P(32));
             enButton.Click += delegate { ChooseLanguage(Loc.EnglishCode); };
             Controls.Add(enButton);
             ruButton.Accent = !Loc.IsEnglish;
             enButton.Accent = Loc.IsEnglish;
 
-            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 530, 300, 24));
+            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 474, 300, 24));
             Controls.Add(Lbl("Версия " + Program.Version + " · GitHub: " + Updater.Repo,
-                Ui.Tiny, Ui.Faint, 24, 556, 380, 18));
+                Ui.Tiny, Ui.Faint, 24, 500, 380, 18));
 
             updateButton = new PillButton();
             updateButton.Ghost = true;
             updateButton.Text = "Проверить обновления";
             updateButton.Font = Ui.Small;
-            updateButton.SetBounds(Ui.P(24), Ui.P(600), Ui.P(208), Ui.P(36));
+            updateButton.SetBounds(Ui.P(24), Ui.P(542), Ui.P(208), Ui.P(36));
             updateButton.Click += delegate { CheckUpdates(); };
             Controls.Add(updateButton);
 
-            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 578, 380, 18);
+            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 520, 380, 18);
             Controls.Add(updateStatus);
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(300), Ui.P(600), Ui.P(104), Ui.P(36));
+            done.SetBounds(Ui.P(300), Ui.P(542), Ui.P(104), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 

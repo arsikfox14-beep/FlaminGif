@@ -454,7 +454,7 @@ namespace Video2Gif
             if (form != null) form.BackColor = Bg;
 
             Card card = root as Card;
-            if (card != null) card.BackColor = Card;
+            if (card != null) card.BackColor = Color.Transparent;
 
             string tag = root.Tag as string;
             if (tag == "surface") root.BackColor = Card;
