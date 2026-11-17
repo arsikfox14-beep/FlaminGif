@@ -125,7 +125,7 @@ namespace Video2Gif
                 DrawSwatch(g, new Rectangle(x + Ui.P(38), y, d, d), SwatchAccent, Ui.Border);
             }
 
-            Ui.Write(g, Title, Ui.Bold,
+            Ui.Write(g, Title, Ui.Small,
                 new Rectangle(Ui.P(14), Ui.P(38), Width - Ui.P(28), Ui.P(18)),
                 Active ? Ui.Text : Ui.Muted, Ui.LeftMid);
 
@@ -178,11 +178,12 @@ namespace Video2Gif
         public SettingsForm(Action<string> pickTheme)
         {
             pick = pickTheme;
+            BackgroundSettings.Load();
 
             Text = "Настройки — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(428), Ui.P(590));
+            ClientSize = new Size(Ui.P(428), Ui.P(480));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -206,7 +207,7 @@ namespace Video2Gif
                     : seasonal == ThemeKind.Gta6
                         ? Color.FromArgb(255, 79, 163)
                         : Color.FromArgb(126, 126, 132);
-            autoTile.SetBounds(Ui.P(24), Ui.P(64), Ui.P(120), Ui.P(64));
+            autoTile.SetBounds(Ui.P(24), Ui.P(62), Ui.P(89), Ui.P(58));
             autoTile.Click += delegate { Choose("auto"); };
             Controls.Add(autoTile);
 
@@ -214,7 +215,7 @@ namespace Video2Gif
             lightTile.SwatchBg = Color.FromArgb(247, 247, 248);
             lightTile.SwatchCard = Color.White;
             lightTile.SwatchAccent = Color.FromArgb(23, 23, 23);
-            lightTile.SetBounds(Ui.P(154), Ui.P(64), Ui.P(120), Ui.P(64));
+            lightTile.SetBounds(Ui.P(121), Ui.P(62), Ui.P(89), Ui.P(58));
             lightTile.Click += delegate { Choose("light"); };
             Controls.Add(lightTile);
 
@@ -222,15 +223,15 @@ namespace Video2Gif
             darkTile.SwatchBg = Color.FromArgb(14, 14, 15);
             darkTile.SwatchCard = Color.FromArgb(24, 24, 26);
             darkTile.SwatchAccent = Color.FromArgb(242, 242, 243);
-            darkTile.SetBounds(Ui.P(284), Ui.P(64), Ui.P(120), Ui.P(64));
+            darkTile.SetBounds(Ui.P(218), Ui.P(62), Ui.P(89), Ui.P(58));
             darkTile.Click += delegate { Choose("dark"); };
             Controls.Add(darkTile);
 
-            newYearTile = MakeTile("newyear", "Снежная тема");
+            newYearTile = MakeTile("newyear", "Снежная");
             newYearTile.SwatchBg = Color.FromArgb(9, 21, 38);
             newYearTile.SwatchCard = Color.FromArgb(16, 34, 56);
             newYearTile.SwatchAccent = Color.FromArgb(126, 200, 255);
-            newYearTile.SetBounds(Ui.P(24), Ui.P(136), Ui.P(120), Ui.P(64));
+            newYearTile.SetBounds(Ui.P(315), Ui.P(62), Ui.P(89), Ui.P(58));
             newYearTile.Click += delegate { Choose("newyear"); };
             Controls.Add(newYearTile);
 
@@ -238,7 +239,7 @@ namespace Video2Gif
             halloweenTile.SwatchBg = Color.FromArgb(18, 12, 24);
             halloweenTile.SwatchCard = Color.FromArgb(29, 19, 38);
             halloweenTile.SwatchAccent = Color.FromArgb(255, 140, 66);
-            halloweenTile.SetBounds(Ui.P(154), Ui.P(136), Ui.P(120), Ui.P(64));
+            halloweenTile.SetBounds(Ui.P(24), Ui.P(126), Ui.P(89), Ui.P(58));
             halloweenTile.Click += delegate { Choose("halloween"); };
             Controls.Add(halloweenTile);
 
@@ -246,7 +247,7 @@ namespace Video2Gif
             gtaTile.SwatchBg = Color.FromArgb(10, 9, 12);
             gtaTile.SwatchCard = Color.FromArgb(22, 17, 27);
             gtaTile.SwatchAccent = Color.FromArgb(255, 79, 163);
-            gtaTile.SetBounds(Ui.P(284), Ui.P(136), Ui.P(120), Ui.P(64));
+            gtaTile.SetBounds(Ui.P(121), Ui.P(126), Ui.P(89), Ui.P(58));
             gtaTile.Click += delegate { Choose("gta6"); };
             Controls.Add(gtaTile);
 
@@ -254,17 +255,17 @@ namespace Video2Gif
             gamesenseTile.SwatchBg = Color.FromArgb(18, 18, 20);
             gamesenseTile.SwatchCard = Color.FromArgb(24, 24, 27);
             gamesenseTile.SwatchAccent = Color.FromArgb(88, 178, 124);
-            gamesenseTile.SetBounds(Ui.P(154), Ui.P(208), Ui.P(120), Ui.P(64));
+            gamesenseTile.SetBounds(Ui.P(218), Ui.P(126), Ui.P(89), Ui.P(58));
             gamesenseTile.Click += delegate { Choose("gamesense"); };
             Controls.Add(gamesenseTile);
 
-            Controls.Add(Lbl("Свои темы", Ui.Small, Ui.Muted, 24, 280, 220, 18));
+            Controls.Add(Lbl("Свои темы", Ui.Small, Ui.Muted, 24, 196, 220, 18));
 
             customButton = new PillButton();
             customButton.Ghost = true;
             customButton.Font = Ui.Small;
             customButton.Text = "— свои темы —";
-            customButton.SetBounds(Ui.P(24), Ui.P(300), Ui.P(196), Ui.P(30));
+            customButton.SetBounds(Ui.P(24), Ui.P(216), Ui.P(196), Ui.P(30));
             customButton.Click += delegate { ShowCustomMenu(); };
             Controls.Add(customButton);
 
@@ -272,7 +273,7 @@ namespace Video2Gif
             addCustom.Ghost = true;
             addCustom.Text = "Создать…";
             addCustom.Font = Ui.Small;
-            addCustom.SetBounds(Ui.P(228), Ui.P(300), Ui.P(80), Ui.P(30));
+            addCustom.SetBounds(Ui.P(228), Ui.P(216), Ui.P(80), Ui.P(30));
             addCustom.Click += delegate { CreateCustom(); };
             Controls.Add(addCustom);
 
@@ -280,16 +281,17 @@ namespace Video2Gif
             customDeleteButton.Ghost = true;
             customDeleteButton.Text = "Удалить";
             customDeleteButton.Font = Ui.Small;
-            customDeleteButton.SetBounds(Ui.P(316), Ui.P(300), Ui.P(88), Ui.P(30));
+            customDeleteButton.SetBounds(Ui.P(316), Ui.P(216), Ui.P(88), Ui.P(30));
             customDeleteButton.Click += delegate { DeleteCustom(); };
             Controls.Add(customDeleteButton);
 
-            Label backgroundStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 340, 280, 18);
+            Label backgroundStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 256, 280, 18);
+            backgroundStatus.AutoEllipsis = true;
             PillButton backgroundButton = new PillButton();
             backgroundButton.Ghost = true;
             backgroundButton.Text = "Фон…";
             backgroundButton.Font = Ui.Small;
-            backgroundButton.SetBounds(Ui.P(316), Ui.P(336), Ui.P(88), Ui.P(30));
+            backgroundButton.SetBounds(Ui.P(316), Ui.P(252), Ui.P(88), Ui.P(30));
             backgroundButton.Click += delegate
             {
                 using (BackgroundForm dialog = new BackgroundForm())
@@ -304,47 +306,44 @@ namespace Video2Gif
             Controls.Add(backgroundButton);
             RefreshBackgroundStatus(backgroundStatus);
 
-            Controls.Add(Lbl("Тема применяется сразу и запоминается.", Ui.Tiny, Ui.Faint,
-                24, 378, 380, 18));
-
-            Controls.Add(Lbl("Язык интерфейса", Ui.Small, Ui.Muted, 24, 404, 220, 18));
+            Controls.Add(Lbl("Язык интерфейса", Ui.Small, Ui.Muted, 24, 294, 220, 18));
 
             PillButton ruButton = new PillButton();
             ruButton.Text = "Русский";
             ruButton.Font = Ui.Small;
-            ruButton.SetBounds(Ui.P(24), Ui.P(428), Ui.P(104), Ui.P(32));
+            ruButton.SetBounds(Ui.P(24), Ui.P(316), Ui.P(104), Ui.P(32));
             ruButton.Click += delegate { ChooseLanguage(Loc.Russian); };
             Controls.Add(ruButton);
 
             PillButton enButton = new PillButton();
             enButton.Text = "English";
             enButton.Font = Ui.Small;
-            enButton.SetBounds(Ui.P(136), Ui.P(428), Ui.P(104), Ui.P(32));
+            enButton.SetBounds(Ui.P(136), Ui.P(316), Ui.P(104), Ui.P(32));
             enButton.Click += delegate { ChooseLanguage(Loc.EnglishCode); };
             Controls.Add(enButton);
             ruButton.Accent = !Loc.IsEnglish;
             enButton.Accent = Loc.IsEnglish;
 
-            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 474, 300, 24));
+            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 360, 300, 24));
             Controls.Add(Lbl("Версия " + Program.Version + " · GitHub: " + Updater.Repo,
-                Ui.Tiny, Ui.Faint, 24, 500, 380, 18));
+                Ui.Tiny, Ui.Faint, 24, 386, 380, 18));
 
             updateButton = new PillButton();
             updateButton.Ghost = true;
             updateButton.Text = "Проверить обновления";
             updateButton.Font = Ui.Small;
-            updateButton.SetBounds(Ui.P(24), Ui.P(542), Ui.P(208), Ui.P(36));
+            updateButton.SetBounds(Ui.P(24), Ui.P(428), Ui.P(208), Ui.P(36));
             updateButton.Click += delegate { CheckUpdates(); };
             Controls.Add(updateButton);
 
-            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 520, 380, 18);
+            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 406, 380, 18);
             Controls.Add(updateStatus);
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(300), Ui.P(542), Ui.P(104), Ui.P(36));
+            done.SetBounds(Ui.P(300), Ui.P(428), Ui.P(104), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 
