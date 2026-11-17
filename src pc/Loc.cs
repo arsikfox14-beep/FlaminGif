@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
@@ -249,9 +249,6 @@ namespace Video2Gif
             new KeyValuePair<string, string>("   ·   доступно: ", "   ·   available: "),
             new KeyValuePair<string, string>(" файл(ов).", " file(s).")
         };
-
-        private static DateTime nextScan;
-
         public static string Language { get; private set; }
 
         static Loc()

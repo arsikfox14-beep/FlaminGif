@@ -1,4 +1,4 @@
-package com.arsikfox14.video2gif;
+package com.video2gif.app;
 
 import android.Manifest;
 import android.annotation.SuppressLint;

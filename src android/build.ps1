@@ -1,4 +1,4 @@
-﻿# Собирает Video2Gif.apk без Gradle: aapt2 + javac + d8 + zipalign + apksigner.
+# Собирает Video2Gif.apk без Gradle: aapt2 + javac + d8 + zipalign + apksigner.
 # Требуется JDK 17+ и .sdk (см. setup-sdk.ps1).
 
 param(
@@ -98,7 +98,7 @@ if (!(Test-Path $ks)) {
     New-Item -ItemType Directory -Force -Path $ksDir | Out-Null
     & keytool -genkeypair -v -keystore $ks -alias video2gif -keyalg RSA -keysize 2048 `
         -validity 10000 -storepass video2gif -keypass video2gif `
-        -dname 'CN=video2gif, OU=Mobile, O=arsikfox14, C=RU'
+        -dname 'CN=video2gif, OU=Mobile, O=video2gif, C=RU'
     if ($LASTEXITCODE -ne 0) { throw 'keytool failed' }
 }
 
