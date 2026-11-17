@@ -300,6 +300,54 @@
   .note.err { color: var(--err); }
   .note a { color: var(--accent); text-decoration: underline; }
   footer.credits { color: var(--muted2); font-size: 11.5px; text-align: center; margin-top: 18px; }
+  .social { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .social a {
+    display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px;
+    border-radius: 999px; border: 1px solid var(--line); background: var(--card);
+    color: var(--text); text-decoration: none; font-size: 13px; font-weight: 600;
+  }
+  .social a svg { width: 16px; height: 16px; display: block; }
+  .social a.donate { color: #ff7a90; border-color: rgba(255,90,120,.4); }
+  .social a.discord { color: #8ea1ff; border-color: rgba(120,140,255,.35); }
+  .social a:active { transform: scale(.98); }
+  button.icon-btn {
+    width: 38px; height: 38px; padding: 0; flex: 0 0 auto; border-radius: 11px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; color: var(--muted);
+  }
+  button.icon-btn:hover { color: var(--text); border-color: var(--accent); }
+  button.icon-btn svg { width: 19px; height: 19px; display: block; }
+  .snake-overlay {
+    position: fixed; inset: 0; z-index: 200; display: none; padding: 14px;
+    align-items: center; justify-content: center;
+    background: rgba(4,6,10,.75); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+  .snake-overlay.on { display: flex; }
+  .snake-panel {
+    width: 100%; max-width: 520px; background: var(--card); color: var(--text);
+    border: 1px solid var(--line); border-radius: 18px; padding: 14px;
+    box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px;
+  }
+  .snake-head { display: flex; align-items: center; gap: 10px; }
+  .snake-head h2 { margin: 0; font-size: 18px; }
+  .snake-score { margin-left: auto; display: flex; gap: 12px; font-size: 12.5px; color: var(--muted); }
+  .snake-score b { color: var(--text); }
+  #snakeCanvas {
+    width: 100%; height: auto; display: block; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--bg2); touch-action: none;
+  }
+  .snake-msg { min-height: 18px; text-align: center; font-size: 13px; color: var(--muted); }
+  .snake-msg.err { color: var(--err); }
+  .snake-controls { display: flex; align-items: center; gap: 12px; }
+  .snake-actions { display: flex; flex-direction: column; gap: 8px; flex: 1 1 auto; }
+  .snake-actions button { padding: 10px; }
+  .dpad { display: grid; grid-template-columns: repeat(3, 46px); grid-template-rows: repeat(3, 46px); gap: 6px; }
+  .dpad button { padding: 0; font-size: 16px; border-radius: 10px; }
+  .dpad .up { grid-area: 1 / 2; }
+  .dpad .left { grid-area: 2 / 1; }
+  .dpad .right { grid-area: 2 / 3; }
+  .dpad .down { grid-area: 3 / 2; }
+  .snake-hint { margin: 0; font-size: 11px; color: var(--muted2); text-align: center; }
   .is-image .video-only { opacity: .5; }
   @media (max-width: 360px) {
     .grid { grid-template-columns: 1fr; }
@@ -318,6 +366,15 @@
       <p>видео и картинки → GIF</p>
     </div>
     <div class="spacer"></div>
+    <button id="snakeBtn" class="icon-btn" type="button" aria-label="Змейка" title="Змейка">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 8h10a5 5 0 0 1 5 5v1.2a2.8 2.8 0 0 1-5 1.6L15 14H9l-2 1.8a2.8 2.8 0 0 1-5-1.6V13a5 5 0 0 1 5-5Z"/>
+        <path d="M7 11v3M5.5 12.5h3"/>
+        <circle cx="16" cy="11" r=".9" fill="currentColor" stroke="none"/>
+        <circle cx="18" cy="13" r=".9" fill="currentColor" stroke="none"/>
+      </svg>
+    </button>
     <div class="ver">2.7 · mobile</div>
   </header>
 
@@ -433,7 +490,51 @@
     TikTok и прямые ссылки на видео можно скачать здесь; YouTube и Spotify — в Windows‑версии <b>Video2Gif.exe</b>.
   </p>
 
-  <footer class="credits">by DeepSeek v4.1 flash &amp; arsikfox14 &amp; dismasdismavich</footer>
+  <footer class="credits">
+    <div class="social">
+      <a class="donate" href="https://www.donationalerts.com/r/arsikfox16" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 21s-7.1-4.4-9.4-8.1C.5 9.9 1.7 6 5.3 5.2c2-.4 3.9.5 4.9 2 .4.5 1.3.5 1.6 0 1-1.5 2.9-2.4 4.9-2 3.6.8 4.8 4.7 2.7 7.7C19.1 16.6 12 21 12 21Z"/>
+        </svg>
+        Donate
+      </a>
+      <a class="discord" href="https://discord.gg/yMaS9HbjHV" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3c-.2.4-.5.9-.7 1.3a18.3 18.3 0 0 0-5.5 0C9 3.9 8.7 3.4 8.5 3a19.7 19.7 0 0 0-4.9 1.5C.5 9-.3 13.5.1 18a19.9 19.9 0 0 0 6 3c.5-.7.9-1.4 1.3-2.1-.7-.3-1.4-.6-2-1l.5-.4a14.2 14.2 0 0 0 12.1 0l.5.4c-.6.4-1.3.7-2 1 .4.7.8 1.5 1.3 2.1a19.8 19.8 0 0 0 6-3c.5-5.2-.8-9.6-3.5-13.6ZM8 15.3c-1.2 0-2.1-1.1-2.1-2.4S6.8 10.5 8 10.5s2.1 1.1 2.1 2.4S9.2 15.3 8 15.3Zm8 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.1 1.1 2.1 2.4-.9 2.4-2.1 2.4Z"/>
+        </svg>
+        Discord
+      </a>
+    </div>
+    by DeepSeek v4.1 flash &amp; arsikfox14 &amp; dismasdismavich
+  </footer>
+</div>
+
+<div class="snake-overlay" id="snakeOverlay" aria-hidden="true">
+  <div class="snake-panel" role="dialog" aria-modal="true" aria-labelledby="snakeTitle">
+    <div class="snake-head">
+      <h2 id="snakeTitle">Змейка</h2>
+      <div class="snake-score">
+        <span>Счёт: <b id="snakeScore">0</b></span>
+        <span>Рекорд: <b id="snakeBest">0</b></span>
+      </div>
+      <button id="snakeClose" class="icon-btn" type="button" aria-label="Закрыть">✕</button>
+    </div>
+    <canvas id="snakeCanvas" width="480" height="360"></canvas>
+    <div class="snake-msg" id="snakeMsg"></div>
+    <div class="snake-controls">
+      <div class="dpad">
+        <button class="up" data-dir="up" type="button" aria-label="Вверх">▲</button>
+        <button class="left" data-dir="left" type="button" aria-label="Влево">◀</button>
+        <button class="right" data-dir="right" type="button" aria-label="Вправо">▶</button>
+        <button class="down" data-dir="down" type="button" aria-label="Вниз">▼</button>
+      </div>
+      <div class="snake-actions">
+        <button id="snakePause" type="button">Пауза</button>
+        <button id="snakeRestart" type="button">Заново</button>
+      </div>
+    </div>
+    <p class="snake-hint">Свайп по полю, стрелки или кнопки. Пробел — пауза.</p>
+  </div>
 </div>
 
 <script>
@@ -1620,6 +1721,264 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     if (e.key !== "Enter") return;
     e.preventDefault();
     downloadLink();
+  });
+})();
+</script>
+<script>
+(function () {
+  var openBtn = document.getElementById("snakeBtn");
+  var overlay = document.getElementById("snakeOverlay");
+  var canvas = document.getElementById("snakeCanvas");
+  if (!openBtn || !overlay || !canvas) return;
+
+  var ctx = canvas.getContext("2d");
+  var COLS = 24, ROWS = 18, CELL = 20;
+  canvas.width = COLS * CELL;
+  canvas.height = ROWS * CELL;
+
+  var scoreEl = document.getElementById("snakeScore");
+  var bestEl = document.getElementById("snakeBest");
+  var msgEl = document.getElementById("snakeMsg");
+  var pauseBtn = document.getElementById("snakePause");
+  var closeBtn = document.getElementById("snakeClose");
+  var restartBtn = document.getElementById("snakeRestart");
+  var BEST_KEY = "video2gif-mobile-snake-best";
+
+  var snake, dir, nextDir, food, score, best, alive, paused, timer;
+  best = 0;
+  try { best = parseInt(localStorage.getItem(BEST_KEY) || "0", 10) || 0; } catch (e) {}
+  bestEl.textContent = best;
+
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function color(name, fallback) {
+    var value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return value || fallback;
+  }
+
+  function occupied(x, y) {
+    for (var i = 0; i < snake.length; i++) {
+      if (snake[i].x === x && snake[i].y === y) return true;
+    }
+    return false;
+  }
+
+  function placeFood() {
+    var free = [];
+    for (var y = 0; y < ROWS; y++) {
+      for (var x = 0; x < COLS; x++) {
+        if (!occupied(x, y)) free.push({ x: x, y: y });
+      }
+    }
+    food = free.length ? free[Math.floor(Math.random() * free.length)] : null;
+  }
+
+  function speedFor() {
+    return Math.max(70, 145 - score * 3);
+  }
+
+  function restart() {
+    clearInterval(timer);
+    snake = [{ x: 12, y: 9 }, { x: 11, y: 9 }, { x: 10, y: 9 }];
+    dir = { x: 1, y: 0 };
+    nextDir = { x: 1, y: 0 };
+    score = 0;
+    alive = true;
+    paused = false;
+    scoreEl.textContent = "0";
+    msgEl.textContent = "";
+    msgEl.className = "snake-msg";
+    pauseBtn.textContent = "Пауза";
+    placeFood();
+    draw();
+    timer = setInterval(tick, speedFor());
+  }
+
+  function applySpeed() {
+    clearInterval(timer);
+    timer = setInterval(tick, speedFor());
+  }
+
+  function tick() {
+    if (!alive || paused) return;
+    dir = nextDir;
+    var head = snake[0];
+    var nx = head.x + dir.x;
+    var ny = head.y + dir.y;
+    if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) return die();
+    var eating = food && nx === food.x && ny === food.y;
+    var limit = eating ? snake.length : snake.length - 1;
+    for (var i = 0; i < limit; i++) {
+      if (snake[i].x === nx && snake[i].y === ny) return die();
+    }
+    snake.unshift({ x: nx, y: ny });
+    if (eating) {
+      score++;
+      scoreEl.textContent = score;
+      if (score > best) {
+        best = score;
+        bestEl.textContent = best;
+        try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
+      }
+      placeFood();
+      applySpeed();
+    } else {
+      snake.pop();
+    }
+    draw();
+  }
+
+  function die() {
+    alive = false;
+    clearInterval(timer);
+    msgEl.textContent = "Игра окончена. Счёт: " + score;
+    msgEl.className = "snake-msg err";
+    draw();
+  }
+
+  function draw() {
+    var bg = color("--bg2", "#0b0d11");
+    var line = color("--line", "#262c37");
+    var accent = color("--accent", "#7aa7ff");
+    var err = color("--err", "#ff8a8a");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = line;
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 1;
+    for (var x = 0; x <= COLS; x++) {
+      ctx.beginPath();
+      ctx.moveTo(x * CELL + 0.5, 0);
+      ctx.lineTo(x * CELL + 0.5, ROWS * CELL);
+      ctx.stroke();
+    }
+    for (var y = 0; y <= ROWS; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * CELL + 0.5);
+      ctx.lineTo(COLS * CELL, y * CELL + 0.5);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    if (food) {
+      ctx.fillStyle = err;
+      roundRect(food.x * CELL + 4, food.y * CELL + 4, CELL - 8, CELL - 8, 4);
+    }
+
+    for (var i = snake.length - 1; i >= 0; i--) {
+      var s = snake[i];
+      ctx.globalAlpha = i === 0 ? 1 : Math.max(0.35, 1 - i / (snake.length + 4));
+      ctx.fillStyle = accent;
+      roundRect(s.x * CELL + 1.5, s.y * CELL + 1.5, CELL - 3, CELL - 3, 4);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function turn(dx, dy) {
+    if (!alive) return;
+    if (nextDir.x === -dx && nextDir.y === -dy) return;
+    nextDir = { x: dx, y: dy };
+    if (paused) setPaused(false);
+  }
+
+  function setPaused(value) {
+    if (!alive) return;
+    paused = value;
+    pauseBtn.textContent = paused ? "Продолжить" : "Пауза";
+    msgEl.textContent = paused ? "Пауза" : "";
+    msgEl.className = "snake-msg";
+    if (!paused) applySpeed();
+  }
+
+  function openGame() {
+    overlay.classList.add("on");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    restart();
+  }
+
+  function closeGame() {
+    overlay.classList.remove("on");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    clearInterval(timer);
+    alive = false;
+  }
+
+  window.__handleBack = function () {
+    if (overlay.classList.contains("on")) {
+      closeGame();
+      return true;
+    }
+    return false;
+  };
+
+  openBtn.addEventListener("click", openGame);
+  closeBtn.addEventListener("click", closeGame);
+  restartBtn.addEventListener("click", restart);
+  pauseBtn.addEventListener("click", function () { setPaused(!paused); });
+  overlay.addEventListener("click", function (e) {
+    if (e.target === overlay) closeGame();
+  });
+
+  var dirs = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+  Array.prototype.forEach.call(document.querySelectorAll("[data-dir]"), function (btn) {
+    btn.addEventListener("click", function () {
+      var d = dirs[btn.getAttribute("data-dir")];
+      if (d) turn(d[0], d[1]);
+    });
+  });
+
+  var sx = 0, sy = 0, tracking = false;
+  canvas.addEventListener("touchstart", function (e) {
+    var t = e.changedTouches[0];
+    sx = t.clientX;
+    sy = t.clientY;
+    tracking = true;
+  }, { passive: true });
+  canvas.addEventListener("touchmove", function (e) { e.preventDefault(); }, { passive: false });
+  canvas.addEventListener("touchend", function (e) {
+    if (!tracking) return;
+    tracking = false;
+    var t = e.changedTouches[0];
+    var dx = t.clientX - sx;
+    var dy = t.clientY - sy;
+    if (Math.abs(dx) < 16 && Math.abs(dy) < 16) return;
+    if (Math.abs(dx) > Math.abs(dy)) turn(dx > 0 ? 1 : -1, 0);
+    else turn(0, dy > 0 ? 1 : -1);
+  }, { passive: true });
+
+  document.addEventListener("keydown", function (e) {
+    if (!overlay.classList.contains("on")) return;
+    var k = e.key;
+    if (k === "ArrowUp" || k === "w" || k === "W" || k === "ц" || k === "Ц") {
+      turn(0, -1); e.preventDefault();
+    } else if (k === "ArrowDown" || k === "s" || k === "S" || k === "ы" || k === "Ы") {
+      turn(0, 1); e.preventDefault();
+    } else if (k === "ArrowLeft" || k === "a" || k === "A" || k === "ф" || k === "Ф") {
+      turn(-1, 0); e.preventDefault();
+    } else if (k === "ArrowRight" || k === "d" || k === "D" || k === "в" || k === "В") {
+      turn(1, 0); e.preventDefault();
+    } else if (k === " " || k === "Spacebar") {
+      setPaused(!paused); e.preventDefault();
+    } else if (k === "Escape") {
+      closeGame();
+    }
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden && overlay.classList.contains("on") && alive && !paused) setPaused(true);
   });
 })();
 </script>
