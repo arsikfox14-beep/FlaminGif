@@ -71,14 +71,11 @@ namespace Video2Gif
             opacityLabel.TextAlign = ContentAlignment.MiddleLeft;
             Controls.Add(opacityLabel);
 
-            TrackBar opacityBar = new TrackBar();
+            FlatSlider opacityBar = new FlatSlider();
             opacityBar.Minimum = 30;
             opacityBar.Maximum = 100;
-            opacityBar.TickStyle = TickStyle.None;
-            opacityBar.BackColor = Ui.Bg;
-            opacityBar.ForeColor = Ui.Text;
             opacityBar.Value = (int)Math.Round(BackgroundSettings.SurfaceOpacity * 100.0);
-            opacityBar.SetBounds(Ui.P(20), Ui.P(130), Ui.P(360), Ui.P(36));
+            opacityBar.SetBounds(Ui.P(24), Ui.P(130), Ui.P(352), Ui.P(28));
             Controls.Add(opacityBar);
 
             Action refreshOpacity = delegate
@@ -100,14 +97,11 @@ namespace Video2Gif
             windowLabel.TextAlign = ContentAlignment.MiddleLeft;
             Controls.Add(windowLabel);
 
-            TrackBar windowBar = new TrackBar();
+            FlatSlider windowBar = new FlatSlider();
             windowBar.Minimum = 0;
             windowBar.Maximum = 100;
-            windowBar.TickStyle = TickStyle.None;
-            windowBar.BackColor = Ui.Bg;
-            windowBar.ForeColor = Ui.Text;
             windowBar.Value = (int)Math.Round((1.0 - BackgroundSettings.BackgroundOpacity) * 100.0);
-            windowBar.SetBounds(Ui.P(20), Ui.P(188), Ui.P(360), Ui.P(36));
+            windowBar.SetBounds(Ui.P(24), Ui.P(188), Ui.P(352), Ui.P(28));
             Controls.Add(windowBar);
 
             Action refreshWindow = delegate
