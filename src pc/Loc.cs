@@ -232,7 +232,9 @@ namespace Video2Gif
                 { "Сброс", "Reset" },
                 { "Фон виден за карточками. GIF анимируется.", "The background shows behind the cards. GIFs animate." },
                 { "Сейчас: стандартный фон темы", "Now: theme background" },
-                { "Выберите картинку или GIF", "Choose an image or GIF" }
+                { "Выберите картинку или GIF", "Choose an image or GIF" },
+                { "Получаем данные из Spotify…", "Getting data from Spotify…" },
+                { "Spotify ограничил доступ, пробуем другой способ…", "Spotify is restricted, trying another way…" }
             };
 
         private static readonly KeyValuePair<string, string>[] Prefixes =

@@ -64,8 +64,63 @@ namespace Video2Gif
         {
             string embed = BuildEmbedUrl(url);
             report(-1, "Получаем данные из Spotify…");
-            string html = Fetch(embed);
-            return ParseSelection(html);
+            try
+            {
+                string html = Fetch(embed);
+                return ParseSelection(html);
+            }
+            catch (ConversionException)
+            {
+                Match match = WebLink.Match(NormalizeUrl(url));
+                if (match.Success && string.Equals(match.Groups[1].Value, "track",
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    return ResolveViaOEmbed(match.Groups[2].Value, report);
+                }
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Spotify в некоторых странах отдаёт «недоступно» (451). oEmbed
+        /// обычно работает и без VPN — берём оттуда название трека.
+        /// </summary>
+        private static SpotifySelection ResolveViaOEmbed(string id, Action<int, string> report)
+        {
+            report(-1, "Spotify ограничил доступ, пробуем другой способ…");
+            string target = "https://open.spotify.com/track/" + id;
+            string api = "https://open.spotify.com/oembed?url=" + Uri.EscapeDataString(target);
+            string json = FetchUtf8(api);
+            JavaScriptSerializer serializer = new JavaScriptSerializer();
+            Dictionary<string, object> root =
+                serializer.DeserializeObject(json) as Dictionary<string, object>;
+            string title = root != null ? Str(Get(root, "title")).Trim() : "";
+            if (title.Length == 0)
+            {
+                throw new ConversionException("Не удалось прочитать ссылку Spotify.");
+            }
+
+            MediaTrack track = new MediaTrack();
+            track.Title = title;
+            SpotifySelection selection = new SpotifySelection();
+            selection.Tracks.Add(track);
+            return selection;
+        }
+
+        /// <summary>Добавляет https:// и приводит spotify.com к open.spotify.com.</summary>
+        private static string NormalizeUrl(string url)
+        {
+            string value = (url ?? "").Trim();
+            if (value.Length == 0) return value;
+            if (value.StartsWith("spotify:", StringComparison.OrdinalIgnoreCase)) return value;
+            if (value.StartsWith("//", StringComparison.Ordinal)) value = "https:" + value;
+            else if (!Regex.IsMatch(value, @"^[a-z][a-z0-9+.-]*://", RegexOptions.IgnoreCase))
+            {
+                value = "https://" + value.TrimStart('/');
+            }
+            value = Regex.Replace(value, @"^(https?://)(www\.)?spotify\.com/",
+                "$1open.spotify.com/", RegexOptions.IgnoreCase);
+            return value;
         }
 
         internal static List<MediaTrack> ParseHtml(string html)
@@ -170,6 +225,7 @@ namespace Video2Gif
 
         private static string BuildEmbedUrl(string url)
         {
+            url = NormalizeUrl(url);
             Match match = WebLink.Match(url ?? "");
             if (match.Success)
             {
@@ -183,6 +239,7 @@ namespace Video2Gif
             }
 
             string final = FollowRedirect(url);
+            final = NormalizeUrl(final);
             match = WebLink.Match(final ?? "");
             if (match.Success)
             {
@@ -209,6 +266,30 @@ namespace Video2Gif
             catch
             {
                 return url;
+            }
+        }
+
+        private static string FetchUtf8(string url)
+        {
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = "GET";
+                request.Timeout = 20000;
+                request.ReadWriteTimeout = 20000;
+                request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
+                request.Accept = "application/json";
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (MemoryStream memory = new MemoryStream())
+                {
+                    stream.CopyTo(memory);
+                    return Encoding.UTF8.GetString(memory.ToArray());
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ConversionException("Не удалось открыть ссылку Spotify: " + ex.Message);
             }
         }
 

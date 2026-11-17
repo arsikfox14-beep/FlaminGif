@@ -328,6 +328,23 @@ namespace Video2Gif
             }
         }
 
+        private static string NormalizeLink(string url)
+        {
+            string value = (url ?? "").Trim();
+            if (value.Length == 0) return value;
+            if (value.StartsWith("spotify:", StringComparison.OrdinalIgnoreCase)) return value;
+            if (value.StartsWith("//", StringComparison.Ordinal)) value = "https:" + value;
+            else if (value.IndexOf("://", StringComparison.Ordinal) < 0)
+            {
+                value = "https://" + value.TrimStart('/');
+            }
+            value = value.Replace("https://www.spotify.com/", "https://open.spotify.com/");
+            value = value.Replace("http://www.spotify.com/", "https://open.spotify.com/");
+            value = value.Replace("https://spotify.com/", "https://open.spotify.com/");
+            value = value.Replace("http://spotify.com/", "https://open.spotify.com/");
+            return value;
+        }
+
         private void StartDownload()
         {
             if (working) return;
@@ -338,6 +355,8 @@ namespace Video2Gif
                 SetStatus(spotify ? "Вставьте ссылку Spotify." : "Вставьте ссылку на видео или музыку.", true);
                 return;
             }
+            url = NormalizeLink(url);
+            urlInput.Value = url;
             if (!LooksLikeWeb(url) && !url.StartsWith("spotify:", StringComparison.OrdinalIgnoreCase))
             {
                 SetStatus("Это не похоже на ссылку.", true);
