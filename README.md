@@ -103,6 +103,7 @@ YouTube и Spotify — только в Windows. Подробности — в `s
   в цвет выбранной темы.
 - **Свои темы**: название, тёмная или светлая основа и цвет акцента;
   создаются и удаляются в настройках.
+- **Свой фон**: цвет или картинка/GIF за карточками приложения.
 - Автообновление с GitHub: проверка при запуске и кнопка
   «Проверить обновления» в настройках.
 - Перетаскивание файла в окно или на exe.
@@ -204,6 +205,7 @@ powershell -ExecutionPolicy Bypass -File "src android\build.ps1"
 - `src pc/MainForm.cs`, `src pc/MainForm.UI.cs` — главное окно;
 - `src pc/Theme.cs`, `src pc/Controls.cs` — темы, значки и элементы интерфейса;
 - `src pc/CustomThemes.cs`, `src pc/CustomThemeForm.cs` — свои темы: хранение и окно создания;
+- `src pc/BackgroundSettings.cs`, `src pc/BackgroundForm.cs` — свой фон: цвет, картинка или GIF;
 - `src pc/Settings.cs` — окно настроек с плитками тем, языком и обновлениями;
 - `src pc/Loc.cs` — русский и английский интерфейс;
 - `src pc/Updater.cs`, `src pc/UpdateForm.cs` — автообновление с GitHub и окно обновления;

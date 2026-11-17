@@ -22,6 +22,10 @@ namespace Video2Gif
             new System.Collections.Generic.List<string>();
         private Converter converter;
         private MemoryStream previewStream;
+        private Image backgroundImage;
+        private MemoryStream backgroundStream;
+        private EventHandler backgroundFrameHandler;
+        private bool backgroundAnimated;
         private int lastReportTick;
         private System.Windows.Forms.Timer themeTimer;
         private System.Windows.Forms.Timer shimmerTimer;
@@ -35,6 +39,8 @@ namespace Video2Gif
             else if (setting.Length == 0 || setting == "auto") Ui.SetThemeAuto(DateTime.Now);
             else Ui.SetTheme(setting);
             BuildUi();
+            BackgroundSettings.Load();
+            SetupBackground();
             EnableDrop(this);
             FormClosing += delegate { Shutdown(); };
             UpdateActions();
@@ -105,6 +111,18 @@ namespace Video2Gif
             }
 
             if (Ui.Holiday) DrawHolidayDecorations(g);
+
+            if (backgroundImage != null)
+            {
+                g.DrawImage(backgroundImage, ClientRectangle);
+            }
+            else if (BackgroundSettings.FillColor.HasValue)
+            {
+                using (SolidBrush brush = new SolidBrush(BackgroundSettings.FillColor.Value))
+                {
+                    g.FillRectangle(brush, ClientRectangle);
+                }
+            }
         }
 
         private void ShimmerTick()
@@ -1106,10 +1124,77 @@ namespace Video2Gif
             if (file != null) LoadVideo(file);
         }
 
+        /* ------------------------------------------------------------- Фон */
+
+        private void SetupBackground()
+        {
+            BackgroundSettings.Changed += ApplyBackground;
+            ApplyBackground();
+        }
+
+        private void ApplyBackground()
+        {
+            StopBackground();
+            string path = BackgroundSettings.ImagePath;
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            {
+                try
+                {
+                    backgroundStream = new MemoryStream(File.ReadAllBytes(path));
+                    backgroundImage = Image.FromStream(backgroundStream);
+                    if (ImageAnimator.CanAnimate(backgroundImage))
+                    {
+                        backgroundFrameHandler = OnBackgroundFrame;
+                        ImageAnimator.Animate(backgroundImage, backgroundFrameHandler);
+                        backgroundAnimated = true;
+                    }
+                }
+                catch
+                {
+                    StopBackground();
+                }
+            }
+            Invalidate(true);
+        }
+
+        private void OnBackgroundFrame(object sender, EventArgs e)
+        {
+            if (IsDisposed || !IsHandleCreated) return;
+            try
+            {
+                BeginInvoke((MethodInvoker)delegate { Invalidate(true); });
+            }
+            catch
+            {
+            }
+        }
+
+        private void StopBackground()
+        {
+            if (backgroundImage != null)
+            {
+                if (backgroundAnimated && backgroundFrameHandler != null)
+                {
+                    try { ImageAnimator.StopAnimate(backgroundImage, backgroundFrameHandler); } catch { }
+                }
+                backgroundImage.Dispose();
+                backgroundImage = null;
+            }
+            backgroundAnimated = false;
+            backgroundFrameHandler = null;
+            if (backgroundStream != null)
+            {
+                backgroundStream.Dispose();
+                backgroundStream = null;
+            }
+        }
+
         /* ------------------------------------------------------------- Очистка */
 
         private void Shutdown()
         {
+            BackgroundSettings.Changed -= ApplyBackground;
+            StopBackground();
             if (shimmerTimer != null)
             {
                 shimmerTimer.Stop();

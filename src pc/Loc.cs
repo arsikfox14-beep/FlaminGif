@@ -31,10 +31,10 @@ namespace Video2Gif
                 { "FFmpeg ещё готовится, подождите пару секунд.", "FFmpeg is still preparing, wait a couple of seconds." },
                 { "GIF будет повторяться без остановки", "GIF will loop forever" },
                 { "GIF-инструменты · кадры и сборка", "GIF tools · frames and assembly" },
-                { "GTA 6 — 18 ноября 15:00 – 20 ноября 00:00.", "GTA 6 — Nov 18, 15:00 – Nov 20, 00:00." },
+                { "GTA 6 — 18 ноя 15:00 – 20 ноя 00:00.", "GTA 6 — Nov 18, 15:00 – Nov 20, 00:00." },
                 { "Sierra — плавнее", "Sierra — smoother" },
                 { "YouTube и другие сайты", "YouTube and other sites" },
-                { "Авто по дате: Хэллоуин 1 окт–1 ноя, Снежная 1 дек–1 янв,\nGTA 6 — 18 ноября 15:00 – 20 ноября 00:00.", "Auto by date: Halloween Oct 1–Nov 1, Snowy Dec 1–Jan 1,\nGTA 6 — Nov 18, 15:00 – Nov 20, 00:00." },
+                { "Авто по дате: Хэллоуин 1 окт–1 ноя, Снежная 1 дек–1 янв,\nGTA 6 — 18 ноя 15:00 – 20 ноя 00:00.", "Auto by date: Halloween Oct 1–Nov 1, Snowy Dec 1–Jan 1,\nGTA 6 — Nov 18, 15:00 – Nov 20, 00:00." },
                 { "Авто", "Auto" },
                 { "Авторы", "Credits" },
                 { "Байер — компактнее", "Bayer — smaller" },
@@ -220,7 +220,17 @@ namespace Video2Gif
                 { "Название", "Name" },
                 { "Основа", "Base" },
                 { "Цвет акцента", "Accent color" },
-                { "Введите название темы.", "Enter a theme name." }
+                { "Введите название темы.", "Enter a theme name." },
+                { "Фон", "Background" },
+                { "Настроить фон…", "Set background…" },
+                { "не задан", "not set" },
+                { "Фон приложения", "App background" },
+                { "Цвет…", "Color…" },
+                { "Картинка или GIF…", "Image or GIF…" },
+                { "Сброс", "Reset" },
+                { "Фон виден за карточками. GIF анимируется.", "The background shows behind the cards. GIFs animate." },
+                { "Сейчас: стандартный фон темы", "Now: theme background" },
+                { "Выберите картинку или GIF", "Choose an image or GIF" }
             };
 
         private static readonly KeyValuePair<string, string>[] Prefixes =
@@ -245,6 +255,9 @@ namespace Video2Gif
             new KeyValuePair<string, string>("Ошибка: ", "Error: "),
             new KeyValuePair<string, string>("Скачано файлов: ", "Files downloaded: "),
             new KeyValuePair<string, string>("Своя тема — ", "Custom theme — "),
+            new KeyValuePair<string, string>("Фон — ", "Background — "),
+            new KeyValuePair<string, string>("Сейчас: цвет ", "Now: color "),
+            new KeyValuePair<string, string>("Сейчас: ", "Now: "),
             new KeyValuePair<string, string>("Удалить тему «", "Delete theme “"),
             new KeyValuePair<string, string>("Видеоредактор — ", "Video editor — "),
             new KeyValuePair<string, string>("GIF-инструменты — ", "GIF tools — "),

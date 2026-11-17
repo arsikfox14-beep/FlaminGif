@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -171,6 +172,7 @@ namespace Video2Gif
         private Label updateStatus;
         private PillButton customButton;
         private PillButton customDeleteButton;
+        private ContextMenuStrip customMenu;
         private bool checking;
 
         public SettingsForm(Action<string> pickTheme)
@@ -180,7 +182,7 @@ namespace Video2Gif
             Text = "Настройки — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(428), Ui.P(610));
+            ClientSize = new Size(Ui.P(428), Ui.P(700));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -257,37 +259,19 @@ namespace Video2Gif
             Controls.Add(gamesenseTile);
 
             Controls.Add(Lbl("Авто по дате: Хэллоуин 1 окт–1 ноя, Снежная 1 дек–1 янв,\n" +
-                "GTA 6 — 18 ноября 15:00 – 20 ноября 00:00.", Ui.Tiny, Ui.Faint,
+                "GTA 6 — 18 ноя 15:00 – 20 ноя 00:00.", Ui.Tiny, Ui.Faint,
                 24, 280, 380, 32));
 
             Controls.Add(Lbl("Тема применяется сразу и запоминается.", Ui.Tiny, Ui.Faint,
                 24, 316, 380, 18));
 
-            Controls.Add(Lbl("Язык интерфейса", Ui.Small, Ui.Muted, 24, 342, 220, 18));
-
-            PillButton ruButton = new PillButton();
-            ruButton.Text = "Русский";
-            ruButton.Font = Ui.Small;
-            ruButton.SetBounds(Ui.P(24), Ui.P(366), Ui.P(104), Ui.P(32));
-            ruButton.Click += delegate { ChooseLanguage(Loc.Russian); };
-            Controls.Add(ruButton);
-
-            PillButton enButton = new PillButton();
-            enButton.Text = "English";
-            enButton.Font = Ui.Small;
-            enButton.SetBounds(Ui.P(136), Ui.P(366), Ui.P(104), Ui.P(32));
-            enButton.Click += delegate { ChooseLanguage(Loc.EnglishCode); };
-            Controls.Add(enButton);
-            ruButton.Accent = !Loc.IsEnglish;
-            enButton.Accent = Loc.IsEnglish;
-
-            Controls.Add(Lbl("Свои темы", Ui.Small, Ui.Muted, 24, 414, 220, 18));
+            Controls.Add(Lbl("Свои темы", Ui.Small, Ui.Muted, 24, 342, 220, 18));
 
             customButton = new PillButton();
             customButton.Ghost = true;
             customButton.Font = Ui.Small;
             customButton.Text = "— свои темы —";
-            customButton.SetBounds(Ui.P(24), Ui.P(435), Ui.P(218), Ui.P(30));
+            customButton.SetBounds(Ui.P(24), Ui.P(366), Ui.P(218), Ui.P(30));
             customButton.Click += delegate { ShowCustomMenu(); };
             Controls.Add(customButton);
 
@@ -295,7 +279,7 @@ namespace Video2Gif
             addCustom.Ghost = true;
             addCustom.Text = "Создать…";
             addCustom.Font = Ui.Small;
-            addCustom.SetBounds(Ui.P(252), Ui.P(435), Ui.P(84), Ui.P(30));
+            addCustom.SetBounds(Ui.P(252), Ui.P(366), Ui.P(84), Ui.P(30));
             addCustom.Click += delegate { CreateCustom(); };
             Controls.Add(addCustom);
 
@@ -303,30 +287,68 @@ namespace Video2Gif
             customDeleteButton.Ghost = true;
             customDeleteButton.Text = "Удалить";
             customDeleteButton.Font = Ui.Small;
-            customDeleteButton.SetBounds(Ui.P(344), Ui.P(435), Ui.P(84), Ui.P(30));
+            customDeleteButton.SetBounds(Ui.P(344), Ui.P(366), Ui.P(84), Ui.P(30));
             customDeleteButton.Click += delegate { DeleteCustom(); };
             Controls.Add(customDeleteButton);
 
-            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 484, 300, 24));
+            Controls.Add(Lbl("Язык интерфейса", Ui.Small, Ui.Muted, 24, 414, 220, 18));
+
+            PillButton ruButton = new PillButton();
+            ruButton.Text = "Русский";
+            ruButton.Font = Ui.Small;
+            ruButton.SetBounds(Ui.P(24), Ui.P(438), Ui.P(104), Ui.P(32));
+            ruButton.Click += delegate { ChooseLanguage(Loc.Russian); };
+            Controls.Add(ruButton);
+
+            PillButton enButton = new PillButton();
+            enButton.Text = "English";
+            enButton.Font = Ui.Small;
+            enButton.SetBounds(Ui.P(136), Ui.P(438), Ui.P(104), Ui.P(32));
+            enButton.Click += delegate { ChooseLanguage(Loc.EnglishCode); };
+            Controls.Add(enButton);
+            ruButton.Accent = !Loc.IsEnglish;
+            enButton.Accent = Loc.IsEnglish;
+
+            Controls.Add(Lbl("Фон", Ui.Small, Ui.Muted, 24, 486, 220, 18));
+
+            PillButton backgroundButton = new PillButton();
+            backgroundButton.Ghost = true;
+            backgroundButton.Text = "Настроить фон…";
+            backgroundButton.Font = Ui.Small;
+            backgroundButton.SetBounds(Ui.P(24), Ui.P(510), Ui.P(218), Ui.P(30));
+            Label backgroundStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 548, 380, 18);
+            backgroundButton.Click += delegate
+            {
+                using (BackgroundForm dialog = new BackgroundForm())
+                {
+                    dialog.ShowDialog(this);
+                }
+                RefreshBackgroundStatus(backgroundStatus);
+            };
+            Controls.Add(backgroundButton);
+            Controls.Add(backgroundStatus);
+            RefreshBackgroundStatus(backgroundStatus);
+
+            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 578, 300, 24));
             Controls.Add(Lbl("Версия " + Program.Version + " · GitHub: " + Updater.Repo,
-                Ui.Tiny, Ui.Faint, 24, 510, 380, 18));
+                Ui.Tiny, Ui.Faint, 24, 604, 380, 18));
 
             updateButton = new PillButton();
             updateButton.Ghost = true;
             updateButton.Text = "Проверить обновления";
             updateButton.Font = Ui.Small;
-            updateButton.SetBounds(Ui.P(24), Ui.P(550), Ui.P(208), Ui.P(36));
+            updateButton.SetBounds(Ui.P(24), Ui.P(648), Ui.P(208), Ui.P(36));
             updateButton.Click += delegate { CheckUpdates(); };
             Controls.Add(updateButton);
 
-            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 528, 380, 18);
+            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 626, 380, 18);
             Controls.Add(updateStatus);
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(300), Ui.P(550), Ui.P(104), Ui.P(36));
+            done.SetBounds(Ui.P(300), Ui.P(648), Ui.P(104), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 
@@ -362,6 +384,25 @@ namespace Video2Gif
             }
         }
 
+        private void RefreshBackgroundStatus(Label label)
+        {
+            if (label == null) return;
+            if (!string.IsNullOrEmpty(BackgroundSettings.ImagePath))
+            {
+                label.Text = Path.GetFileName(BackgroundSettings.ImagePath);
+            }
+            else if (BackgroundSettings.FillColor.HasValue)
+            {
+                Color color = BackgroundSettings.FillColor.Value;
+                label.Text = "#" + color.R.ToString("X2") + color.G.ToString("X2") +
+                    color.B.ToString("X2");
+            }
+            else
+            {
+                label.Text = "не задан";
+            }
+        }
+
         private void RefreshCustomThemes()
         {
             if (customButton == null) return;
@@ -376,11 +417,16 @@ namespace Video2Gif
 
         private void ShowCustomMenu()
         {
+            if (customMenu != null)
+            {
+                customMenu.Dispose();
+                customMenu = null;
+            }
             ContextMenuStrip menu = new ContextMenuStrip();
+            customMenu = menu;
             menu.BackColor = Ui.Card;
             menu.ForeColor = Ui.Text;
             menu.Font = Ui.Small;
-            menu.Closed += delegate { menu.Dispose(); };
 
             bool any = false;
             foreach (CustomTheme theme in CustomThemes.All)
@@ -398,6 +444,16 @@ namespace Video2Gif
                 menu.Items.Add(empty);
             }
             menu.Show(customButton, new Point(0, customButton.Height));
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && customMenu != null)
+            {
+                customMenu.Dispose();
+                customMenu = null;
+            }
+            base.Dispose(disposing);
         }
 
         private void CreateCustom()
