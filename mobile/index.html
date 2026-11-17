@@ -930,44 +930,58 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
         onProgress(written / total * 100);
       }
     } else {
+      // Быстрый режим: тайминг считаем по индексам кадров, а не по часам.
+      // Маленькие пропуски (1–2 кадра) дублируем, большие — закрываем одним
+      // кадром с длинной задержкой. Поэтому длительность GIF всегда совпадает
+      // с длительностью ролика, даже если телефон не успевает кодировать.
       var startedAt = Date.now();
       var lastAdvanceAt = Date.now();
-      var pending = null;
-      var last = -1;
+      var lastIndex = -1;
+      var emittedCs = 0;
 
-      while (!isCancelled()) {
+      function emitAt(index) {
+        var desired = Math.round((index + 1) * 100 / fps);
+        var delayCs = Math.max(1, desired - emittedCs);
+        emittedCs = desired;
+        drawTo(ctx, video, w, h);
+        emit(grab(), delayCs * 10);
+      }
+
+      while (lastIndex < total - 1 && !isCancelled()) {
         await nextVideoFrame(video);
         if (isCancelled()) break;
-        var current = video.currentTime;
-        var t = current - start;
+        var t = video.currentTime - start;
         if (t < -0.05) {
           if (video.ended) break;
           continue;
         }
         var target = Math.min(total - 1, Math.floor(t * fps));
-        if (target > last) {
-          last = target;
+        if (target > lastIndex) {
           lastAdvanceAt = Date.now();
-          drawTo(ctx, video, w, h);
-          var indices = grab();
-          if (pending) {
-            emit(pending.indices, (current - pending.time) * 1000);
+          var gap = target - lastIndex;
+          if (gap <= 2) {
+            while (lastIndex < target) {
+              lastIndex++;
+              emitAt(lastIndex);
+            }
+          } else {
+            lastIndex = target;
+            emitAt(target);
           }
-          pending = { indices: indices, time: current };
-          progressByTime(t);
+          onProgress((lastIndex + 1) / total * 100);
         }
         if (video.ended) break;
         if (Date.now() - startedAt > (dur + 10) * 1000) break;
         if (Date.now() - lastAdvanceAt > 3000) break;
-        if (!pending && Date.now() - startedAt > 2500) break;
       }
       try { video.pause(); } catch (e) {}
 
       if (isCancelled()) throw new Error("cancelled");
-      if (!pending) {
+      if (lastIndex < 0) {
         await seekPass();
-      } else {
-        emit(pending.indices, 1000 / fps);
+      } else if (lastIndex < total - 1) {
+        lastIndex = total - 1;
+        emitAt(lastIndex);
       }
     }
 
