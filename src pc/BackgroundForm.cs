@@ -67,7 +67,8 @@ namespace Video2Gif
             opacityLabel.Font = Ui.Small;
             opacityLabel.ForeColor = Ui.Muted;
             opacityLabel.BackColor = Color.Transparent;
-            opacityLabel.SetBounds(Ui.P(24), Ui.P(112), Ui.P(352), Ui.P(18));
+            opacityLabel.SetBounds(Ui.P(24), Ui.P(112), Ui.P(352), Ui.P(20));
+            opacityLabel.TextAlign = ContentAlignment.MiddleLeft;
             Controls.Add(opacityLabel);
 
             TrackBar opacityBar = new TrackBar();
@@ -95,26 +96,27 @@ namespace Video2Gif
             windowLabel.Font = Ui.Small;
             windowLabel.ForeColor = Ui.Muted;
             windowLabel.BackColor = Color.Transparent;
-            windowLabel.SetBounds(Ui.P(24), Ui.P(170), Ui.P(352), Ui.P(18));
+            windowLabel.SetBounds(Ui.P(24), Ui.P(170), Ui.P(352), Ui.P(20));
+            windowLabel.TextAlign = ContentAlignment.MiddleLeft;
             Controls.Add(windowLabel);
 
             TrackBar windowBar = new TrackBar();
-            windowBar.Minimum = 50;
+            windowBar.Minimum = 0;
             windowBar.Maximum = 100;
             windowBar.TickStyle = TickStyle.None;
             windowBar.BackColor = Ui.Bg;
             windowBar.ForeColor = Ui.Text;
-            windowBar.Value = (int)Math.Round(BackgroundSettings.WindowOpacity * 100.0);
+            windowBar.Value = (int)Math.Round((1.0 - BackgroundSettings.BackgroundOpacity) * 100.0);
             windowBar.SetBounds(Ui.P(20), Ui.P(188), Ui.P(360), Ui.P(36));
             Controls.Add(windowBar);
 
             Action refreshWindow = delegate
             {
-                windowLabel.Text = "Прозрачность окон: " + windowBar.Value + "%";
+                windowLabel.Text = "Прозрачность фона: " + windowBar.Value + "%";
             };
             windowBar.ValueChanged += delegate
             {
-                BackgroundSettings.SetWindowOpacity(windowBar.Value / 100.0);
+                BackgroundSettings.SetBackgroundOpacity(1.0 - windowBar.Value / 100.0);
                 refreshWindow();
             };
             refreshWindow();

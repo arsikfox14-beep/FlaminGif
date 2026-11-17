@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -11,7 +11,7 @@ namespace Video2Gif
         public static Color? FillColor;
         public static string ImagePath = "";
         public static double SurfaceOpacity = 1.0;
-        public static double WindowOpacity = 1.0;
+        public static double BackgroundOpacity = 1.0;
 
         public static event Action Changed;
 
@@ -40,7 +40,7 @@ namespace Video2Gif
                 {
                     if (File.Exists(parts[1])) ImagePath = parts[1];
                     ReadOpacity(parts, 2);
-                    ReadWindowOpacity(parts, 3);
+                    ReadBackgroundOpacity(parts, 3);
                 }
                 else if (parts[0] == "color")
                 {
@@ -51,15 +51,15 @@ namespace Video2Gif
                         FillColor = Color.FromArgb(argb);
                     }
                     ReadOpacity(parts, 2);
-                    ReadWindowOpacity(parts, 3);
+                    ReadBackgroundOpacity(parts, 3);
                 }
                 else if (parts[0] == "opacity")
                 {
                     ReadOpacity(parts, 1);
-                    ReadWindowOpacity(parts, 2);
+                    ReadBackgroundOpacity(parts, 2);
                 }
                 Ui.SurfaceAlpha = SurfaceOpacity;
-                Ui.WindowOpacity = WindowOpacity;
+                Ui.BackgroundOpacity = BackgroundOpacity;
             }
             catch
             {
@@ -85,29 +85,29 @@ namespace Video2Gif
             Raise();
         }
 
-        private static void ReadWindowOpacity(string[] parts, int index)
+        private static void ReadBackgroundOpacity(string[] parts, int index)
         {
             if (parts.Length <= index) return;
             double value;
             if (double.TryParse(parts[index], NumberStyles.Float,
                 CultureInfo.InvariantCulture, out value))
             {
-                WindowOpacity = ClampWindow(value);
+                BackgroundOpacity = ClampAlpha(value);
             }
         }
 
-        public static void SetWindowOpacity(double value)
+        public static void SetBackgroundOpacity(double value)
         {
-            WindowOpacity = ClampWindow(value);
-            Ui.WindowOpacity = WindowOpacity;
+            BackgroundOpacity = ClampAlpha(value);
+            Ui.BackgroundOpacity = BackgroundOpacity;
             Flush();
             Raise();
-            Ui.ApplyWindowOpacity();
+            
         }
 
-        private static double ClampWindow(double value)
+        private static double ClampAlpha(double value)
         {
-            if (value < 0.5) return 0.5;
+            if (value < 0.0) return 0.0;
             if (value > 1.0) return 1.0;
             return value;
         }
@@ -152,20 +152,20 @@ namespace Video2Gif
                 string dir = Path.GetDirectoryName(path);
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 string opacity = SurfaceOpacity.ToString("0.###", CultureInfo.InvariantCulture);
-                string window = WindowOpacity.ToString("0.###", CultureInfo.InvariantCulture);
+                string background = BackgroundOpacity.ToString("0.###", CultureInfo.InvariantCulture);
                 string line;
                 if (!string.IsNullOrEmpty(ImagePath))
                 {
-                    line = "image\t" + ImagePath + "\t" + opacity + "\t" + window;
+                    line = "image\t" + ImagePath + "\t" + opacity + "\t" + background;
                 }
                 else if (FillColor.HasValue)
                 {
                     line = "color\t" + FillColor.Value.ToArgb().ToString("X8",
-                        CultureInfo.InvariantCulture) + "\t" + opacity + "\t" + window;
+                        CultureInfo.InvariantCulture) + "\t" + opacity + "\t" + background;
                 }
                 else
                 {
-                    line = "opacity\t" + opacity + "\t" + window;
+                    line = "opacity\t" + opacity + "\t" + background;
                 }
                 File.WriteAllText(path, line);
             }

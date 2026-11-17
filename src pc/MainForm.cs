@@ -112,13 +112,35 @@ namespace Video2Gif
 
             if (Ui.Holiday) DrawHolidayDecorations(g);
 
-            if (backgroundImage != null)
+            double alpha = BackgroundSettings.BackgroundOpacity;
+            if (backgroundImage != null && alpha > 0.001)
             {
-                g.DrawImage(backgroundImage, ClientRectangle);
+                if (alpha >= 0.999)
+                {
+                    g.DrawImage(backgroundImage, ClientRectangle);
+                }
+                else
+                {
+                    ColorMatrix matrix = new ColorMatrix();
+                    matrix.Matrix33 = (float)alpha;
+                    using (ImageAttributes attributes = new ImageAttributes())
+                    {
+                        attributes.SetColorMatrix(matrix, ColorMatrixFlag.Default,
+                            ColorAdjustType.Bitmap);
+                        g.DrawImage(backgroundImage, ClientRectangle, 0, 0,
+                            backgroundImage.Width, backgroundImage.Height,
+                            GraphicsUnit.Pixel, attributes);
+                    }
+                }
             }
-            else if (BackgroundSettings.FillColor.HasValue)
+            else if (BackgroundSettings.FillColor.HasValue && alpha > 0.001)
             {
-                using (SolidBrush brush = new SolidBrush(BackgroundSettings.FillColor.Value))
+                Color color = BackgroundSettings.FillColor.Value;
+                if (alpha < 0.999)
+                {
+                    color = Color.FromArgb((int)Math.Round(255 * alpha), color);
+                }
+                using (SolidBrush brush = new SolidBrush(color))
                 {
                     g.FillRectangle(brush, ClientRectangle);
                 }

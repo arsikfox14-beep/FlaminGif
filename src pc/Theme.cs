@@ -184,31 +184,8 @@ namespace Video2Gif
         /// <summary>Прозрачность серых карточек и плиток (0.3–1.0).</summary>
         public static double SurfaceAlpha = 1.0;
 
-        /// <summary>Прозрачность всех окон приложения (0.5–1.0).</summary>
-        public static double WindowOpacity = 1.0;
-
-        public static void ApplyWindowOpacity()
-        {
-            foreach (Form form in Application.OpenForms)
-            {
-                if (form == null) continue;
-                if (Math.Abs(form.Opacity - WindowOpacity) > 0.001)
-                {
-                    try { form.Opacity = WindowOpacity; } catch { }
-                }
-            }
-        }
-
-        public static void InstallWindowOpacityWatcher()
-        {
-            Timer timer = new Timer();
-            timer.Interval = 400;
-            timer.Tick += delegate
-            {
-                if (WindowOpacity < 0.999) ApplyWindowOpacity();
-            };
-            timer.Start();
-        }
+        /// <summary>Непрозрачность своего фона (0.0–1.0).</summary>
+        public static double BackgroundOpacity = 1.0;
 
         public static Color SurfaceColor(Color color)
         {
