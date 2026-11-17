@@ -11,6 +11,7 @@ namespace Video2Gif
         public static Color? FillColor;
         public static string ImagePath = "";
         public static double SurfaceOpacity = 1.0;
+        public static double WindowOpacity = 1.0;
 
         public static event Action Changed;
 
@@ -39,6 +40,7 @@ namespace Video2Gif
                 {
                     if (File.Exists(parts[1])) ImagePath = parts[1];
                     ReadOpacity(parts, 2);
+                    ReadWindowOpacity(parts, 3);
                 }
                 else if (parts[0] == "color")
                 {
@@ -49,12 +51,15 @@ namespace Video2Gif
                         FillColor = Color.FromArgb(argb);
                     }
                     ReadOpacity(parts, 2);
+                    ReadWindowOpacity(parts, 3);
                 }
                 else if (parts[0] == "opacity")
                 {
                     ReadOpacity(parts, 1);
+                    ReadWindowOpacity(parts, 2);
                 }
                 Ui.SurfaceAlpha = SurfaceOpacity;
+                Ui.WindowOpacity = WindowOpacity;
             }
             catch
             {
@@ -78,6 +83,33 @@ namespace Video2Gif
             Ui.SurfaceAlpha = SurfaceOpacity;
             Flush();
             Raise();
+        }
+
+        private static void ReadWindowOpacity(string[] parts, int index)
+        {
+            if (parts.Length <= index) return;
+            double value;
+            if (double.TryParse(parts[index], NumberStyles.Float,
+                CultureInfo.InvariantCulture, out value))
+            {
+                WindowOpacity = ClampWindow(value);
+            }
+        }
+
+        public static void SetWindowOpacity(double value)
+        {
+            WindowOpacity = ClampWindow(value);
+            Ui.WindowOpacity = WindowOpacity;
+            Flush();
+            Raise();
+            Ui.ApplyWindowOpacity();
+        }
+
+        private static double ClampWindow(double value)
+        {
+            if (value < 0.5) return 0.5;
+            if (value > 1.0) return 1.0;
+            return value;
         }
 
         private static double Clamp(double value)
@@ -120,19 +152,20 @@ namespace Video2Gif
                 string dir = Path.GetDirectoryName(path);
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 string opacity = SurfaceOpacity.ToString("0.###", CultureInfo.InvariantCulture);
+                string window = WindowOpacity.ToString("0.###", CultureInfo.InvariantCulture);
                 string line;
                 if (!string.IsNullOrEmpty(ImagePath))
                 {
-                    line = "image\t" + ImagePath + "\t" + opacity;
+                    line = "image\t" + ImagePath + "\t" + opacity + "\t" + window;
                 }
                 else if (FillColor.HasValue)
                 {
                     line = "color\t" + FillColor.Value.ToArgb().ToString("X8",
-                        CultureInfo.InvariantCulture) + "\t" + opacity;
+                        CultureInfo.InvariantCulture) + "\t" + opacity + "\t" + window;
                 }
                 else
                 {
-                    line = "opacity\t" + opacity;
+                    line = "opacity\t" + opacity + "\t" + window;
                 }
                 File.WriteAllText(path, line);
             }

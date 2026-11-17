@@ -30,6 +30,7 @@ namespace Video2Gif
             Application.SetCompatibleTextRenderingDefault(false);
             Loc.Load();
             Loc.InstallWatcher();
+            Ui.InstallWindowOpacityWatcher();
             try
             {
                 Application.Run(new MainForm());

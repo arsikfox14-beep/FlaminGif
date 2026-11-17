@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -16,7 +16,7 @@ namespace Video2Gif
             BackColor = Ui.Bg;
             ForeColor = Ui.Text;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(400), Ui.P(290));
+            ClientSize = new Size(Ui.P(400), Ui.P(300));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -30,7 +30,7 @@ namespace Video2Gif
             title.Font = Ui.H2;
             title.ForeColor = Ui.Text;
             title.BackColor = Color.Transparent;
-            title.SetBounds(Ui.P(24), Ui.P(18), Ui.P(340), Ui.P(26));
+            title.SetBounds(Ui.P(24), Ui.P(16), Ui.P(340), Ui.P(26));
             Controls.Add(title);
 
             status = new Label();
@@ -38,20 +38,20 @@ namespace Video2Gif
             status.ForeColor = Ui.Muted;
             status.BackColor = Color.Transparent;
             status.AutoEllipsis = true;
-            status.SetBounds(Ui.P(24), Ui.P(50), Ui.P(352), Ui.P(20));
+            status.SetBounds(Ui.P(24), Ui.P(44), Ui.P(352), Ui.P(20));
             Controls.Add(status);
 
             PillButton color = new PillButton();
             color.Text = "Цвет…";
             color.Font = Ui.Small;
-            color.SetBounds(Ui.P(24), Ui.P(86), Ui.P(110), Ui.P(34));
+            color.SetBounds(Ui.P(24), Ui.P(74), Ui.P(110), Ui.P(34));
             color.Click += delegate { PickColor(); };
             Controls.Add(color);
 
             PillButton image = new PillButton();
             image.Text = "Картинка или GIF…";
             image.Font = Ui.Small;
-            image.SetBounds(Ui.P(140), Ui.P(86), Ui.P(170), Ui.P(34));
+            image.SetBounds(Ui.P(140), Ui.P(74), Ui.P(170), Ui.P(34));
             image.Click += delegate { PickImage(); };
             Controls.Add(image);
 
@@ -59,7 +59,7 @@ namespace Video2Gif
             reset.Ghost = true;
             reset.Text = "Сброс";
             reset.Font = Ui.Small;
-            reset.SetBounds(Ui.P(316), Ui.P(86), Ui.P(60), Ui.P(34));
+            reset.SetBounds(Ui.P(316), Ui.P(74), Ui.P(60), Ui.P(34));
             reset.Click += delegate { BackgroundSettings.Clear(); UpdateStatus(); };
             Controls.Add(reset);
 
@@ -67,7 +67,7 @@ namespace Video2Gif
             opacityLabel.Font = Ui.Small;
             opacityLabel.ForeColor = Ui.Muted;
             opacityLabel.BackColor = Color.Transparent;
-            opacityLabel.SetBounds(Ui.P(24), Ui.P(132), Ui.P(352), Ui.P(18));
+            opacityLabel.SetBounds(Ui.P(24), Ui.P(112), Ui.P(352), Ui.P(18));
             Controls.Add(opacityLabel);
 
             TrackBar opacityBar = new TrackBar();
@@ -77,7 +77,7 @@ namespace Video2Gif
             opacityBar.BackColor = Ui.Bg;
             opacityBar.ForeColor = Ui.Text;
             opacityBar.Value = (int)Math.Round(BackgroundSettings.SurfaceOpacity * 100.0);
-            opacityBar.SetBounds(Ui.P(20), Ui.P(150), Ui.P(360), Ui.P(40));
+            opacityBar.SetBounds(Ui.P(20), Ui.P(130), Ui.P(360), Ui.P(36));
             Controls.Add(opacityBar);
 
             Action refreshOpacity = delegate
@@ -91,19 +91,39 @@ namespace Video2Gif
             };
             refreshOpacity();
 
-            Label hint = new Label();
-            hint.Text = "Фон виден за карточками. GIF анимируется.";
-            hint.Font = Ui.Tiny;
-            hint.ForeColor = Ui.Faint;
-            hint.BackColor = Color.Transparent;
-            hint.SetBounds(Ui.P(24), Ui.P(196), Ui.P(352), Ui.P(18));
-            Controls.Add(hint);
+            Label windowLabel = new Label();
+            windowLabel.Font = Ui.Small;
+            windowLabel.ForeColor = Ui.Muted;
+            windowLabel.BackColor = Color.Transparent;
+            windowLabel.SetBounds(Ui.P(24), Ui.P(170), Ui.P(352), Ui.P(18));
+            Controls.Add(windowLabel);
+
+            TrackBar windowBar = new TrackBar();
+            windowBar.Minimum = 50;
+            windowBar.Maximum = 100;
+            windowBar.TickStyle = TickStyle.None;
+            windowBar.BackColor = Ui.Bg;
+            windowBar.ForeColor = Ui.Text;
+            windowBar.Value = (int)Math.Round(BackgroundSettings.WindowOpacity * 100.0);
+            windowBar.SetBounds(Ui.P(20), Ui.P(188), Ui.P(360), Ui.P(36));
+            Controls.Add(windowBar);
+
+            Action refreshWindow = delegate
+            {
+                windowLabel.Text = "Прозрачность окон: " + windowBar.Value + "%";
+            };
+            windowBar.ValueChanged += delegate
+            {
+                BackgroundSettings.SetWindowOpacity(windowBar.Value / 100.0);
+                refreshWindow();
+            };
+            refreshWindow();
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(24), Ui.P(236), Ui.P(352), Ui.P(36));
+            done.SetBounds(Ui.P(24), Ui.P(242), Ui.P(352), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 

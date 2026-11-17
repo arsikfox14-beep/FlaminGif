@@ -262,6 +262,7 @@ namespace Video2Gif
             new KeyValuePair<string, string>("Сейчас: ", "Now: "),
             new KeyValuePair<string, string>("Фон: ", "Background: "),
             new KeyValuePair<string, string>("Прозрачность карточек: ", "Card opacity: "),
+            new KeyValuePair<string, string>("Прозрачность окон: ", "Window opacity: "),
             new KeyValuePair<string, string>("Удалить тему «", "Delete theme “"),
             new KeyValuePair<string, string>("Видеоредактор — ", "Video editor — "),
             new KeyValuePair<string, string>("GIF-инструменты — ", "GIF tools — "),
