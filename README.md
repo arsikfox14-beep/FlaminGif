@@ -75,9 +75,9 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 и добавить на экран «Домой» на iPhone.
 
 Темы те же, что в Windows-версии: авто по дате, светлая, тёмная, снежная,
-хэллоуин, GTA 6 и Gamesense. TikTok и прямые ссылки на видео можно скачать
-прямо в мобильной версии; YouTube и Spotify остаются только в
-Windows-версии `Video2Gif.exe`. Подробности — в `mobile/README.txt`.
+хэллоуин, GTA 6 и Gamesense. В браузере можно скачать видео или картинку
+по прямой ссылке; TikTok есть в Android-приложении и Windows-версии,
+YouTube и Spotify — только в Windows. Подробности — в `mobile/README.txt`.
 
 ## Возможности
 
