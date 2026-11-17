@@ -126,7 +126,7 @@ namespace Video2Gif
             }
 
             Ui.Write(g, Title, Ui.Small,
-                new Rectangle(Ui.P(14), Ui.P(38), Width - Ui.P(28), Ui.P(18)),
+                new Rectangle(Ui.P(14), Ui.P(34), Width - Ui.P(28), Ui.P(18)),
                 Active ? Ui.Text : Ui.Muted, Ui.LeftMid);
 
             if (Active)
