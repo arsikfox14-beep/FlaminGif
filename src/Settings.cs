@@ -178,7 +178,7 @@ namespace Video2Gif
             Text = "Настройки — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(428), Ui.P(470));
+            ClientSize = new Size(Ui.P(428), Ui.P(540));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -261,26 +261,44 @@ namespace Video2Gif
             Controls.Add(Lbl("Тема применяется сразу и запоминается.", Ui.Tiny, Ui.Faint,
                 24, 316, 380, 18));
 
-            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 340, 300, 24));
+            Controls.Add(Lbl("Язык интерфейса", Ui.Small, Ui.Muted, 24, 342, 220, 18));
+
+            PillButton ruButton = new PillButton();
+            ruButton.Text = "Русский";
+            ruButton.Font = Ui.Small;
+            ruButton.SetBounds(Ui.P(24), Ui.P(366), Ui.P(104), Ui.P(32));
+            ruButton.Click += delegate { ChooseLanguage(Loc.Russian); };
+            Controls.Add(ruButton);
+
+            PillButton enButton = new PillButton();
+            enButton.Text = "English";
+            enButton.Font = Ui.Small;
+            enButton.SetBounds(Ui.P(136), Ui.P(366), Ui.P(104), Ui.P(32));
+            enButton.Click += delegate { ChooseLanguage(Loc.EnglishCode); };
+            Controls.Add(enButton);
+            ruButton.Accent = !Loc.IsEnglish;
+            enButton.Accent = Loc.IsEnglish;
+
+            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 414, 300, 24));
             Controls.Add(Lbl("Версия " + Program.Version + " · GitHub: " + Updater.Repo,
-                Ui.Tiny, Ui.Faint, 24, 366, 380, 18));
+                Ui.Tiny, Ui.Faint, 24, 440, 380, 18));
 
             updateButton = new PillButton();
             updateButton.Ghost = true;
             updateButton.Text = "Проверить обновления";
             updateButton.Font = Ui.Small;
-            updateButton.SetBounds(Ui.P(24), Ui.P(410), Ui.P(208), Ui.P(36));
+            updateButton.SetBounds(Ui.P(24), Ui.P(480), Ui.P(208), Ui.P(36));
             updateButton.Click += delegate { CheckUpdates(); };
             Controls.Add(updateButton);
 
-            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 388, 380, 18);
+            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 458, 380, 18);
             Controls.Add(updateStatus);
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(300), Ui.P(410), Ui.P(104), Ui.P(36));
+            done.SetBounds(Ui.P(300), Ui.P(480), Ui.P(104), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 
@@ -302,6 +320,17 @@ namespace Video2Gif
             Ui.ApplyTheme(this);
             ApplyTitleBar();
             Invalidate(true);
+        }
+
+        private void ChooseLanguage(string code)
+        {
+            if (Loc.Language == code) return;
+            Loc.SaveLanguage(code);
+            if (MessageBox.Show(this, Loc.T("Перезапустить сейчас?"), Program.AppName,
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                Application.Restart();
+            }
         }
 
         private void RefreshActive()

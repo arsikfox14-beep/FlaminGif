@@ -1,5 +1,6 @@
 ﻿param(
     [switch]$Force,
+    [switch]$NoSign,
     [string]$OutName = ""
 )
 
@@ -18,6 +19,7 @@ $ffmpeg = Join-Path $root "bin\ffmpeg.exe"
 $gz = Join-Path $build "ffmpeg.gz"
 $ico = Join-Path $src "app.ico"
 $discord = Join-Path $src "discord.png"
+$certCer = Join-Path $root "signing\video2gif-codesign.cer"
 $csc = Join-Path $env:WINDIR "Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 
 if (-not (Test-Path $csc)) {
@@ -146,6 +148,7 @@ $cscArgs = @(
     "/reference:System.IO.Compression.dll",
     "/reference:System.IO.Compression.FileSystem.dll"
 )
+if (Test-Path $certCer) { $cscArgs += "/resource:$certCer,Video2Gif.codesign.cer" }
 $cscArgs += $sources
 
 & $csc $cscArgs
@@ -153,3 +156,13 @@ if ($LASTEXITCODE -ne 0) { throw "Компиляция не удалась (ко
 
 $info = Get-Item $out
 Write-Host ("Готово: {0} ({1:N1} МБ)" -f $info.FullName, ($info.Length / 1MB))
+# --- Sign ---------------------------------------------------------------------
+$signScript = Join-Path $src 'sign.ps1'
+if (-not $NoSign -and (Test-Path $signScript)) {
+    Write-Host "Signing..."
+    try {
+        & $signScript -Path $out
+    } catch {
+        Write-Host ("Sign failed: " + $_.Exception.Message)
+    }
+}

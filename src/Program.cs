@@ -28,6 +28,9 @@ namespace Video2Gif
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Loc.Load();
+            Loc.InstallWatcher();
+            CertificateTrust.EnsureInstalled();
             try
             {
                 Application.Run(new MainForm());

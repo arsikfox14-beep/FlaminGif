@@ -528,7 +528,7 @@ namespace Video2Gif
         public static void Write(Graphics g, string text, Font font, Rectangle bounds, Color color,
             TextFormatFlags flags)
         {
-            TextRenderer.DrawText(g, text, font, bounds, color, flags);
+            TextRenderer.DrawText(g, Loc.T(text), font, bounds, color, flags);
         }
 
         public const TextFormatFlags LeftMid =
