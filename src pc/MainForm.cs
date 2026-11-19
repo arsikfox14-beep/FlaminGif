@@ -35,8 +35,7 @@ namespace Video2Gif
         public MainForm()
         {
             string setting = LoadThemeSetting();
-            if (Ui.Gta6Window(DateTime.Now)) Ui.SetTheme(ThemeKind.Gta6);
-            else if (setting.Length == 0 || setting == "auto") Ui.SetThemeAuto(DateTime.Now);
+            if (setting.Length == 0 || setting == "auto") Ui.SetThemeAuto(DateTime.Now);
             else Ui.SetTheme(setting);
             BuildUi();
             BackgroundSettings.Load();
@@ -256,31 +255,10 @@ namespace Video2Gif
 
         private void RefreshScheduledTheme()
         {
-            DateTime now = DateTime.Now;
-            string setting = LoadThemeSetting();
-            bool savedGta6 =
-                setting == "gta6" || setting == "gta" || setting == "gta-6";
-
-            if (Ui.Gta6Window(now))
-            {
-                if (!Ui.Gta6)
-                {
-                    Ui.SetTheme(ThemeKind.Gta6);
-                    ApplyThemeNow();
-                }
-                return;
-            }
-
-            if (Ui.Gta6 && !savedGta6)
-            {
-                // Праздничное окно закончилось — возвращаем сохранённую тему.
-                if (setting.Length == 0 || setting == "auto") Ui.SetThemeAuto(now);
-                else Ui.SetTheme(setting);
-                ApplyThemeNow();
-                return;
-            }
-
-            if (Ui.RefreshAutoTheme(now)) ApplyThemeNow();
+            // Сезонную тему и GTA 6 включаем только в режиме «Авто».
+            // Если пользователь выбрал свою тему, её не трогаем.
+            if (!Ui.AutoTheme) return;
+            if (Ui.RefreshAutoTheme(DateTime.Now)) ApplyThemeNow();
         }
 
         private void ApplyThemeNow()

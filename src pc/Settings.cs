@@ -128,19 +128,6 @@ namespace Video2Gif
             Ui.Write(g, Title, Ui.Small,
                 new Rectangle(Ui.P(14), Ui.P(34), Width - Ui.P(28), Ui.P(18)),
                 Active ? Ui.Text : Ui.Muted, Ui.LeftMid);
-
-            if (Active)
-            {
-                using (Pen pen = new Pen(Ui.Accent, Math.Max(1.6f, Ui.P(1.6))))
-                {
-                    pen.StartCap = LineCap.Round;
-                    pen.EndCap = LineCap.Round;
-                    int cxp = Width - Ui.P(20);
-                    int cyp = Ui.P(21);
-                    g.DrawLine(pen, cxp - Ui.P(5), cyp, cxp - Ui.P(1), cyp + Ui.P(4));
-                    g.DrawLine(pen, cxp - Ui.P(1), cyp + Ui.P(4), cxp + Ui.P(6), cyp - Ui.P(4));
-                }
-            }
         }
 
         private static void DrawSwatch(Graphics g, Rectangle r, Color color, Color border)
