@@ -35,7 +35,8 @@ namespace Video2Gif
         public const string Repo = "arsikfox14-beep/video2gif";
 
         private const string Api = "https://api.github.com/repos/" + Repo + "/releases";
-        private static readonly string UserAgent = "Video2Gif/" + Program.Version;
+        private static readonly string UserAgent =
+            "Video2Gif/" + Program.Version.Replace(" ", "-");
 
         static Updater()
         {
@@ -467,8 +468,15 @@ namespace Video2Gif
             int[] result = new int[parts.Length];
             for (int i = 0; i < parts.Length; i++)
             {
-                int number;
-                int.TryParse(parts[i], NumberStyles.Integer, CultureInfo.InvariantCulture, out number);
+                string part = parts[i].Trim();
+                int end = 0;
+                while (end < part.Length && char.IsDigit(part[end])) end++;
+                int number = 0;
+                if (end > 0)
+                {
+                    int.TryParse(part.Substring(0, end), NumberStyles.Integer,
+                        CultureInfo.InvariantCulture, out number);
+                }
                 result[i] = number;
             }
             return result;

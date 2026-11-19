@@ -150,15 +150,12 @@ namespace Video2Gif
 
         private static string Prepare()
         {
-            string dir = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Video2Gif");
+            string dir = AppSettings.Folder;
             string exe = System.IO.Path.Combine(dir, "ffmpeg.exe");
-            string stamp = System.IO.Path.Combine(dir, "version.txt");
             string wanted = "ffmpeg-9.0.2 ess";
 
             if (File.Exists(exe) && new FileInfo(exe).Length > 20L * 1024L * 1024L &&
-                File.Exists(stamp) && File.ReadAllText(stamp).Trim() == wanted)
+                AppSettings.Get("ffmpeg.version", "") == wanted)
             {
                 return exe;
             }
@@ -185,7 +182,7 @@ namespace Video2Gif
 
                 if (File.Exists(exe)) File.Delete(exe);
                 File.Move(tmp, exe);
-                File.WriteAllText(stamp, wanted);
+                AppSettings.Set("ffmpeg.version", wanted);
             }
             catch (Exception ex)
             {
@@ -222,15 +219,12 @@ namespace Video2Gif
 
         private static string Prepare()
         {
-            string dir = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Video2Gif");
+            string dir = AppSettings.Folder;
             string exe = System.IO.Path.Combine(dir, "yt-dlp.exe");
-            string stamp = System.IO.Path.Combine(dir, "yt-dlp-version.txt");
             string wanted = "yt-dlp-2026.10.26";
 
             if (File.Exists(exe) && new FileInfo(exe).Length > 15L * 1024L * 1024L &&
-                File.Exists(stamp) && File.ReadAllText(stamp).Trim() == wanted)
+                AppSettings.Get("ytdlp.version", "") == wanted)
             {
                 return exe;
             }
@@ -257,7 +251,7 @@ namespace Video2Gif
 
                 if (File.Exists(exe)) File.Delete(exe);
                 File.Move(tmp, exe);
-                File.WriteAllText(stamp, wanted);
+                AppSettings.Set("ytdlp.version", wanted);
             }
             catch (Exception ex)
             {

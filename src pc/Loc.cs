@@ -7,7 +7,7 @@ namespace Video2Gif
 {
     /// <summary>
     /// Простая локализация: словарь русских строк и авто-перевод текста
-    /// элементов управления. Язык хранится в language.txt и применяется
+    /// элементов управления. Язык хранится в settings.txt и применяется
     /// после перезапуска.
     /// </summary>
     internal static class Loc
@@ -299,45 +299,16 @@ namespace Video2Gif
             get { return Language == EnglishCode; }
         }
 
-        private static string LanguagePath
-        {
-            get
-            {
-                return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Video2Gif", "language.txt");
-            }
-        }
-
         public static void Load()
         {
-            try
-            {
-                if (File.Exists(LanguagePath))
-                {
-                    string code = File.ReadAllText(LanguagePath).Trim().ToLowerInvariant();
-                    Language = code == EnglishCode ? EnglishCode : Russian;
-                }
-            }
-            catch
-            {
-                Language = Russian;
-            }
+            string code = AppSettings.Get("language", Russian).Trim().ToLowerInvariant();
+            Language = code == EnglishCode ? EnglishCode : Russian;
         }
 
         public static void SaveLanguage(string code)
         {
             Language = code == EnglishCode ? EnglishCode : Russian;
-            try
-            {
-                string path = LanguagePath;
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                File.WriteAllText(path, Language);
-            }
-            catch
-            {
-            }
+            AppSettings.Set("language", Language);
         }
 
         public static string T(string text)

@@ -17,63 +17,37 @@ namespace Video2Gif
 
         private static bool loaded;
 
-        private static string FilePath
-        {
-            get
-            {
-                return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Video2Gif", "background.txt");
-            }
-        }
-
         public static void Load()
         {
             if (loaded) return;
             loaded = true;
             try
             {
-                if (!File.Exists(FilePath)) return;
-                string[] parts = File.ReadAllText(FilePath).Trim().Split('\t');
-                if (parts.Length < 2) return;
-                if (parts[0] == "image")
+                string type = AppSettings.Get("background.type", "");
+                if (type == "image")
                 {
-                    if (File.Exists(parts[1])) ImagePath = parts[1];
-                    ReadOpacity(parts, 2);
-                    ReadBackgroundOpacity(parts, 3);
+                    string path = AppSettings.Get("background.path", "");
+                    if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                        ImagePath = path;
                 }
-                else if (parts[0] == "color")
+                else if (type == "color")
                 {
                     int argb;
-                    if (int.TryParse(parts[1], NumberStyles.HexNumber,
-                        CultureInfo.InvariantCulture, out argb))
+                    if (int.TryParse(AppSettings.Get("background.color", ""),
+                        NumberStyles.HexNumber, CultureInfo.InvariantCulture, out argb))
                     {
                         FillColor = Color.FromArgb(argb);
                     }
-                    ReadOpacity(parts, 2);
-                    ReadBackgroundOpacity(parts, 3);
                 }
-                else if (parts[0] == "opacity")
-                {
-                    ReadOpacity(parts, 1);
-                    ReadBackgroundOpacity(parts, 2);
-                }
+                SurfaceOpacity = AppSettings.GetDouble(
+                    "background.card", 1.0, 0.3, 1.0);
+                BackgroundOpacity = AppSettings.GetDouble(
+                    "background.opacity", 1.0, 0.0, 1.0);
                 Ui.SurfaceAlpha = SurfaceOpacity;
                 Ui.BackgroundOpacity = BackgroundOpacity;
             }
             catch
             {
-            }
-        }
-
-        private static void ReadOpacity(string[] parts, int index)
-        {
-            if (parts.Length <= index) return;
-            double value;
-            if (double.TryParse(parts[index], NumberStyles.Float,
-                CultureInfo.InvariantCulture, out value))
-            {
-                SurfaceOpacity = Clamp(value);
             }
         }
 
@@ -83,17 +57,6 @@ namespace Video2Gif
             Ui.SurfaceAlpha = SurfaceOpacity;
             Flush();
             Raise();
-        }
-
-        private static void ReadBackgroundOpacity(string[] parts, int index)
-        {
-            if (parts.Length <= index) return;
-            double value;
-            if (double.TryParse(parts[index], NumberStyles.Float,
-                CultureInfo.InvariantCulture, out value))
-            {
-                BackgroundOpacity = ClampAlpha(value);
-            }
         }
 
         public static void SetBackgroundOpacity(double value)
@@ -146,32 +109,32 @@ namespace Video2Gif
 
         private static void Flush()
         {
-            try
+            string type;
+            string path = "";
+            string color = "";
+            if (!string.IsNullOrEmpty(ImagePath))
             {
-                string path = FilePath;
-                string dir = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                string opacity = SurfaceOpacity.ToString("0.###", CultureInfo.InvariantCulture);
-                string background = BackgroundOpacity.ToString("0.###", CultureInfo.InvariantCulture);
-                string line;
-                if (!string.IsNullOrEmpty(ImagePath))
-                {
-                    line = "image\t" + ImagePath + "\t" + opacity + "\t" + background;
-                }
-                else if (FillColor.HasValue)
-                {
-                    line = "color\t" + FillColor.Value.ToArgb().ToString("X8",
-                        CultureInfo.InvariantCulture) + "\t" + opacity + "\t" + background;
-                }
-                else
-                {
-                    line = "opacity\t" + opacity + "\t" + background;
-                }
-                File.WriteAllText(path, line);
+                type = "image";
+                path = ImagePath;
             }
-            catch
+            else if (FillColor.HasValue)
             {
+                type = "color";
+                color = FillColor.Value.ToArgb().ToString("X8", CultureInfo.InvariantCulture);
             }
+            else
+            {
+                type = "none";
+            }
+            string opacity = SurfaceOpacity.ToString("0.###", CultureInfo.InvariantCulture);
+            string background = BackgroundOpacity.ToString("0.###", CultureInfo.InvariantCulture);
+
+            AppSettings.SetMany(
+                "background.type", type,
+                "background.path", path,
+                "background.color", color,
+                "background.card", opacity,
+                "background.opacity", background);
         }
 
         private static void Raise()

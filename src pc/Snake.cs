@@ -171,37 +171,15 @@ namespace Video2Gif
             Ui.ApplyTitleBar(Handle);
         }
 
-        private static string BestPath
-        {
-            get
-            {
-                return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Video2Gif", "snake-best.txt");
-            }
-        }
-
         private static int LoadBest()
         {
-            try
-            {
-                string path = BestPath;
-                if (!File.Exists(path)) return 0;
-                int value;
-                return int.TryParse(File.ReadAllText(path).Trim(), out value) && value > 0 ? value : 0;
-            }
-            catch { return 0; }
+            int value = AppSettings.GetInt("snake.best", 0);
+            return value > 0 ? value : 0;
         }
 
         private void SaveBest()
         {
-            try
-            {
-                string path = BestPath;
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
-                File.WriteAllText(path, best.ToString());
-            }
-            catch { }
+            AppSettings.Set("snake.best", best.ToString());
         }
 
         /* ------------------------------------------------------------ Управление */

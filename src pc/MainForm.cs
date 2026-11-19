@@ -264,37 +264,15 @@ namespace Video2Gif
 
         /* --------------------------------------------------------------- Тема */
 
-        private static string SettingsPath
-        {
-            get
-            {
-                return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Video2Gif", "theme.txt");
-            }
-        }
-
         private static string LoadThemeSetting()
         {
-            try
-            {
-                string path = SettingsPath;
-                if (!File.Exists(path)) return "auto";
-                string setting = File.ReadAllText(path).Trim().ToLowerInvariant();
-                return setting.Length == 0 ? "auto" : setting;
-            }
-            catch { return "auto"; }
+            string setting = AppSettings.Get("theme", "auto").Trim().ToLowerInvariant();
+            return setting.Length == 0 ? "auto" : setting;
         }
 
         private void SaveTheme()
         {
-            try
-            {
-                string path = SettingsPath;
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
-                File.WriteAllText(path, Ui.AutoTheme ? "auto" : Ui.ThemeName);
-            }
-            catch { }
+            AppSettings.Set("theme", Ui.AutoTheme ? "auto" : Ui.ThemeName);
         }
 
         private void RefreshScheduledTheme()
@@ -350,16 +328,6 @@ namespace Video2Gif
 
         /* ------------------------------------------------------------ Обновления */
 
-        private static string SeenUpdatePath
-        {
-            get
-            {
-                return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Video2Gif", "update.txt");
-            }
-        }
-
         private void CheckUpdatesOnStart()
         {
             Task.Factory.StartNew(delegate
@@ -381,14 +349,9 @@ namespace Video2Gif
         {
             if (info == null || !info.HasUpdate) return;
 
-            try
-            {
-                string seen = SeenUpdatePath;
-                if (File.Exists(seen) && File.ReadAllText(seen).Trim() == info.Version) return;
-                Directory.CreateDirectory(Path.GetDirectoryName(seen));
-                File.WriteAllText(seen, info.Version);
-            }
-            catch { }
+            string seen = AppSettings.Get("update.seen", "");
+            if (seen == info.Version) return;
+            AppSettings.Set("update.seen", info.Version);
 
             DialogResult answer = MessageBox.Show(this,
                 "Доступна новая версия " + info.Version + " (у вас " + Program.Version + ").\n" +
