@@ -792,7 +792,7 @@ namespace Video2Gif
         {
             if (Box.IsHandleCreated && placeholder.Length > 0)
             {
-                SendMessage(Box.Handle, EM_SETCUEBANNER, (IntPtr)1, placeholder);
+                SendMessage(Box.Handle, EM_SETCUEBANNER, (IntPtr)1, Loc.T(placeholder));
             }
         }
 

@@ -298,8 +298,7 @@ namespace Video2Gif
         {
             CustomName = "";
             Theme = kind;
-            Dark = kind != ThemeKind.Light &&
-                kind != ThemeKind.Sakura && kind != ThemeKind.Summer;
+            Dark = kind != ThemeKind.Light;
             ApplyColors(kind);
         }
 
@@ -455,43 +454,45 @@ namespace Video2Gif
             }
             else if (kind == ThemeKind.Sakura)
             {
-                Bg = Color.FromArgb(253, 245, 247);
-                Card = Color.White;
-                Border = Color.FromArgb(244, 222, 228);
-                BorderStrong = Color.FromArgb(230, 190, 201);
-                Text = Color.FromArgb(58, 36, 48);
-                Muted = Color.FromArgb(140, 108, 120);
-                Faint = Color.FromArgb(183, 154, 164);
-                Accent = Color.FromArgb(231, 92, 135);
-                AccentDark = Color.FromArgb(201, 72, 115);
-                AccentInk = Color.FromArgb(194, 65, 106);
-                AccentSoft = Color.FromArgb(252, 231, 238);
-                AccentLine = Color.FromArgb(240, 195, 210);
-                AccentWash = Color.FromArgb(253, 241, 245);
-                Track = Color.FromArgb(247, 227, 233);
-                Good = Color.FromArgb(63, 174, 106);
-                Bad = Color.FromArgb(216, 74, 95);
-                OnAccent = Color.White;
+                // Тёмная сливовая база с мягким розовым акцентом — глазам спокойнее.
+                Bg = Color.FromArgb(26, 17, 21);
+                Card = Color.FromArgb(39, 26, 32);
+                Border = Color.FromArgb(63, 43, 51);
+                BorderStrong = Color.FromArgb(96, 67, 77);
+                Text = Color.FromArgb(250, 238, 242);
+                Muted = Color.FromArgb(205, 178, 187);
+                Faint = Color.FromArgb(156, 128, 137);
+                Accent = Color.FromArgb(238, 138, 163);
+                AccentDark = Color.FromArgb(212, 109, 137);
+                AccentInk = Color.FromArgb(245, 168, 189);
+                AccentSoft = Color.FromArgb(55, 33, 42);
+                AccentLine = Color.FromArgb(92, 54, 68);
+                AccentWash = Color.FromArgb(38, 24, 30);
+                Track = Color.FromArgb(47, 33, 39);
+                Good = Color.FromArgb(120, 210, 160);
+                Bad = Color.FromArgb(255, 120, 130);
+                OnAccent = Color.FromArgb(35, 20, 26);
             }
             else if (kind == ThemeKind.Summer)
             {
-                Bg = Color.FromArgb(239, 250, 252);
-                Card = Color.White;
-                Border = Color.FromArgb(205, 235, 239);
-                BorderStrong = Color.FromArgb(166, 216, 223);
-                Text = Color.FromArgb(18, 51, 58);
-                Muted = Color.FromArgb(93, 133, 140);
-                Faint = Color.FromArgb(143, 175, 180);
-                Accent = Color.FromArgb(15, 163, 177);
-                AccentDark = Color.FromArgb(11, 135, 148);
-                AccentInk = Color.FromArgb(11, 124, 136);
-                AccentSoft = Color.FromArgb(223, 245, 247);
-                AccentLine = Color.FromArgb(183, 227, 232);
-                AccentWash = Color.FromArgb(237, 249, 250);
-                Track = Color.FromArgb(221, 242, 244);
-                Good = Color.FromArgb(46, 158, 98);
-                Bad = Color.FromArgb(220, 90, 90);
-                OnAccent = Color.White;
+                // Тёплый вечерний закат: тёмная охра и оранжевый акцент.
+                Bg = Color.FromArgb(28, 19, 15);
+                Card = Color.FromArgb(41, 29, 22);
+                Border = Color.FromArgb(66, 47, 36);
+                BorderStrong = Color.FromArgb(100, 72, 54);
+                Text = Color.FromArgb(252, 241, 230);
+                Muted = Color.FromArgb(206, 182, 160);
+                Faint = Color.FromArgb(156, 132, 110);
+                Accent = Color.FromArgb(255, 154, 74);
+                AccentDark = Color.FromArgb(226, 124, 48);
+                AccentInk = Color.FromArgb(255, 178, 112);
+                AccentSoft = Color.FromArgb(58, 39, 28);
+                AccentLine = Color.FromArgb(98, 64, 44);
+                AccentWash = Color.FromArgb(39, 27, 21);
+                Track = Color.FromArgb(50, 37, 28);
+                Good = Color.FromArgb(126, 208, 150);
+                Bad = Color.FromArgb(255, 120, 110);
+                OnAccent = Color.FromArgb(35, 20, 10);
             }
             else
             {
@@ -1604,15 +1605,15 @@ namespace Video2Gif
             if (Ui.Sakura)
             {
                 Ui.DrawBlossom(g, Width / 2f, Height / 2f,
-                    Math.Min(Width, Height) * 0.34f, Ui.OnAccent,
-                    Color.FromArgb(255, 224, 140));
+                    Math.Min(Width, Height) * 0.34f,
+                    Color.FromArgb(255, 250, 252), Color.FromArgb(255, 224, 140));
                 return;
             }
 
             if (Ui.Summer)
             {
                 Ui.DrawSun(g, Width / 2f, Height / 2f,
-                    Math.Min(Width, Height) * 0.21f, Ui.OnAccent);
+                    Math.Min(Width, Height) * 0.21f, Color.FromArgb(255, 248, 238));
                 return;
             }
 

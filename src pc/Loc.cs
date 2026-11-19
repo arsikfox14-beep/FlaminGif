@@ -174,6 +174,8 @@ namespace Video2Gif
                 { "Без водяного знака · интернет нужен только для загрузки", "No watermark · internet is only needed to download" },
                 { "Вставьте ссылку на видео или фото-пост", "Paste a video or photo post link" },
                 { "GIF-инструменты", "GIF tools" },
+                { "GIF-файл", "GIF file" },
+                { "Трек, альбом или плейлист · находим на YouTube и сохраняем в MP3 или WAV", "Track, album or playlist · find it on YouTube and save as MP3 or WAV" },
                 { "Разбить GIF на кадры или собрать его обратно", "Split a GIF into frames or assemble it back" },
                 { "Разбить GIF на кадры", "Split GIF into frames" },
                 { "Выбрать GIF", "Choose GIF" },

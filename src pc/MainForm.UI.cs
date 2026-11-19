@@ -139,13 +139,13 @@ namespace Video2Gif
             Controls.Add(donateButton);
 
             headerTip = new ToolTip();
-            headerTip.SetToolTip(gameButton, "Играть · Змейка");
-            headerTip.SetToolTip(editorButton, "Видеоредактор · обрезка видео и фото");
-            headerTip.SetToolTip(gifToolsButton, "GIF-инструменты · кадры и сборка");
-            headerTip.SetToolTip(downloadsButton, "Скачать видео, музыку или TikTok");
-            headerTip.SetToolTip(settingsButton, "Настройки · тема оформления");
-            headerTip.SetToolTip(discordButton, "Discord — чат сообщества");
-            headerTip.SetToolTip(donateButton, "Поддержать проект · Donate");
+            headerTip.SetToolTip(gameButton, Loc.T("Играть · Змейка"));
+            headerTip.SetToolTip(editorButton, Loc.T("Видеоредактор · обрезка видео и фото"));
+            headerTip.SetToolTip(gifToolsButton, Loc.T("GIF-инструменты · кадры и сборка"));
+            headerTip.SetToolTip(downloadsButton, Loc.T("Скачать видео, музыку или TikTok"));
+            headerTip.SetToolTip(settingsButton, Loc.T("Настройки · тема оформления"));
+            headerTip.SetToolTip(discordButton, Loc.T("Discord — чат сообщества"));
+            headerTip.SetToolTip(donateButton, Loc.T("Поддержать проект · Donate"));
 
             const string credits =
                 "Coders - deepseek v4.1 flash 1017, arsikfox14\n" +
@@ -219,8 +219,8 @@ namespace Video2Gif
             fpsInput.SetBounds(Ui.P(336), Ui.P(72), Ui.P(96), Ui.P(34));
             fpsInput.Value = "30";
             settings.Controls.Add(fpsInput);
-            headerTip.SetToolTip(widthInput, "0 — оригинальная ширина");
-            headerTip.SetToolTip(fpsInput, "От 1 до 60 кадров в секунду");
+            headerTip.SetToolTip(widthInput, Loc.T("0 — оригинальная ширина"));
+            headerTip.SetToolTip(fpsInput, Loc.T("От 1 до 60 кадров в секунду"));
 
             limitInput = new FlatInput();
             limitInput.SetBounds(Ui.P(442), Ui.P(72), Ui.P(96), Ui.P(34));

@@ -233,12 +233,12 @@ namespace Video2Gif
 
                 Ui.SetTheme("sakura");
                 Check("theme sakura",
-                    !Ui.Dark && Ui.Sakura && Ui.ThemeName == "sakura" &&
-                    Ui.Accent == Color.FromArgb(231, 92, 135) && !Ui.Holiday);
+                    Ui.Dark && Ui.Sakura && Ui.ThemeName == "sakura" &&
+                    Ui.Accent == Color.FromArgb(238, 138, 163) && !Ui.Holiday);
                 Ui.SetTheme("summer");
                 Check("theme summer",
-                    !Ui.Dark && Ui.Summer && Ui.ThemeName == "summer" &&
-                    Ui.Accent == Color.FromArgb(15, 163, 177) && !Ui.Holiday);
+                    Ui.Dark && Ui.Summer && Ui.ThemeName == "summer" &&
+                    Ui.Accent == Color.FromArgb(255, 154, 74) && !Ui.Holiday);
 
                 Check("theme seasonal sakura",
                     Ui.SeasonalTheme(new DateTime(2026, 3, 1)) == ThemeKind.Sakura &&

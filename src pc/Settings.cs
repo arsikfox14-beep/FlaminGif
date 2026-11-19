@@ -196,9 +196,9 @@ namespace Video2Gif
                     : seasonal == ThemeKind.Gta6
                         ? Color.FromArgb(255, 79, 163)
                         : seasonal == ThemeKind.Sakura
-                            ? Color.FromArgb(231, 92, 135)
+                            ? Color.FromArgb(238, 138, 163)
                             : seasonal == ThemeKind.Summer
-                                ? Color.FromArgb(15, 163, 177)
+                                ? Color.FromArgb(255, 154, 74)
                                 : Color.FromArgb(126, 126, 132);
             autoTile.SetBounds(Ui.P(24), Ui.P(62), Ui.P(89), Ui.P(58));
             autoTile.Click += delegate { Choose("auto"); };
@@ -253,17 +253,17 @@ namespace Video2Gif
             Controls.Add(gamesenseTile);
 
             sakuraTile = MakeTile("sakura", "Сакура");
-            sakuraTile.SwatchBg = Color.FromArgb(253, 245, 247);
-            sakuraTile.SwatchCard = Color.White;
-            sakuraTile.SwatchAccent = Color.FromArgb(231, 92, 135);
+            sakuraTile.SwatchBg = Color.FromArgb(26, 17, 21);
+            sakuraTile.SwatchCard = Color.FromArgb(39, 26, 32);
+            sakuraTile.SwatchAccent = Color.FromArgb(238, 138, 163);
             sakuraTile.SetBounds(Ui.P(315), Ui.P(126), Ui.P(89), Ui.P(58));
             sakuraTile.Click += delegate { Choose("sakura"); };
             Controls.Add(sakuraTile);
 
             summerTile = MakeTile("summer", "Лето");
-            summerTile.SwatchBg = Color.FromArgb(239, 250, 252);
-            summerTile.SwatchCard = Color.White;
-            summerTile.SwatchAccent = Color.FromArgb(15, 163, 177);
+            summerTile.SwatchBg = Color.FromArgb(28, 19, 15);
+            summerTile.SwatchCard = Color.FromArgb(41, 29, 22);
+            summerTile.SwatchAccent = Color.FromArgb(255, 154, 74);
             summerTile.SetBounds(Ui.P(24), Ui.P(190), Ui.P(89), Ui.P(58));
             summerTile.Click += delegate { Choose("summer"); };
             Controls.Add(summerTile);
