@@ -472,6 +472,19 @@ namespace Video2Gif
             return label;
         }
 
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            if (Width > 4 && Height > 4)
+            {
+                using (GraphicsPath path = Ui.Round(
+                    new Rectangle(0, 0, Width, Height), Ui.P(10)))
+                {
+                    Region = new Region(path);
+                }
+            }
+        }
+
         protected override void OnPaintBackground(PaintEventArgs e)
         {
             e.Graphics.Clear(Ui.Card);
