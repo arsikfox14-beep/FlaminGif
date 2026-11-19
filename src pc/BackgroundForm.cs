@@ -72,9 +72,9 @@ namespace Video2Gif
             Controls.Add(opacityLabel);
 
             FlatSlider opacityBar = new FlatSlider();
-            opacityBar.Minimum = 30;
-            opacityBar.Maximum = 100;
-            opacityBar.Value = (int)Math.Round(BackgroundSettings.SurfaceOpacity * 100.0);
+            opacityBar.Minimum = 0;
+            opacityBar.Maximum = 70;
+            opacityBar.Value = (int)Math.Round((1.0 - BackgroundSettings.SurfaceOpacity) * 100.0);
             opacityBar.SetBounds(Ui.P(24), Ui.P(130), Ui.P(352), Ui.P(28));
             Controls.Add(opacityBar);
 
@@ -84,7 +84,7 @@ namespace Video2Gif
             };
             opacityBar.ValueChanged += delegate
             {
-                BackgroundSettings.SetSurfaceOpacity(opacityBar.Value / 100.0);
+                BackgroundSettings.SetSurfaceOpacity(1.0 - opacityBar.Value / 100.0);
                 refreshOpacity();
             };
             refreshOpacity();

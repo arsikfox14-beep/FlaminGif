@@ -65,6 +65,14 @@ namespace Video2Gif
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
+            // Если кнопку отпустили вне ползунка (быстрый рывок мышью,
+            // переключение окна), значение больше не должно меняться.
+            if (dragging && (e.Button & MouseButtons.Left) == 0 &&
+                Control.MouseButtons == MouseButtons.None)
+            {
+                dragging = false;
+                return;
+            }
             if (dragging) Value = ValueAt(e.X);
         }
 
@@ -72,6 +80,12 @@ namespace Video2Gif
         {
             base.OnMouseUp(e);
             dragging = false;
+        }
+
+        protected override void OnMouseCaptureChanged(EventArgs e)
+        {
+            base.OnMouseCaptureChanged(e);
+            if (Control.MouseButtons == MouseButtons.None) dragging = false;
         }
 
         protected override void OnPaint(PaintEventArgs e)

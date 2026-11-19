@@ -6,10 +6,11 @@
 $ErrorActionPreference = "Stop"
 $src = $PSScriptRoot
 $parent = Split-Path -Parent $src
-if ((Split-Path -Leaf $parent) -eq "src") {
-    $root = Split-Path -Parent $parent
-} else {
+if (Test-Path (Join-Path $parent "src")) {
     $root = $parent
+    $src = Join-Path $parent "src"
+} else {
+    $root = $src
 }
 $build = Join-Path $root "build"
 $out = Join-Path $root $(if ($OutName) { $OutName } else { "Video2Gif.exe" })

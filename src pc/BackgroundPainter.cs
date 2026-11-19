@@ -15,6 +15,7 @@ namespace Video2Gif
         private static EventHandler frameHandler;
         private static bool animated;
         private static bool installed;
+        private static string appliedPath;
 
         public static void Install()
         {
@@ -27,24 +28,30 @@ namespace Video2Gif
 
         public static void Refresh()
         {
-            Stop();
             string path = BackgroundSettings.ImagePath;
-            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            bool changed = !string.Equals(path, appliedPath,
+                StringComparison.OrdinalIgnoreCase);
+            if (changed)
             {
-                try
+                appliedPath = path;
+                Stop();
+                if (!string.IsNullOrEmpty(path) && File.Exists(path))
                 {
-                    stream = new MemoryStream(File.ReadAllBytes(path));
-                    image = Image.FromStream(stream);
-                    if (ImageAnimator.CanAnimate(image))
+                    try
                     {
-                        frameHandler = OnFrame;
-                        ImageAnimator.Animate(image, frameHandler);
-                        animated = true;
+                        stream = new MemoryStream(File.ReadAllBytes(path));
+                        image = Image.FromStream(stream);
+                        if (ImageAnimator.CanAnimate(image))
+                        {
+                            frameHandler = OnFrame;
+                            ImageAnimator.Animate(image, frameHandler);
+                            animated = true;
+                        }
                     }
-                }
-                catch
-                {
-                    Stop();
+                    catch
+                    {
+                        Stop();
+                    }
                 }
             }
             InvalidateAll();
@@ -93,18 +100,48 @@ namespace Video2Gif
             InvalidateAll();
         }
 
+        private static bool invalidatePending;
+
         private static void InvalidateAll()
         {
+            // Кадры GIF приходят из таймера ImageAnimator (не UI-поток),
+            // поэтому перерисовку заказываем через BeginInvoke.
+            // Пока запрос в очереди, новые не добавляем — быстрые
+            // движения ползунка не забивают очередь сообщений.
+            if (invalidatePending) return;
+            Form anchor = null;
             foreach (Form form in Application.OpenForms)
             {
-                if (form == null || !form.IsHandleCreated || form.IsDisposed) continue;
-                try
+                if (form != null && form.IsHandleCreated && !form.IsDisposed)
                 {
-                    form.BeginInvoke((MethodInvoker)delegate { form.Invalidate(true); });
+                    anchor = form;
+                    break;
                 }
-                catch
+            }
+            if (anchor == null) return;
+
+            invalidatePending = true;
+            try
+            {
+                anchor.BeginInvoke((MethodInvoker)delegate
                 {
-                }
+                    invalidatePending = false;
+                    foreach (Form form in Application.OpenForms)
+                    {
+                        if (form == null || !form.IsHandleCreated || form.IsDisposed) continue;
+                        try
+                        {
+                            form.Invalidate(true);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                });
+            }
+            catch
+            {
+                invalidatePending = false;
             }
         }
 
@@ -132,6 +169,23 @@ namespace Video2Gif
     /// <summary>Окно с общим фоном приложения.</summary>
     internal class ThemedForm : Form
     {
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            BackgroundSettings.Changed += OnBackgroundChanged;
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            BackgroundSettings.Changed -= OnBackgroundChanged;
+            base.OnHandleDestroyed(e);
+        }
+
+        private void OnBackgroundChanged()
+        {
+            if (IsHandleCreated && !IsDisposed) Invalidate(true);
+        }
+
         protected override void OnPaintBackground(PaintEventArgs e)
         {
             base.OnPaintBackground(e);

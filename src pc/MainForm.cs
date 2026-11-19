@@ -26,6 +26,8 @@ namespace Video2Gif
         private MemoryStream backgroundStream;
         private EventHandler backgroundFrameHandler;
         private bool backgroundAnimated;
+        private string appliedBackgroundPath;
+        private Color appliedBackgroundColor = Color.Empty;
         private int lastReportTick;
         private System.Windows.Forms.Timer themeTimer;
         private System.Windows.Forms.Timer shimmerTimer;
@@ -1134,9 +1136,21 @@ namespace Video2Gif
 
         private void ApplyBackground()
         {
-            StopBackground();
             string path = BackgroundSettings.ImagePath;
-            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            Color color = BackgroundSettings.FillColor.HasValue
+                ? BackgroundSettings.FillColor.Value
+                : Color.Empty;
+            bool changed = !string.Equals(path, appliedBackgroundPath,
+                    StringComparison.OrdinalIgnoreCase) ||
+                color.ToArgb() != appliedBackgroundColor.ToArgb();
+            if (changed)
+            {
+                appliedBackgroundPath = path;
+                appliedBackgroundColor = color;
+                StopBackground();
+            }
+            if (!string.IsNullOrEmpty(path) && File.Exists(path) &&
+                (changed || backgroundImage == null))
             {
                 try
                 {
