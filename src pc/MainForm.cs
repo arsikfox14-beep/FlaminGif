@@ -112,6 +112,8 @@ namespace Video2Gif
             }
 
             if (Ui.Holiday) DrawHolidayDecorations(g);
+            else if (Ui.Sakura) DrawSakuraDecorations(g);
+            else if (Ui.Summer) DrawSummerDecorations(g);
 
             double alpha = BackgroundSettings.BackgroundOpacity;
             if (backgroundImage != null && alpha > 0.001)
@@ -218,6 +220,46 @@ namespace Video2Gif
                 Color.FromArgb(120, Ui.Accent), 20f);
             Ui.DrawLeaf(g, Ui.P(366), Ui.P(52), Ui.P(10),
                 Color.FromArgb(120, Ui.Accent), 60f);
+        }
+
+        /// <summary>Весенние лепестки сакуры в свободной части шапки.</summary>
+        private void DrawSakuraDecorations(Graphics g)
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            Ui.DrawBlossom(g, Ui.P(396), Ui.P(22), Ui.P(11),
+                Color.FromArgb(200, Ui.Accent), Color.FromArgb(220, 255, 224, 140));
+            Ui.DrawPetal(g, Ui.P(440), Ui.P(50), Ui.P(10),
+                Color.FromArgb(175, Ui.Accent), -28f);
+            Ui.DrawPetal(g, Ui.P(486), Ui.P(16), Ui.P(8),
+                Color.FromArgb(155, Ui.Accent), 36f);
+            Ui.DrawPetal(g, Ui.P(532), Ui.P(52), Ui.P(11),
+                Color.FromArgb(165, Ui.Accent), -52f);
+            Ui.DrawPetal(g, Ui.P(578), Ui.P(20), Ui.P(9),
+                Color.FromArgb(145, Ui.Accent), 18f);
+            Ui.DrawPetal(g, Ui.P(624), Ui.P(50), Ui.P(10),
+                Color.FromArgb(160, Ui.Accent), 60f);
+            Ui.DrawPetal(g, Ui.P(666), Ui.P(14), Ui.P(7),
+                Color.FromArgb(135, Ui.Accent), -20f);
+        }
+
+        /// <summary>Летнее солнце, чайки и волны в шапке.</summary>
+        private void DrawSummerDecorations(Graphics g)
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            Ui.DrawSun(g, Ui.P(404), Ui.P(24), Ui.P(10),
+                Color.FromArgb(190, Ui.Accent));
+            Ui.DrawGull(g, Ui.P(452), Ui.P(22), Ui.P(12),
+                Color.FromArgb(170, Ui.Accent));
+            Ui.DrawGull(g, Ui.P(508), Ui.P(12), Ui.P(9),
+                Color.FromArgb(145, Ui.Accent));
+            Ui.DrawGull(g, Ui.P(552), Ui.P(30), Ui.P(10),
+                Color.FromArgb(155, Ui.Accent));
+            Ui.DrawWave(g, Ui.P(596), Ui.P(46), Ui.P(54), Ui.P(9),
+                Color.FromArgb(160, Ui.Accent));
+            Ui.DrawWave(g, Ui.P(650), Ui.P(24), Ui.P(34), Ui.P(7),
+                Color.FromArgb(135, Ui.Accent));
         }
 
         /* --------------------------------------------------------------- Тема */

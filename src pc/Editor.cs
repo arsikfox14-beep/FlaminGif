@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -183,13 +184,15 @@ namespace Video2Gif
             double start, double end)
         {
             double duration = Math.Max(0.05, end - start);
-            RunFfmpeg(
-                "-hide_banner -loglevel error -y -ss " + Fmt.Num(start) +
+            string args = "-hide_banner -loglevel error -y -ss " + Fmt.Num(start) +
                 " -i " + Fmt.Quote(input) +
                 " -t " + Fmt.Num(duration) +
+                " -map 0:v:0 -map 0:a:0?" +
                 " -vf scale=trunc(iw/2)*2:trunc(ih/2)*2" +
                 " -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p" +
-                " -c:a aac -b:a 192k -movflags +faststart " + Fmt.Quote(output));
+                " -c:a aac -b:a 192k -movflags +faststart " + Fmt.Quote(output);
+            RunFfmpeg(args);
+            RetryAudioCopy(input, output, args);
         }
 
         /// <summary>Обрезка видео с подписью и картинкой поверх.</summary>
@@ -239,10 +242,43 @@ namespace Video2Gif
             if (hasOverlay) args += " -i " + Fmt.Quote(overlay);
             args += " -t " + Fmt.Num(duration) +
                 " -filter_complex \"" + filters + "\"" +
-                " -map \"[" + current + "]\" -map 0:a?" +
+                " -map \"[" + current + "]\" -map 0:a:0?" +
                 " -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p" +
                 " -c:a aac -b:a 192k -movflags +faststart " + Fmt.Quote(output);
             RunFfmpeg(args);
+            RetryAudioCopy(input, output, args);
+        }
+
+        /// <summary>
+        /// Страховка: если кодировщик AAC по какой-то причине не дал звук,
+        /// повторяем сборку с копированием исходной дорожки.
+        /// </summary>
+        private static void RetryAudioCopy(string input, string output, string args)
+        {
+            if (!HasAudio(input) || HasAudio(output)) return;
+            string retry = args
+                .Replace("-map 0:a:0?", "-map 0:a:0")
+                .Replace("-c:a aac -b:a 192k", "-c:a copy");
+            try
+            {
+                RunFfmpeg(retry);
+            }
+            catch
+            {
+                // Основной файл уже создан — оставляем его.
+            }
+        }
+
+        private static bool HasAudio(string path)
+        {
+            try
+            {
+                return Ffmpeg.Probe(path).Audio;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private static string EscapeDrawText(string text)
@@ -267,6 +303,17 @@ namespace Video2Gif
                 " -t " + Fmt.Num(Math.Max(0.05, duration)) +
                 " -vf fps=" + fps + ",scale=480:-2" +
                 " -q:v 5 -start_number 0 " + Fmt.Quote(pattern));
+        }
+
+        /// <summary>Звук выбранного фрагмента для «Проверить» (WAV, моно).</summary>
+        public static void ExtractPreviewAudio(string input, string output,
+            double start, double duration)
+        {
+            RunFfmpeg(
+                "-hide_banner -loglevel error -y -ss " + Fmt.Num(Math.Max(0, start)) +
+                " -i " + Fmt.Quote(input) +
+                " -t " + Fmt.Num(Math.Max(0.05, duration)) +
+                " -vn -ac 1 -ar 22050 -c:a pcm_s16le " + Fmt.Quote(output));
         }
 
         private static void RunFfmpeg(string args)
@@ -675,6 +722,7 @@ namespace Video2Gif
 
         private readonly List<string> playFrames = new List<string>();
         private Timer playTimer;
+        private SoundPlayer playSound;
         private string playDir = "";
         private int playIndex;
         private int playFps;
@@ -731,7 +779,7 @@ namespace Video2Gif
             preview.SetBounds(Ui.P(24), Ui.P(72), Ui.P(672), Ui.P(300));
             Controls.Add(preview);
 
-            hintLabel = MakeLabel("Потяните бегунки, затем «Проверить» — фрагмент проиграется без звука.",
+            hintLabel = MakeLabel("Потяните бегунки, затем «Проверить» — фрагмент проиграется со звуком.",
                 Ui.Tiny, Ui.Faint, 24, 376, 672, 18);
             Controls.Add(hintLabel);
 
@@ -961,7 +1009,9 @@ namespace Video2Gif
             saveButton.Text = photo ? "Сохранить фото" : "Сохранить видео";
             hintLabel.Text = photo
                 ? "Выделите область мышью на фото. Двойной клик — весь кадр."
-                : "Потяните бегунки, затем «Проверить» — фрагмент проиграется без звука.";
+                : (info != null && !info.Audio && path.Length > 0
+                    ? "В этом файле нет звуковой дорожки — видео сохранится без звука."
+                    : "Потяните бегунки, затем «Проверить» — фрагмент проиграется со звуком.");
             saveButton.Enabled = !working && CanSave();
             playButton.Enabled = !working && !preparing &&
                 !isImage && path.Length > 0 && Duration() > 0;
@@ -1108,6 +1158,7 @@ namespace Video2Gif
             string folder = playDir;
             double from = start;
             double len = previewLength;
+            bool hasAudio = info != null && info.Audio;
 
             preparing = true;
             playButton.Enabled = false;
@@ -1120,6 +1171,17 @@ namespace Video2Gif
             Task.Factory.StartNew(delegate
             {
                 EditorCore.ExtractPreviewFrames(source, folder, from, len, fps);
+                if (hasAudio)
+                {
+                    try
+                    {
+                        EditorCore.ExtractPreviewAudio(source,
+                            Path.Combine(folder, "preview.wav"), from, len);
+                    }
+                    catch
+                    {
+                    }
+                }
             }).ContinueWith(delegate(Task task)
             {
                 if (IsDisposed) return;
@@ -1159,6 +1221,7 @@ namespace Video2Gif
                         ShowPlayFrame(0);
                         playTimer.Interval = Math.Max(50, (int)Math.Round(1000.0 / fps));
                         playTimer.Start();
+                        StartPreviewAudio(Path.Combine(playDir, "preview.wav"));
                     });
                 }
                 catch { }
@@ -1195,6 +1258,7 @@ namespace Video2Gif
 
         private void StopPlayback(bool restoreFrame)
         {
+            StopPreviewAudio();
             if (playTimer != null) playTimer.Stop();
             bool hadFrames = playFrames.Count > 0;
             playing = false;
@@ -1222,6 +1286,7 @@ namespace Video2Gif
 
         private void CleanupPlayFrames()
         {
+            StopPreviewAudio();
             if (playTimer != null) playTimer.Stop();
             if (playDir.Length > 0)
             {
@@ -1229,6 +1294,30 @@ namespace Video2Gif
                 catch { }
                 playDir = "";
             }
+        }
+
+        private void StartPreviewAudio(string file)
+        {
+            StopPreviewAudio();
+            if (string.IsNullOrEmpty(file) || !File.Exists(file)) return;
+            try
+            {
+                playSound = new SoundPlayer(file);
+                playSound.Load();
+                playSound.Play();
+            }
+            catch
+            {
+                StopPreviewAudio();
+            }
+        }
+
+        private void StopPreviewAudio()
+        {
+            if (playSound == null) return;
+            try { playSound.Stop(); } catch { }
+            try { playSound.Dispose(); } catch { }
+            playSound = null;
         }
 
         private void Save()

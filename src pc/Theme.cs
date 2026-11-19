@@ -13,7 +13,9 @@ namespace Video2Gif
         NewYear,
         Halloween,
         Gta6,
-        Gamesense
+        Gamesense,
+        Sakura,
+        Summer
     }
 
     internal static class Ui
@@ -52,6 +54,16 @@ namespace Video2Gif
             get { return Theme == ThemeKind.Halloween; }
         }
 
+        public static bool Sakura
+        {
+            get { return Theme == ThemeKind.Sakura; }
+        }
+
+        public static bool Summer
+        {
+            get { return Theme == ThemeKind.Summer; }
+        }
+
         public static string ThemeName
         {
             get
@@ -62,6 +74,8 @@ namespace Video2Gif
                 if (Theme == ThemeKind.Halloween) return "halloween";
                 if (Theme == ThemeKind.Gta6) return "gta6";
                 if (Theme == ThemeKind.Gamesense) return "gamesense";
+                if (Theme == ThemeKind.Sakura) return "sakura";
+                if (Theme == ThemeKind.Summer) return "summer";
                 return "dark";
             }
         }
@@ -217,6 +231,10 @@ namespace Video2Gif
             else if (value == "gta6" || value == "gta" || value == "gta-6") kind = ThemeKind.Gta6;
             else if (value == "gamesense" || value == "game-sense" ||
                      value == "game sense" || value == "gs") kind = ThemeKind.Gamesense;
+            else if (value == "sakura" || value == "spring" || value == "сакура")
+                kind = ThemeKind.Sakura;
+            else if (value == "summer" || value == "leto" || value == "лето")
+                kind = ThemeKind.Summer;
             SetTheme(kind);
         }
 
@@ -245,6 +263,7 @@ namespace Video2Gif
         }
 
         /// <summary>
+        /// Авто по дате: сакура — март–май, лето — июнь–август,
         /// Хэллоуин — с 1 октября по 1 ноября, Новый год — с 1 декабря
         /// по 1 января, а тема GTA 6 — с 18 ноября 15:00 по 20 ноября 00:00
         /// (границы включительно). В остальное время — тёмная.
@@ -257,6 +276,10 @@ namespace Video2Gif
                 return ThemeKind.Halloween;
             if (date.Month == 12 || (date.Month == 1 && date.Day == 1))
                 return ThemeKind.NewYear;
+            if (date.Month >= 3 && date.Month <= 5)
+                return ThemeKind.Sakura;
+            if (date.Month >= 6 && date.Month <= 8)
+                return ThemeKind.Summer;
             return ThemeKind.Dark;
         }
 
@@ -275,7 +298,8 @@ namespace Video2Gif
         {
             CustomName = "";
             Theme = kind;
-            Dark = kind != ThemeKind.Light;
+            Dark = kind != ThemeKind.Light &&
+                kind != ThemeKind.Sakura && kind != ThemeKind.Summer;
             ApplyColors(kind);
         }
 
@@ -428,6 +452,46 @@ namespace Video2Gif
                 Good = Color.FromArgb(88, 178, 124);
                 Bad = Color.FromArgb(232, 96, 96);
                 OnAccent = Color.FromArgb(10, 12, 10);
+            }
+            else if (kind == ThemeKind.Sakura)
+            {
+                Bg = Color.FromArgb(253, 245, 247);
+                Card = Color.White;
+                Border = Color.FromArgb(244, 222, 228);
+                BorderStrong = Color.FromArgb(230, 190, 201);
+                Text = Color.FromArgb(58, 36, 48);
+                Muted = Color.FromArgb(140, 108, 120);
+                Faint = Color.FromArgb(183, 154, 164);
+                Accent = Color.FromArgb(231, 92, 135);
+                AccentDark = Color.FromArgb(201, 72, 115);
+                AccentInk = Color.FromArgb(194, 65, 106);
+                AccentSoft = Color.FromArgb(252, 231, 238);
+                AccentLine = Color.FromArgb(240, 195, 210);
+                AccentWash = Color.FromArgb(253, 241, 245);
+                Track = Color.FromArgb(247, 227, 233);
+                Good = Color.FromArgb(63, 174, 106);
+                Bad = Color.FromArgb(216, 74, 95);
+                OnAccent = Color.White;
+            }
+            else if (kind == ThemeKind.Summer)
+            {
+                Bg = Color.FromArgb(239, 250, 252);
+                Card = Color.White;
+                Border = Color.FromArgb(205, 235, 239);
+                BorderStrong = Color.FromArgb(166, 216, 223);
+                Text = Color.FromArgb(18, 51, 58);
+                Muted = Color.FromArgb(93, 133, 140);
+                Faint = Color.FromArgb(143, 175, 180);
+                Accent = Color.FromArgb(15, 163, 177);
+                AccentDark = Color.FromArgb(11, 135, 148);
+                AccentInk = Color.FromArgb(11, 124, 136);
+                AccentSoft = Color.FromArgb(223, 245, 247);
+                AccentLine = Color.FromArgb(183, 227, 232);
+                AccentWash = Color.FromArgb(237, 249, 250);
+                Track = Color.FromArgb(221, 242, 244);
+                Good = Color.FromArgb(46, 158, 98);
+                Bad = Color.FromArgb(220, 90, 90);
+                OnAccent = Color.White;
             }
             else
             {
@@ -677,6 +741,105 @@ namespace Video2Gif
             finally
             {
                 g.Restore(state);
+            }
+        }
+
+        /// <summary>Лепесток сакуры: мягкая капля с заострённым кончиком.</summary>
+        public static void DrawPetal(Graphics g, float cx, float cy, float size,
+            Color color, float angle)
+        {
+            GraphicsState state = g.Save();
+            try
+            {
+                g.TranslateTransform(cx, cy);
+                g.RotateTransform(angle);
+                using (GraphicsPath path = new GraphicsPath())
+                {
+                    path.AddBezier(0, -size * 0.95f,
+                        -size * 0.86f, -size * 0.42f,
+                        -size * 0.62f, size * 0.74f,
+                        0, size);
+                    path.AddBezier(0, size,
+                        size * 0.62f, size * 0.74f,
+                        size * 0.86f, -size * 0.42f,
+                        0, -size * 0.95f);
+                    path.CloseFigure();
+                    using (SolidBrush brush = new SolidBrush(color))
+                    {
+                        g.FillPath(brush, path);
+                    }
+                }
+            }
+            finally
+            {
+                g.Restore(state);
+            }
+        }
+
+        /// <summary>Цветок сакуры: пять лепестков и светлая серединка.</summary>
+        public static void DrawBlossom(Graphics g, float cx, float cy, float size,
+            Color petal, Color center)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                GraphicsState state = g.Save();
+                try
+                {
+                    g.TranslateTransform(cx, cy);
+                    g.RotateTransform(i * 72f);
+                    DrawPetal(g, 0, -size * 0.58f, size * 0.58f, petal, 0f);
+                }
+                finally
+                {
+                    g.Restore(state);
+                }
+            }
+            using (SolidBrush brush = new SolidBrush(center))
+            {
+                float r = Math.Max(1.4f, size * 0.18f);
+                g.FillEllipse(brush, cx - r, cy - r, r * 2f, r * 2f);
+            }
+        }
+
+        /// <summary>Солнце с лучами для летней темы.</summary>
+        public static void DrawSun(Graphics g, float cx, float cy, float radius, Color color)
+        {
+            using (SolidBrush brush = new SolidBrush(color))
+            {
+                g.FillEllipse(brush, cx - radius, cy - radius, radius * 2f, radius * 2f);
+            }
+            using (Pen pen = new Pen(color, Math.Max(1.2f, radius * 0.12f)))
+            {
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
+                for (int i = 0; i < 8; i++)
+                {
+                    double angle = Math.PI / 4.0 * i;
+                    float inner = radius * 1.42f;
+                    float outer = radius * 1.92f;
+                    g.DrawLine(pen,
+                        cx + (float)(Math.Cos(angle) * inner),
+                        cy + (float)(Math.Sin(angle) * inner),
+                        cx + (float)(Math.Cos(angle) * outer),
+                        cy + (float)(Math.Sin(angle) * outer));
+                }
+            }
+        }
+
+        /// <summary>Небольшая волна: дуга для летних украшений.</summary>
+        public static void DrawWave(Graphics g, float x, float y, float width,
+            float height, Color color)
+        {
+            using (Pen pen = new Pen(color, Math.Max(1.2f, P(1.6))))
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                pen.StartCap = LineCap.Round;
+                pen.EndCap = LineCap.Round;
+                path.AddBezier(x, y,
+                    x + width * 0.24f, y - height,
+                    x + width * 0.52f, y + height,
+                    x + width, y - height * 0.15f);
+                g.DrawPath(pen, path);
             }
         }
 
@@ -1301,6 +1464,38 @@ namespace Video2Gif
                     }
                 }
             }
+            else if (Ui.Sakura)
+            {
+                int right = Width - Ui.P(18);
+                Ui.DrawBlossom(g, right - Ui.P(46), Height * 0.40f, Ui.P(15),
+                    Color.FromArgb(170, Ui.Accent),
+                    Color.FromArgb(200, 255, 224, 140));
+                Ui.DrawPetal(g, right - Ui.P(94), Height * 0.24f, Ui.P(9),
+                    Color.FromArgb(150, Ui.Accent), -28f);
+                Ui.DrawPetal(g, right - Ui.P(16), Height * 0.68f, Ui.P(8),
+                    Color.FromArgb(135, Ui.Accent), 34f);
+                Ui.DrawPetal(g, right - Ui.P(66), Height * 0.88f, Ui.P(7),
+                    Color.FromArgb(125, Ui.Accent), -52f);
+
+                Ui.DrawPetal(g, Width * 0.34f, Height * 0.30f, Ui.P(9),
+                    Color.FromArgb(46, Ui.Accent), 24f);
+                Ui.DrawPetal(g, Width * 0.47f, Height * 0.76f, Ui.P(7),
+                    Color.FromArgb(40, Ui.Accent), -60f);
+            }
+            else if (Ui.Summer)
+            {
+                int right = Width - Ui.P(18);
+                Ui.DrawSun(g, right - Ui.P(56), Height * 0.34f, Ui.P(12),
+                    Color.FromArgb(170, Ui.Accent));
+                Ui.DrawGull(g, right - Ui.P(116), Height * 0.22f, Ui.P(9),
+                    Color.FromArgb(150, Ui.Accent));
+                Ui.DrawGull(g, right - Ui.P(30), Height * 0.58f, Ui.P(7),
+                    Color.FromArgb(130, Ui.Accent));
+                Ui.DrawWave(g, right - Ui.P(150), Height * 0.84f,
+                    Ui.P(52), Ui.P(7), Color.FromArgb(135, Ui.Accent));
+                Ui.DrawWave(g, right - Ui.P(78), Height - Ui.P(8),
+                    Ui.P(64), Ui.P(6), Color.FromArgb(110, Ui.Accent));
+            }
 
             int iconSize = Ui.P(42);
             int iconX = Ui.P(20);
@@ -1403,6 +1598,21 @@ namespace Video2Gif
                     (int)(Width * 0.18f), (int)(Height * 0.30f),
                     (int)(Width * 0.64f), (int)(Height * 0.52f));
                 Ui.DrawPumpkin(g, pumpkin, Ui.Accent, Ui.AccentWash);
+                return;
+            }
+
+            if (Ui.Sakura)
+            {
+                Ui.DrawBlossom(g, Width / 2f, Height / 2f,
+                    Math.Min(Width, Height) * 0.34f, Ui.OnAccent,
+                    Color.FromArgb(255, 224, 140));
+                return;
+            }
+
+            if (Ui.Summer)
+            {
+                Ui.DrawSun(g, Width / 2f, Height / 2f,
+                    Math.Min(Width, Height) * 0.21f, Ui.OnAccent);
                 return;
             }
 

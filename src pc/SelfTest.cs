@@ -230,6 +230,23 @@ namespace Video2Gif
                 Check("theme gamesense",
                     Ui.Dark && Ui.Gamesense && Ui.ThemeName == "gamesense" &&
                     Ui.Accent == Color.FromArgb(88, 178, 124) && !Ui.Holiday);
+
+                Ui.SetTheme("sakura");
+                Check("theme sakura",
+                    !Ui.Dark && Ui.Sakura && Ui.ThemeName == "sakura" &&
+                    Ui.Accent == Color.FromArgb(231, 92, 135) && !Ui.Holiday);
+                Ui.SetTheme("summer");
+                Check("theme summer",
+                    !Ui.Dark && Ui.Summer && Ui.ThemeName == "summer" &&
+                    Ui.Accent == Color.FromArgb(15, 163, 177) && !Ui.Holiday);
+
+                Check("theme seasonal sakura",
+                    Ui.SeasonalTheme(new DateTime(2026, 3, 1)) == ThemeKind.Sakura &&
+                    Ui.SeasonalTheme(new DateTime(2026, 5, 31)) == ThemeKind.Sakura);
+                Check("theme seasonal summer",
+                    Ui.SeasonalTheme(new DateTime(2026, 6, 1)) == ThemeKind.Summer &&
+                    Ui.SeasonalTheme(new DateTime(2026, 8, 31)) == ThemeKind.Summer &&
+                    Ui.SeasonalTheme(new DateTime(2026, 9, 1)) == ThemeKind.Dark);
                 Check("gamesense rainbow",
                     Ui.Rainbow(0.0, 0.8, 1.0).R > 200 &&
                     Ui.Rainbow(1.0 / 3.0, 0.8, 1.0).G > 200 &&

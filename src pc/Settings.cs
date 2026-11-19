@@ -155,6 +155,8 @@ namespace Video2Gif
         private readonly ThemeTile halloweenTile;
         private readonly ThemeTile gtaTile;
         private readonly ThemeTile gamesenseTile;
+        private readonly ThemeTile sakuraTile;
+        private readonly ThemeTile summerTile;
         private PillButton updateButton;
         private Label updateStatus;
         private PillButton customButton;
@@ -170,7 +172,7 @@ namespace Video2Gif
             Text = "Настройки — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(428), Ui.P(480));
+            ClientSize = new Size(Ui.P(428), Ui.P(544));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -193,7 +195,11 @@ namespace Video2Gif
                     ? Color.FromArgb(126, 200, 255)
                     : seasonal == ThemeKind.Gta6
                         ? Color.FromArgb(255, 79, 163)
-                        : Color.FromArgb(126, 126, 132);
+                        : seasonal == ThemeKind.Sakura
+                            ? Color.FromArgb(231, 92, 135)
+                            : seasonal == ThemeKind.Summer
+                                ? Color.FromArgb(15, 163, 177)
+                                : Color.FromArgb(126, 126, 132);
             autoTile.SetBounds(Ui.P(24), Ui.P(62), Ui.P(89), Ui.P(58));
             autoTile.Click += delegate { Choose("auto"); };
             Controls.Add(autoTile);
@@ -246,13 +252,29 @@ namespace Video2Gif
             gamesenseTile.Click += delegate { Choose("gamesense"); };
             Controls.Add(gamesenseTile);
 
-            Controls.Add(Lbl("Свои темы", Ui.Small, Ui.Muted, 24, 196, 220, 18));
+            sakuraTile = MakeTile("sakura", "Сакура");
+            sakuraTile.SwatchBg = Color.FromArgb(253, 245, 247);
+            sakuraTile.SwatchCard = Color.White;
+            sakuraTile.SwatchAccent = Color.FromArgb(231, 92, 135);
+            sakuraTile.SetBounds(Ui.P(315), Ui.P(126), Ui.P(89), Ui.P(58));
+            sakuraTile.Click += delegate { Choose("sakura"); };
+            Controls.Add(sakuraTile);
+
+            summerTile = MakeTile("summer", "Лето");
+            summerTile.SwatchBg = Color.FromArgb(239, 250, 252);
+            summerTile.SwatchCard = Color.White;
+            summerTile.SwatchAccent = Color.FromArgb(15, 163, 177);
+            summerTile.SetBounds(Ui.P(24), Ui.P(190), Ui.P(89), Ui.P(58));
+            summerTile.Click += delegate { Choose("summer"); };
+            Controls.Add(summerTile);
+
+            Controls.Add(Lbl("Свои темы", Ui.Small, Ui.Muted, 24, 260, 220, 18));
 
             customButton = new PillButton();
             customButton.Ghost = true;
             customButton.Font = Ui.Small;
             customButton.Text = "— свои темы —";
-            customButton.SetBounds(Ui.P(24), Ui.P(216), Ui.P(196), Ui.P(30));
+            customButton.SetBounds(Ui.P(24), Ui.P(280), Ui.P(196), Ui.P(30));
             customButton.Click += delegate { ShowCustomMenu(); };
             Controls.Add(customButton);
 
@@ -260,7 +282,7 @@ namespace Video2Gif
             addCustom.Ghost = true;
             addCustom.Text = "Создать…";
             addCustom.Font = Ui.Small;
-            addCustom.SetBounds(Ui.P(228), Ui.P(216), Ui.P(80), Ui.P(30));
+            addCustom.SetBounds(Ui.P(228), Ui.P(280), Ui.P(80), Ui.P(30));
             addCustom.Click += delegate { CreateCustom(); };
             Controls.Add(addCustom);
 
@@ -268,17 +290,17 @@ namespace Video2Gif
             customDeleteButton.Ghost = true;
             customDeleteButton.Text = "Удалить";
             customDeleteButton.Font = Ui.Small;
-            customDeleteButton.SetBounds(Ui.P(316), Ui.P(216), Ui.P(88), Ui.P(30));
+            customDeleteButton.SetBounds(Ui.P(316), Ui.P(280), Ui.P(88), Ui.P(30));
             customDeleteButton.Click += delegate { DeleteCustom(); };
             Controls.Add(customDeleteButton);
 
-            Label backgroundStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 256, 280, 18);
+            Label backgroundStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 320, 280, 18);
             backgroundStatus.AutoEllipsis = true;
             PillButton backgroundButton = new PillButton();
             backgroundButton.Ghost = true;
             backgroundButton.Text = "Фон…";
             backgroundButton.Font = Ui.Small;
-            backgroundButton.SetBounds(Ui.P(316), Ui.P(252), Ui.P(88), Ui.P(30));
+            backgroundButton.SetBounds(Ui.P(316), Ui.P(316), Ui.P(88), Ui.P(30));
             backgroundButton.Click += delegate
             {
                 using (BackgroundForm dialog = new BackgroundForm())
@@ -293,44 +315,44 @@ namespace Video2Gif
             Controls.Add(backgroundButton);
             RefreshBackgroundStatus(backgroundStatus);
 
-            Controls.Add(Lbl("Язык интерфейса", Ui.Small, Ui.Muted, 24, 294, 220, 18));
+            Controls.Add(Lbl("Язык интерфейса", Ui.Small, Ui.Muted, 24, 358, 220, 18));
 
             PillButton ruButton = new PillButton();
             ruButton.Text = "Русский";
             ruButton.Font = Ui.Small;
-            ruButton.SetBounds(Ui.P(24), Ui.P(316), Ui.P(104), Ui.P(32));
+            ruButton.SetBounds(Ui.P(24), Ui.P(380), Ui.P(104), Ui.P(32));
             ruButton.Click += delegate { ChooseLanguage(Loc.Russian); };
             Controls.Add(ruButton);
 
             PillButton enButton = new PillButton();
             enButton.Text = "English";
             enButton.Font = Ui.Small;
-            enButton.SetBounds(Ui.P(136), Ui.P(316), Ui.P(104), Ui.P(32));
+            enButton.SetBounds(Ui.P(136), Ui.P(380), Ui.P(104), Ui.P(32));
             enButton.Click += delegate { ChooseLanguage(Loc.EnglishCode); };
             Controls.Add(enButton);
             ruButton.Accent = !Loc.IsEnglish;
             enButton.Accent = Loc.IsEnglish;
 
-            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 360, 300, 24));
+            Controls.Add(Lbl("Обновления", Ui.H2, Ui.Text, 24, 424, 300, 24));
             Controls.Add(Lbl("Версия " + Program.Version + " · GitHub: " + Updater.Repo,
-                Ui.Tiny, Ui.Faint, 24, 386, 380, 18));
+                Ui.Tiny, Ui.Faint, 24, 450, 380, 18));
 
             updateButton = new PillButton();
             updateButton.Ghost = true;
             updateButton.Text = "Проверить обновления";
             updateButton.Font = Ui.Small;
-            updateButton.SetBounds(Ui.P(24), Ui.P(428), Ui.P(208), Ui.P(36));
+            updateButton.SetBounds(Ui.P(24), Ui.P(492), Ui.P(208), Ui.P(36));
             updateButton.Click += delegate { CheckUpdates(); };
             Controls.Add(updateButton);
 
-            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 406, 380, 18);
+            updateStatus = Lbl("", Ui.Tiny, Ui.Faint, 24, 470, 380, 18);
             Controls.Add(updateStatus);
 
             PillButton done = new PillButton();
             done.Accent = true;
             done.Text = "Готово";
             done.Font = Ui.Bold;
-            done.SetBounds(Ui.P(300), Ui.P(428), Ui.P(104), Ui.P(36));
+            done.SetBounds(Ui.P(300), Ui.P(492), Ui.P(104), Ui.P(36));
             done.Click += delegate { Close(); };
             Controls.Add(done);
 
@@ -476,6 +498,8 @@ namespace Video2Gif
             halloweenTile.Active = !Ui.AutoTheme && current == "halloween";
             gtaTile.Active = !Ui.AutoTheme && current == "gta6";
             gamesenseTile.Active = !Ui.AutoTheme && current == "gamesense";
+            sakuraTile.Active = !Ui.AutoTheme && current == "sakura";
+            summerTile.Active = !Ui.AutoTheme && current == "summer";
 
             if (customButton != null)
             {

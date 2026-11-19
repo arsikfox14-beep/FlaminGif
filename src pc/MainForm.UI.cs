@@ -521,6 +521,28 @@ namespace Video2Gif
                         Color.FromArgb(100, Ui.Accent), -64f);
                 }
             }
+            else if (Ui.Sakura)
+            {
+                Ui.DrawBlossom(g, Width - Ui.P(30), Ui.P(30), Ui.P(14),
+                    Color.FromArgb(130, Ui.Accent), Color.FromArgb(150, 255, 220, 130));
+                Ui.DrawPetal(g, Ui.P(30), Ui.P(70), Ui.P(10),
+                    Color.FromArgb(125, Ui.Accent), -30f);
+                Ui.DrawPetal(g, Width - Ui.P(76), Ui.P(92), Ui.P(8),
+                    Color.FromArgb(115, Ui.Accent), 40f);
+                Ui.DrawPetal(g, Width - Ui.P(36), Ui.P(150), Ui.P(7),
+                    Color.FromArgb(100, Ui.Accent), -60f);
+            }
+            else if (Ui.Summer)
+            {
+                Ui.DrawSun(g, Width - Ui.P(34), Ui.P(34), Ui.P(13),
+                    Color.FromArgb(130, Ui.Accent));
+                Ui.DrawGull(g, Ui.P(34), Ui.P(60), Ui.P(10),
+                    Color.FromArgb(120, Ui.Accent));
+                Ui.DrawGull(g, Ui.P(64), Ui.P(42), Ui.P(7),
+                    Color.FromArgb(100, Ui.Accent));
+                Ui.DrawWave(g, Width - Ui.P(110), Ui.P(120), Ui.P(70), Ui.P(8),
+                    Color.FromArgb(110, Ui.Accent));
+            }
 
             int cx = Width / 2;
             int top = Ui.P(74);
