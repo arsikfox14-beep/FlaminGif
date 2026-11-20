@@ -185,6 +185,44 @@ namespace Video2Gif
                     }
                 }
 
+                try
+                {
+                    bool aiReady = AiCutout.Available;
+                    Check("ai model available", aiReady);
+                    if (aiReady)
+                    {
+                        using (Bitmap aiSource = new Bitmap(200, 160,
+                            PixelFormat.Format32bppArgb))
+                        {
+                            using (Graphics aiGraphics = Graphics.FromImage(aiSource))
+                            {
+                                aiGraphics.Clear(Color.FromArgb(240, 240, 236));
+                                using (SolidBrush aiSubject = new SolidBrush(
+                                    Color.FromArgb(210, 70, 90)))
+                                {
+                                    aiGraphics.FillEllipse(aiSubject, 30, 20, 140, 120);
+                                }
+                            }
+                            float[] aiMask = AiCutout.Segment(aiSource);
+                            float aiMax = 0;
+                            for (int i = 0; i < aiMask.Length; i++)
+                                if (aiMask[i] > aiMax) aiMax = aiMask[i];
+                            Check("ai mask", aiMask.Length == 320 * 320 && aiMax > 0.5f);
+                            using (Bitmap aiCut = AiCutout.ApplyMask(
+                                aiSource, aiMask, 2, 50))
+                            {
+                                Check("ai cutout",
+                                    aiCut.GetPixel(2, 2).A < 60 &&
+                                    aiCut.GetPixel(100, 80).A > 150);
+                            }
+                        }
+                    }
+                }
+                catch (Exception aiError)
+                {
+                    Check("ai model error: " + aiError.Message, false);
+                }
+
                 bool foodOk = true;
                 for (int i = 0; i < 40; i++)
                 {

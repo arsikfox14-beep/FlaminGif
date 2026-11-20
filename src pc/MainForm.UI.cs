@@ -157,7 +157,8 @@ namespace Video2Gif
             const string credits =
                 "Coders - deepseek v4.1 flash 1017, arsikfox14\n" +
                 "beta-testers - dismasdismavich, sosiska_0, d.i.0\n" +
-                "donaters - none";
+                "donaters - none\n" +
+                "AI - U²-Net (Apache 2.0), ONNX Runtime (MIT)";
             infoBadge = new InfoBadge();
             infoBadge.InfoText = credits;
             infoBadge.SetBounds(Ui.P(914), Ui.P(552), Ui.P(22), Ui.P(22));

@@ -61,6 +61,47 @@ if ($Force -or -not (Test-Path $ytgz) -or ((Get-Item $ytdlp).LastWriteTime -gt (
     Write-Host ("  yt-dlp.gz: {0:N1} МБ" -f ((Get-Item $ytgz).Length / 1MB))
 }
 
+# --- Нейросеть: модель и ONNX Runtime -> gzip-ресурсы -----------------------
+function Compress-Gzip([string]$source, [string]$target, [string]$label) {
+    if (-not (Test-Path $source)) { throw "Не найден $source" }
+    if ($Force -or -not (Test-Path $target) -or ((Get-Item $source).LastWriteTime -gt (Get-Item $target).LastWriteTime)) {
+        Write-Host "Сжимаю $label..."
+        $inStream = [IO.File]::OpenRead($source)
+        $outStream = [IO.File]::Create($target)
+        try {
+            $gzip = New-Object IO.Compression.GZipStream($outStream, [IO.Compression.CompressionMode]::Compress)
+            try { $inStream.CopyTo($gzip) } finally { $gzip.Close() }
+        } finally {
+            $outStream.Close()
+            $inStream.Close()
+        }
+    }
+}
+
+$aiModel = Join-Path $root "bin\u2netp.onnx"
+$aiOrt = Join-Path $root "bin\Microsoft.ML.OnnxRuntime.dll"
+$aiNative = Join-Path $root "bin\onnxruntime.dll"
+$aiMemory = Join-Path $root "bin\System.Memory.dll"
+$aiBuffers = Join-Path $root "bin\System.Buffers.dll"
+$aiUnsafe = Join-Path $root "bin\System.Runtime.CompilerServices.Unsafe.dll"
+$aiVectors = Join-Path $root "bin\System.Numerics.Vectors.dll"
+
+$aiModelGz = Join-Path $build "u2netp.gz"
+$aiOrtGz = Join-Path $build "onnx-managed.gz"
+$aiNativeGz = Join-Path $build "onnx-native.gz"
+$aiMemoryGz = Join-Path $build "sys-memory.gz"
+$aiBuffersGz = Join-Path $build "sys-buffers.gz"
+$aiUnsafeGz = Join-Path $build "sys-unsafe.gz"
+$aiVectorsGz = Join-Path $build "sys-vectors.gz"
+
+Compress-Gzip $aiModel $aiModelGz "U2-Netp"
+Compress-Gzip $aiOrt $aiOrtGz "ONNX Runtime (managed)"
+Compress-Gzip $aiNative $aiNativeGz "ONNX Runtime (native)"
+Compress-Gzip $aiMemory $aiMemoryGz "System.Memory"
+Compress-Gzip $aiBuffers $aiBuffersGz "System.Buffers"
+Compress-Gzip $aiUnsafe $aiUnsafeGz "System.Runtime.CompilerServices.Unsafe"
+Compress-Gzip $aiVectors $aiVectorsGz "System.Numerics.Vectors"
+
 # --- Icon --------------------------------------------------------------------
 function New-RoundedPath([System.Drawing.RectangleF]$rect, [float]$radius) {
     $path = New-Object System.Drawing.Drawing2D.GraphicsPath
@@ -127,6 +168,11 @@ if ($Force -or -not (Test-Path $ico)) {
 
 # --- Compile -----------------------------------------------------------------
 Write-Host "Компилирую..."
+$netstd = Join-Path (Split-Path $csc) "netstandard.dll"
+if (-not (Test-Path $netstd)) {
+    $netstd = "C:\Windows\Microsoft.NET\assembly\GAC_MSIL\netstandard\v4.0_2.0.0.0__cc7b13ffcd2ddd51\netstandard.dll"
+}
+
 $sources = Get-ChildItem (Join-Path $src "*.cs") | ForEach-Object { $_.FullName }
 $cscArgs = @(
     "/nologo",
@@ -139,13 +185,23 @@ $cscArgs = @(
     "/resource:$gz,ffmpeg.gz",
     "/resource:$ytgz,yt-dlp.gz",
     "/resource:$discord,Video2Gif.discord.png",
+    "/resource:$aiModelGz,ai-model.gz",
+    "/resource:$aiOrtGz,ai-ort.gz",
+    "/resource:$aiNativeGz,ai-native.gz",
+    "/resource:$aiMemoryGz,ai-memory.gz",
+    "/resource:$aiBuffersGz,ai-buffers.gz",
+    "/resource:$aiUnsafeGz,ai-unsafe.gz",
+    "/resource:$aiVectorsGz,ai-vectors.gz",
     "/reference:System.dll",
     "/reference:System.Core.dll",
     "/reference:System.Drawing.dll",
     "/reference:System.Windows.Forms.dll",
     "/reference:System.Web.Extensions.dll",
     "/reference:System.IO.Compression.dll",
-    "/reference:System.IO.Compression.FileSystem.dll"
+    "/reference:System.IO.Compression.FileSystem.dll",
+    "/reference:$netstd",
+    "/reference:$aiOrt",
+    "/reference:$aiMemory"
 )
 $cscArgs += $sources
 
