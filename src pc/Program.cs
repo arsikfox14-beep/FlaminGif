@@ -30,7 +30,6 @@ namespace Video2Gif
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             AppSettings.Load();
-            try { AiCutout.Install(); } catch { }
             Loc.Load();
             Loc.InstallWatcher();
             BackgroundPainter.Install();

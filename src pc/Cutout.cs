@@ -515,9 +515,6 @@ namespace Video2Gif
         private readonly Label toleranceLabel;
         private readonly Label featherLabel;
         private readonly ToggleRow linkedToggle;
-        private readonly Label colorLabel;
-        private readonly ToggleRow aiToggle;
-        private readonly Label aiHint;
 
         private string path = "";
         private bool isGif;
@@ -530,12 +527,7 @@ namespace Video2Gif
         private int tolerance = 14;
         private int feather = 2;
         private int suggestedTolerance = 14;
-        private int threshold = 50;
         private bool connected = true;
-        private bool aiMode;
-        private bool aiBusy;
-        private int aiTicket;
-        private float[] aiMask;
 
         public CutoutForm()
         {
@@ -543,7 +535,7 @@ namespace Video2Gif
             BackColor = Ui.Bg;
             ForeColor = Ui.Text;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(760), Ui.P(640));
+            ClientSize = new Size(Ui.P(760), Ui.P(592));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -565,7 +557,7 @@ namespace Video2Gif
             };
 
             Controls.Add(Lbl("Убрать фон", Ui.H1, Ui.Text, 24, 16, 420, 30));
-            Controls.Add(Lbl("Фото и GIF · умное удаление фона",
+            Controls.Add(Lbl("Фото и GIF · удаление фона по цвету",
                 Ui.Small, Ui.Muted, 24, 48, 520, 18));
 
             openButton = new PillButton();
@@ -595,47 +587,17 @@ namespace Video2Gif
             statusLabel.AutoEllipsis = true;
             Controls.Add(statusLabel);
 
-            aiMode = AiCutout.Available;
-            aiToggle = new ToggleRow();
-            aiToggle.Title = "Нейросеть (умный фон)";
-            aiToggle.Subtitle = "U²-Netp · 4,6 МБ · работает без интернета";
-            aiToggle.Checked = aiMode;
-            aiToggle.SetBounds(Ui.P(24), Ui.P(376), Ui.P(712), Ui.P(38));
-            aiToggle.CheckedChanged += delegate
-            {
-                if (suppress) return;
-                aiMode = aiToggle.Checked;
-                UpdateModeUi();
-                if (original == null) return;
-                if (aiMode)
-                {
-                    if (aiMask != null)
-                    {
-                        ApplyCachedAiMask();
-                        statusLabel.Text = "Нейросеть: объект выделен";
-                    }
-                    else StartAiPreview();
-                }
-                else
-                {
-                    UpdatePreview();
-                    statusLabel.Text = "Режим: по цвету";
-                }
-            };
-            Controls.Add(aiToggle);
-
             chip = new ColorChip();
             chip.Value = Color.White;
-            chip.SetBounds(Ui.P(24), Ui.P(424), Ui.P(32), Ui.P(32));
+            chip.SetBounds(Ui.P(24), Ui.P(380), Ui.P(32), Ui.P(32));
             Controls.Add(chip);
-            colorLabel = Lbl("Цвет фона", Ui.Small, Ui.Muted, 64, 424, 130, 32);
-            Controls.Add(colorLabel);
+            Controls.Add(Lbl("Цвет фона", Ui.Small, Ui.Muted, 64, 380, 130, 32));
 
             autoButton = new PillButton();
             autoButton.Ghost = true;
             autoButton.Text = "Взять из угла";
             autoButton.Font = Ui.Small;
-            autoButton.SetBounds(Ui.P(430), Ui.P(424), Ui.P(140), Ui.P(32));
+            autoButton.SetBounds(Ui.P(430), Ui.P(380), Ui.P(140), Ui.P(32));
             autoButton.Click += delegate { TakeAutoColor(); };
             Controls.Add(autoButton);
 
@@ -643,7 +605,7 @@ namespace Video2Gif
             pickButton.Ghost = true;
             pickButton.Text = "Пипетка";
             pickButton.Font = Ui.Small;
-            pickButton.SetBounds(Ui.P(578), Ui.P(424), Ui.P(158), Ui.P(32));
+            pickButton.SetBounds(Ui.P(578), Ui.P(380), Ui.P(158), Ui.P(32));
             pickButton.Click += delegate
             {
                 if (original == null) return;
@@ -655,58 +617,41 @@ namespace Video2Gif
             };
             Controls.Add(pickButton);
 
-            toleranceLabel = Lbl("Допуск: 30", Ui.Small, Ui.Muted, 24, 468, 340, 18);
+            toleranceLabel = Lbl("Допуск: 30", Ui.Small, Ui.Muted, 24, 424, 340, 18);
             Controls.Add(toleranceLabel);
             toleranceBar = new FlatSlider();
             toleranceBar.Minimum = 0;
             toleranceBar.Maximum = 100;
             toleranceBar.Value = tolerance;
-            toleranceBar.SetBounds(Ui.P(24), Ui.P(488), Ui.P(340), Ui.P(28));
+            toleranceBar.SetBounds(Ui.P(24), Ui.P(444), Ui.P(340), Ui.P(28));
             toleranceBar.ValueChanged += delegate
             {
-                if (aiMode)
-                {
-                    threshold = toleranceBar.Value;
-                    toleranceLabel.Text = "Порог: " + threshold;
-                    if (!suppress) ApplyCachedAiMask();
-                }
-                else
-                {
-                    tolerance = toleranceBar.Value;
-                    toleranceLabel.Text = "Допуск: " + tolerance;
-                    if (!suppress) UpdatePreview();
-                }
+                tolerance = toleranceBar.Value;
+                toleranceLabel.Text = "Допуск: " + tolerance;
+                if (!suppress) UpdatePreview();
             };
             Controls.Add(toleranceBar);
 
-            featherLabel = Lbl("Края: 2", Ui.Small, Ui.Muted, 390, 468, 346, 18);
+            featherLabel = Lbl("Края: 2", Ui.Small, Ui.Muted, 390, 424, 346, 18);
             Controls.Add(featherLabel);
             featherBar = new FlatSlider();
             featherBar.Minimum = 0;
             featherBar.Maximum = 12;
             featherBar.Value = feather;
-            featherBar.SetBounds(Ui.P(390), Ui.P(488), Ui.P(346), Ui.P(28));
+            featherBar.SetBounds(Ui.P(390), Ui.P(444), Ui.P(346), Ui.P(28));
             featherBar.ValueChanged += delegate
             {
                 feather = featherBar.Value;
                 featherLabel.Text = "Края: " + feather;
-                if (!suppress)
-                {
-                    if (aiMode) ApplyCachedAiMask();
-                    else UpdatePreview();
-                }
+                if (!suppress) UpdatePreview();
             };
             Controls.Add(featherBar);
-
-            aiHint = Lbl("Модель сама находит объект — фон убирается целиком.",
-                Ui.Tiny, Ui.Faint, 24, 488, 712, 18);
-            Controls.Add(aiHint);
 
             linkedToggle = new ToggleRow();
             linkedToggle.Title = "Только связанный фон";
             linkedToggle.Subtitle = "Не трогать похожие цвета внутри объекта";
             linkedToggle.Checked = true;
-            linkedToggle.SetBounds(Ui.P(24), Ui.P(524), Ui.P(712), Ui.P(38));
+            linkedToggle.SetBounds(Ui.P(24), Ui.P(480), Ui.P(712), Ui.P(38));
             linkedToggle.CheckedChanged += delegate
             {
                 connected = linkedToggle.Checked;
@@ -718,7 +663,7 @@ namespace Video2Gif
             saveButton.Accent = true;
             saveButton.Text = "Сохранить PNG";
             saveButton.Font = Ui.Bold;
-            saveButton.SetBounds(Ui.P(24), Ui.P(578), Ui.P(300), Ui.P(44));
+            saveButton.SetBounds(Ui.P(24), Ui.P(532), Ui.P(300), Ui.P(44));
             saveButton.Enabled = false;
             saveButton.Click += delegate { Save(); };
             Controls.Add(saveButton);
@@ -727,7 +672,7 @@ namespace Video2Gif
             resetButton.Ghost = true;
             resetButton.Text = "Сбросить";
             resetButton.Font = Ui.Small;
-            resetButton.SetBounds(Ui.P(336), Ui.P(578), Ui.P(120), Ui.P(44));
+            resetButton.SetBounds(Ui.P(336), Ui.P(532), Ui.P(120), Ui.P(44));
             resetButton.Enabled = false;
             resetButton.Click += delegate { ResetSettings(); };
             Controls.Add(resetButton);
@@ -735,11 +680,9 @@ namespace Video2Gif
             closeButton = new PillButton();
             closeButton.Ghost = true;
             closeButton.Text = "Закрыть";
-            closeButton.SetBounds(Ui.P(468), Ui.P(578), Ui.P(268), Ui.P(44));
+            closeButton.SetBounds(Ui.P(468), Ui.P(532), Ui.P(268), Ui.P(44));
             closeButton.Click += delegate { Close(); };
             Controls.Add(closeButton);
-
-            UpdateModeUi();
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -756,7 +699,7 @@ namespace Video2Gif
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            if (working || aiBusy)
+            if (working)
             {
                 e.Cancel = true;
                 statusLabel.Text = "Подождите, идёт обработка…";
@@ -832,17 +775,13 @@ namespace Video2Gif
                 key = CutoutCore.AutoColor(previewBase);
                 suggestedTolerance = CutoutCore.SuggestTolerance(previewBase, key);
                 chip.Value = key;
-                aiMask = null;
-                aiTicket++;
                 ResetSlidersQuietly();
-                UpdateModeUi();
+                UpdatePreview();
                 saveButton.Enabled = true;
                 resetButton.Enabled = true;
                 saveButton.Text = isGif ? "Сохранить GIF" : "Сохранить PNG";
                 statusLabel.Text = Path.GetFileName(file) +
                     (isGif ? " · GIF" : " · фото");
-                if (aiMode) StartAiPreview();
-                else UpdatePreview();
             }
             catch (Exception ex)
             {
@@ -859,23 +798,13 @@ namespace Video2Gif
         private void ResetSlidersQuietly()
         {
             suppress = true;
-            if (aiMode)
-            {
-                threshold = 50;
-                feather = 2;
-                toleranceBar.Value = threshold;
-                toleranceLabel.Text = "Порог: " + threshold;
-            }
-            else
-            {
-                tolerance = suggestedTolerance;
-                if (tolerance < 0) tolerance = 0;
-                if (tolerance > 100) tolerance = 100;
-                feather = 2;
-                toleranceBar.Value = tolerance;
-                toleranceLabel.Text = "Допуск: " + tolerance;
-            }
+            tolerance = suggestedTolerance;
+            if (tolerance < 0) tolerance = 0;
+            if (tolerance > 100) tolerance = 100;
+            feather = 2;
+            toleranceBar.Value = tolerance;
             featherBar.Value = feather;
+            toleranceLabel.Text = "Допуск: " + tolerance;
             featherLabel.Text = "Края: " + feather;
             suppress = false;
         }
@@ -883,13 +812,6 @@ namespace Video2Gif
         private void ResetSettings()
         {
             if (original == null) return;
-            if (aiMode)
-            {
-                aiMask = null;
-                ResetSlidersQuietly();
-                StartAiPreview();
-                return;
-            }
             suppress = true;
             key = CutoutCore.AutoColor(previewBase);
             suggestedTolerance = CutoutCore.SuggestTolerance(previewBase, key);
@@ -917,7 +839,6 @@ namespace Video2Gif
 
         private void UpdatePreview()
         {
-            if (aiMode) return;
             if (original == null || previewBase == null) return;
             if (previewResult != null)
             {
@@ -930,129 +851,9 @@ namespace Video2Gif
             preview.Invalidate();
         }
 
-        private void ApplyCachedAiMask()
-        {
-            if (!aiMode || aiMask == null || previewBase == null) return;
-            if (previewResult != null)
-            {
-                previewResult.Dispose();
-                previewResult = null;
-            }
-            previewResult = AiCutout.ApplyMask(previewBase, aiMask, feather, threshold);
-            preview.SetImages(previewResult, previewBase);
-            preview.Invalidate();
-        }
-
-        private void StartAiPreview()
-        {
-            if (original == null || previewBase == null) return;
-            if (!AiCutout.Available)
-            {
-                suppress = true;
-                aiToggle.Checked = false;
-                suppress = false;
-                aiMode = false;
-                UpdateModeUi();
-                UpdatePreview();
-                statusLabel.Text = "Нейросеть недоступна.";
-                return;
-            }
-
-            int ticket = ++aiTicket;
-            aiMask = null;
-            SetAiBusy(true, "Нейросеть выделяет объект…");
-            Bitmap sample = previewBase;
-            Task.Factory.StartNew(delegate { return AiCutout.Segment(sample); })
-                .ContinueWith(delegate(Task<float[]> task)
-                {
-                    if (IsDisposed || !IsHandleCreated) return;
-                    try
-                    {
-                        BeginInvoke((MethodInvoker)delegate
-                        {
-                            if (ticket != aiTicket) return;
-                            if (task.IsFaulted)
-                            {
-                                SetAiBusy(false, "");
-                                suppress = true;
-                                aiToggle.Checked = false;
-                                suppress = false;
-                                aiMode = false;
-                                UpdateModeUi();
-                                UpdatePreview();
-                                statusLabel.Text =
-                                    "Нейросеть: ошибка, включён режим по цвету.";
-                                return;
-                            }
-                            aiMask = task.Result;
-                            ApplyCachedAiMask();
-                            SetAiBusy(false, "");
-                            statusLabel.Text = "Нейросеть: объект выделен";
-                        });
-                    }
-                    catch { }
-                });
-        }
-
-        private void UpdateModeUi()
-        {
-            bool colorMode = !aiMode;
-            chip.Visible = colorMode;
-            colorLabel.Visible = colorMode;
-            autoButton.Visible = colorMode;
-            pickButton.Visible = colorMode;
-            linkedToggle.Visible = colorMode;
-            aiHint.Visible = aiMode;
-
-            int labelTop = aiMode ? 424 : 468;
-            toleranceLabel.SetBounds(Ui.P(24), Ui.P(labelTop), Ui.P(340), Ui.P(18));
-            toleranceBar.SetBounds(Ui.P(24), Ui.P(labelTop + 20), Ui.P(340), Ui.P(28));
-            featherLabel.SetBounds(Ui.P(390), Ui.P(labelTop), Ui.P(346), Ui.P(18));
-            featherBar.SetBounds(Ui.P(390), Ui.P(labelTop + 20), Ui.P(346), Ui.P(28));
-            aiHint.SetBounds(Ui.P(24), Ui.P(labelTop + 66), Ui.P(712), Ui.P(18));
-
-            suppress = true;
-            toleranceBar.Value = aiMode ? threshold : tolerance;
-            featherBar.Value = feather;
-            suppress = false;
-
-            if (aiMode)
-            {
-                toleranceLabel.Text = "Порог: " + threshold;
-                preview.PickMode = false;
-                pickButton.Active = false;
-            }
-            else
-            {
-                toleranceLabel.Text = "Допуск: " + tolerance;
-            }
-            aiToggle.Enabled = AiCutout.Available;
-        }
-
-        private void SetAiBusy(bool busy, string text)
-        {
-            aiBusy = busy;
-            openButton.Enabled = !busy && !working;
-            pickButton.Enabled = !busy && !working;
-            autoButton.Enabled = !busy && !working;
-            saveButton.Enabled = !busy && !working && original != null &&
-                (!aiMode || aiMask != null);
-            resetButton.Enabled = !busy && !working && original != null;
-            closeButton.Enabled = !busy && !working;
-            aiToggle.Enabled = !busy && !working && AiCutout.Available;
-            UseWaitCursor = busy || working;
-            if (!string.IsNullOrEmpty(text)) statusLabel.Text = text;
-        }
-
         private void Save()
         {
-            if (working || aiBusy || original == null) return;
-            if (aiMode && !isGif && aiMask == null)
-            {
-                MessageBox.Show(this, Loc.T("Дождитесь окончания обработки."),
-                    Program.AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
+            if (working || original == null) return;
             using (SaveFileDialog dialog = new SaveFileDialog())
             {
                 dialog.InitialDirectory = SavePaths.Desktop();
@@ -1083,12 +884,9 @@ namespace Video2Gif
                 int tol = tolerance;
                 int soft = feather;
                 bool onlyLinked = connected;
-                bool useAi = aiMode;
-                float[] mask = aiMask;
-                int cutoff = threshold;
                 Bitmap sourceBitmap = original;
 
-                SetWorking(true, useAi ? "Нейросеть обрабатывает…" : "Сохраняем…");
+                SetWorking(true, "Сохраняем…");
                 Task.Factory.StartNew(delegate
                 {
                     if (gif)
@@ -1104,19 +902,10 @@ namespace Video2Gif
                                 string frame = Path.Combine(folder,
                                     "frame-" + i.ToString("0000") + ".png");
                                 using (Bitmap image = EditorCore.LoadBitmap(frame))
+                                using (Bitmap cut = CutoutCore.RemoveBackground(
+                                    image, color, tol, soft, onlyLinked))
                                 {
-                                    Bitmap cut;
-                                    if (useAi)
-                                    {
-                                        float[] frameMask = AiCutout.Segment(image);
-                                        cut = AiCutout.ApplyMask(image, frameMask, soft, cutoff);
-                                    }
-                                    else
-                                    {
-                                        cut = CutoutCore.RemoveBackground(
-                                            image, color, tol, soft, onlyLinked);
-                                    }
-                                    using (cut) cut.Save(frame, ImageFormat.Png);
+                                    cut.Save(frame, ImageFormat.Png);
                                 }
                             }
                             int fps = 10;
@@ -1136,10 +925,8 @@ namespace Video2Gif
                     }
                     else
                     {
-                        using (Bitmap cut = useAi
-                            ? AiCutout.ApplyMask(sourceBitmap, mask, soft, cutoff)
-                            : CutoutCore.RemoveBackground(
-                                sourceBitmap, color, tol, soft, onlyLinked))
+                        using (Bitmap cut = CutoutCore.RemoveBackground(
+                            sourceBitmap, color, tol, soft, onlyLinked))
                         {
                             cut.Save(output, ImageFormat.Png);
                         }
@@ -1186,24 +973,20 @@ namespace Video2Gif
         private void SetWorking(bool busy, string text)
         {
             working = busy;
-            openButton.Enabled = !busy && !aiBusy;
-            pickButton.Enabled = !busy && !aiBusy;
-            autoButton.Enabled = !busy && !aiBusy;
+            openButton.Enabled = !busy;
+            pickButton.Enabled = !busy;
+            autoButton.Enabled = !busy;
             toleranceBar.Enabled = !busy;
             featherBar.Enabled = !busy;
-            saveButton.Enabled = !busy && !aiBusy && original != null &&
-                (!aiMode || aiMask != null || isGif);
-            resetButton.Enabled = !busy && !aiBusy && original != null;
-            closeButton.Enabled = !busy && !aiBusy;
-            aiToggle.Enabled = !busy && !aiBusy && AiCutout.Available;
-            UseWaitCursor = busy || aiBusy;
+            saveButton.Enabled = !busy && original != null;
+            resetButton.Enabled = !busy && original != null;
+            closeButton.Enabled = !busy;
+            UseWaitCursor = busy;
             if (!string.IsNullOrEmpty(text)) statusLabel.Text = text;
         }
 
         private void DisposeImages()
         {
-            aiTicket++;
-            aiMask = null;
             if (previewResult != null) { previewResult.Dispose(); previewResult = null; }
             if (previewBase != null) { previewBase.Dispose(); previewBase = null; }
             if (original != null) { original.Dispose(); original = null; }
