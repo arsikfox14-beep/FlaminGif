@@ -104,7 +104,10 @@ namespace Video2Gif
             return result;
         }
 
-        /// <summary>Самый частый цвет по краям картинки.</summary>
+        /// <summary>
+        /// Цвет фона по углам картинки. Углы надёжнее всего края: объект
+        /// часто касается нижней или боковой кромки и не должен попадать в фон.
+        /// </summary>
         public static Color AutoColor(Bitmap bitmap)
         {
             if (bitmap == null || bitmap.Width < 1 || bitmap.Height < 1)
@@ -117,28 +120,47 @@ namespace Video2Gif
 
             int width = bitmap.Width;
             int height = bitmap.Height;
-            int stepX = Math.Max(1, width / 500);
-            int stepY = Math.Max(1, height / 500);
+            int patch = Math.Max(3, Math.Min(16, Math.Min(width, height) / 18));
+            int samples = 0;
+            samples += AddCorner(bitmap, 0, 0, patch, counts, sumR, sumG, sumB);
+            samples += AddCorner(bitmap, width - patch, 0, patch, counts, sumR, sumG, sumB);
+            samples += AddCorner(bitmap, 0, height - patch, patch, counts, sumR, sumG, sumB);
+            samples += AddCorner(bitmap, width - patch, height - patch, patch,
+                counts, sumR, sumG, sumB);
 
-            for (int x = 0; x < width; x += stepX)
+            if (samples == 0)
             {
-                AddBorderSample(bitmap.GetPixel(x, 0), counts, sumR, sumG, sumB);
-                AddBorderSample(bitmap.GetPixel(x, height - 1), counts, sumR, sumG, sumB);
-            }
-            for (int y = 0; y < height; y += stepY)
-            {
-                AddBorderSample(bitmap.GetPixel(0, y), counts, sumR, sumG, sumB);
-                AddBorderSample(bitmap.GetPixel(width - 1, y), counts, sumR, sumG, sumB);
+                int stepX = Math.Max(1, width / 500);
+                int stepY = Math.Max(1, height / 500);
+                for (int x = 0; x < width; x += stepX)
+                {
+                    AddBorderSample(bitmap.GetPixel(x, 0), counts, sumR, sumG, sumB);
+                    AddBorderSample(bitmap.GetPixel(x, height - 1), counts, sumR, sumG, sumB);
+                }
+                for (int y = 0; y < height; y += stepY)
+                {
+                    AddBorderSample(bitmap.GetPixel(0, y), counts, sumR, sumG, sumB);
+                    AddBorderSample(bitmap.GetPixel(width - 1, y), counts, sumR, sumG, sumB);
+                }
             }
 
             int best = -1;
             int bestCount = 0;
+            int bestSaturation = int.MaxValue;
             for (int i = 0; i < counts.Length; i++)
             {
-                if (counts[i] > bestCount)
+                if (counts[i] == 0) continue;
+                int r = sumR[i] / counts[i];
+                int g = sumG[i] / counts[i];
+                int b = sumB[i] / counts[i];
+                int saturation = Math.Max(r, Math.Max(g, b)) - Math.Min(r, Math.Min(g, b));
+                // При равном количестве выбираем более нейтральный цвет.
+                if (counts[i] > bestCount ||
+                    (counts[i] == bestCount && saturation < bestSaturation))
                 {
                     bestCount = counts[i];
                     best = i;
+                    bestSaturation = saturation;
                 }
             }
             if (best < 0 || bestCount == 0) return Color.White;
@@ -146,6 +168,61 @@ namespace Video2Gif
                 sumR[best] / bestCount,
                 sumG[best] / bestCount,
                 sumB[best] / bestCount);
+        }
+
+        /// <summary>Подходящий начальный допуск по разбросу цвета фона.</summary>
+        public static int SuggestTolerance(Bitmap bitmap, Color key)
+        {
+            if (bitmap == null) return 14;
+            int width = bitmap.Width;
+            int height = bitmap.Height;
+            int stepX = Math.Max(1, width / 300);
+            int stepY = Math.Max(1, height / 300);
+            int max = 0;
+            int count = 0;
+            for (int x = 0; x < width; x += stepX)
+            {
+                AddSpread(bitmap.GetPixel(x, 0), key, ref max, ref count);
+                AddSpread(bitmap.GetPixel(x, height - 1), key, ref max, ref count);
+            }
+            for (int y = 0; y < height; y += stepY)
+            {
+                AddSpread(bitmap.GetPixel(0, y), key, ref max, ref count);
+                AddSpread(bitmap.GetPixel(width - 1, y), key, ref max, ref count);
+            }
+            if (count == 0) return 12;
+            int tolerance = 4 + max / 2;
+            if (tolerance < 8) tolerance = 8;
+            if (tolerance > 30) tolerance = 30;
+            return tolerance;
+        }
+
+        private static int AddCorner(Bitmap bitmap, int left, int top, int size,
+            int[] counts, int[] sumR, int[] sumG, int[] sumB)
+        {
+            int samples = 0;
+            int right = Math.Min(bitmap.Width, left + size);
+            int bottom = Math.Min(bitmap.Height, top + size);
+            for (int y = Math.Max(0, top); y < bottom; y++)
+            {
+                for (int x = Math.Max(0, left); x < right; x++)
+                {
+                    AddBorderSample(bitmap.GetPixel(x, y),
+                        counts, sumR, sumG, sumB);
+                    samples++;
+                }
+            }
+            return samples;
+        }
+
+        private static void AddSpread(Color color, Color key, ref int max, ref int count)
+        {
+            if (color.A < 20) return;
+            int distance = RawDistance(color.ToArgb(), key);
+            // Явно чужие пиксели (объект у края) не раздувают допуск.
+            if (distance > 60) return;
+            if (distance > max) max = distance;
+            count++;
         }
 
         private static void AddBorderSample(Color color,
@@ -170,13 +247,48 @@ namespace Video2Gif
         {
             int alpha = (pixel >> 24) & 0xFF;
             if (alpha < 20) return true;
+            return Distance(pixel, key) <= limit;
+        }
+
+        /// <summary>
+        /// Разница цветов. Чуть сильнее наказываем насыщенные пиксели:
+        /// блики кожи на нейтральном фоне перестают считаться фоном.
+        /// </summary>
+        private static int Distance(int pixel, Color key)
+        {
             int r = (pixel >> 16) & 0xFF;
             int g = (pixel >> 8) & 0xFF;
             int b = pixel & 0xFF;
-            int dr = Math.Abs(r - key.R);
-            int dg = Math.Abs(g - key.G);
-            int db = Math.Abs(b - key.B);
-            return Math.Max(dr, Math.Max(dg, db)) <= limit;
+            int distance = Math.Max(Math.Abs(r - key.R),
+                Math.Max(Math.Abs(g - key.G), Math.Abs(b - key.B)));
+
+            int saturation = Math.Max(r, Math.Max(g, b)) - Math.Min(r, Math.Min(g, b));
+            int keySaturation = Math.Max(key.R, Math.Max(key.G, key.B)) -
+                Math.Min(key.R, Math.Min(key.G, key.B));
+            int extra = saturation - keySaturation - 16;
+            if (extra > 0) distance += extra / 3;
+            return distance;
+        }
+
+        private static int RawDistance(int pixel, Color key)
+        {
+            int r = (pixel >> 16) & 0xFF;
+            int g = (pixel >> 8) & 0xFF;
+            int b = pixel & 0xFF;
+            return Math.Max(Math.Abs(r - key.R),
+                Math.Max(Math.Abs(g - key.G), Math.Abs(b - key.B)));
+        }
+
+        private static int EdgeDiff(int first, int second)
+        {
+            int r1 = (first >> 16) & 0xFF;
+            int g1 = (first >> 8) & 0xFF;
+            int b1 = first & 0xFF;
+            int r2 = (second >> 16) & 0xFF;
+            int g2 = (second >> 8) & 0xFF;
+            int b2 = second & 0xFF;
+            return Math.Max(Math.Abs(r1 - r2),
+                Math.Max(Math.Abs(g1 - g2), Math.Abs(b1 - b2)));
         }
 
         private static void FloodFromBorder(int[] pixels, int width, int height,
@@ -185,13 +297,13 @@ namespace Video2Gif
             Stack<int> stack = new Stack<int>();
             for (int x = 0; x < width; x++)
             {
-                Push(x, 0, pixels, width, key, limit, background, stack);
-                Push(x, height - 1, pixels, width, key, limit, background, stack);
+                Push(x, 0, pixels, width, key, limit, background, stack, 0, false);
+                Push(x, height - 1, pixels, width, key, limit, background, stack, 0, false);
             }
             for (int y = 1; y < height - 1; y++)
             {
-                Push(0, y, pixels, width, key, limit, background, stack);
-                Push(width - 1, y, pixels, width, key, limit, background, stack);
+                Push(0, y, pixels, width, key, limit, background, stack, 0, false);
+                Push(width - 1, y, pixels, width, key, limit, background, stack, 0, false);
             }
 
             while (stack.Count > 0)
@@ -199,19 +311,26 @@ namespace Video2Gif
                 int index = stack.Pop();
                 int x = index % width;
                 int y = index / width;
-                if (x > 0) Push(x - 1, y, pixels, width, key, limit, background, stack);
-                if (x + 1 < width) Push(x + 1, y, pixels, width, key, limit, background, stack);
-                if (y > 0) Push(x, y - 1, pixels, width, key, limit, background, stack);
-                if (y + 1 < height) Push(x, y + 1, pixels, width, key, limit, background, stack);
+                int from = pixels[index];
+                if (x > 0) Push(x - 1, y, pixels, width, key, limit, background, stack, from, true);
+                if (x + 1 < width) Push(x + 1, y, pixels, width, key, limit, background, stack, from, true);
+                if (y > 0) Push(x, y - 1, pixels, width, key, limit, background, stack, from, true);
+                if (y + 1 < height) Push(x, y + 1, pixels, width, key, limit, background, stack, from, true);
             }
         }
 
         private static void Push(int x, int y, int[] pixels, int width,
-            Color key, int limit, bool[] background, Stack<int> stack)
+            Color key, int limit, bool[] background, Stack<int> stack,
+            int fromPixel, bool checkEdge)
         {
             int index = y * width + x;
             if (background[index]) return;
             if (!Matches(pixels[index], key, limit)) return;
+            // Не протекаем в объект через резкую границу.
+            if (checkEdge &&
+                ((fromPixel >> 24) & 0xFF) >= 20 &&
+                ((pixels[index] >> 24) & 0xFF) >= 20 &&
+                EdgeDiff(fromPixel, pixels[index]) > 80) return;
             background[index] = true;
             stack.Push(index);
         }
@@ -405,8 +524,9 @@ namespace Video2Gif
         private Bitmap previewBase;
         private Bitmap previewResult;
         private Color key = Color.White;
-        private int tolerance = 30;
+        private int tolerance = 14;
         private int feather = 2;
+        private int suggestedTolerance = 14;
         private bool connected = true;
 
         public CutoutForm()
@@ -453,8 +573,10 @@ namespace Video2Gif
             preview.Picked += delegate(Color color)
             {
                 key = color;
+                suggestedTolerance = CutoutCore.SuggestTolerance(previewBase, color);
                 chip.Value = color;
                 pickButton.Active = false;
+                ResetSlidersQuietly();
                 UpdatePreview();
                 statusLabel.Text = "Цвет фона: #" + color.R.ToString("X2") +
                     color.G.ToString("X2") + color.B.ToString("X2");
@@ -651,6 +773,7 @@ namespace Video2Gif
                 path = file;
                 previewBase = CutoutCore.Fit(original, 640, 400);
                 key = CutoutCore.AutoColor(previewBase);
+                suggestedTolerance = CutoutCore.SuggestTolerance(previewBase, key);
                 chip.Value = key;
                 ResetSlidersQuietly();
                 UpdatePreview();
@@ -675,7 +798,9 @@ namespace Video2Gif
         private void ResetSlidersQuietly()
         {
             suppress = true;
-            tolerance = 30;
+            tolerance = suggestedTolerance;
+            if (tolerance < 0) tolerance = 0;
+            if (tolerance > 100) tolerance = 100;
             feather = 2;
             toleranceBar.Value = tolerance;
             featherBar.Value = feather;
@@ -689,6 +814,7 @@ namespace Video2Gif
             if (original == null) return;
             suppress = true;
             key = CutoutCore.AutoColor(previewBase);
+            suggestedTolerance = CutoutCore.SuggestTolerance(previewBase, key);
             chip.Value = key;
             linkedToggle.Checked = true;
             connected = true;
@@ -703,9 +829,11 @@ namespace Video2Gif
         {
             if (previewBase == null) return;
             key = CutoutCore.AutoColor(previewBase);
+            suggestedTolerance = CutoutCore.SuggestTolerance(previewBase, key);
             chip.Value = key;
             preview.PickMode = false;
             pickButton.Active = false;
+            ResetSlidersQuietly();
             UpdatePreview();
         }
 

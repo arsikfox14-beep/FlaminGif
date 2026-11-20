@@ -151,6 +151,40 @@ namespace Video2Gif
                     }
                 }
 
+                using (Bitmap smartSource = new Bitmap(200, 160,
+                    PixelFormat.Format32bppArgb))
+                {
+                    using (Graphics smartGraphics = Graphics.FromImage(smartSource))
+                    {
+                        smartGraphics.Clear(Color.FromArgb(236, 232, 228));
+                        using (SolidBrush skin = new SolidBrush(
+                            Color.FromArgb(222, 182, 162)))
+                        {
+                            smartGraphics.FillEllipse(skin, 30, 20, 140, 150);
+                        }
+                        using (SolidBrush light = new SolidBrush(
+                            Color.FromArgb(240, 214, 202)))
+                        {
+                            smartGraphics.FillEllipse(light, 75, 35, 34, 24);
+                            smartGraphics.FillEllipse(light, 60, 80, 20, 14);
+                        }
+                    }
+                    Color smartKey = CutoutCore.AutoColor(smartSource);
+                    int smartTolerance = CutoutCore.SuggestTolerance(smartSource, smartKey);
+                    Check("cutout smart key",
+                        smartKey.R > 230 && smartKey.G > 225 && smartKey.B > 220 &&
+                        smartTolerance <= 16);
+                    using (Bitmap cut = CutoutCore.RemoveBackground(smartSource,
+                        smartKey, smartTolerance, 2, true))
+                    {
+                        Check("cutout keeps highlights",
+                            cut.GetPixel(2, 2).A == 0 &&
+                            cut.GetPixel(50, 90).A == 255 &&
+                            cut.GetPixel(90, 45).A == 255 &&
+                            cut.GetPixel(68, 86).A == 255);
+                    }
+                }
+
                 bool foodOk = true;
                 for (int i = 0; i < 40; i++)
                 {
