@@ -120,27 +120,27 @@ namespace Video2Gif
             Controls.Add(gifToolsButton);
 
             downloadsButton = new IconButton(IconKind.Download);
-            downloadsButton.SetBounds(Ui.P(760), Ui.P(16), Ui.P(32), Ui.P(32));
+            downloadsButton.SetBounds(Ui.P(796), Ui.P(16), Ui.P(32), Ui.P(32));
             downloadsButton.Click += delegate { ShowDownloadMenu(); };
             Controls.Add(downloadsButton);
 
             settingsButton = new IconButton(IconKind.Settings);
-            settingsButton.SetBounds(Ui.P(796), Ui.P(16), Ui.P(32), Ui.P(32));
+            settingsButton.SetBounds(Ui.P(832), Ui.P(16), Ui.P(32), Ui.P(32));
             settingsButton.Click += delegate { OpenSettings(); };
             Controls.Add(settingsButton);
 
             discordButton = new IconButton(IconKind.Discord);
-            discordButton.SetBounds(Ui.P(832), Ui.P(16), Ui.P(32), Ui.P(32));
+            discordButton.SetBounds(Ui.P(868), Ui.P(16), Ui.P(32), Ui.P(32));
             discordButton.Click += delegate { OpenLink("https://discord.gg/yMaS9HbjHV"); };
             Controls.Add(discordButton);
 
             donateButton = new IconButton(IconKind.Donate);
-            donateButton.SetBounds(Ui.P(868), Ui.P(16), Ui.P(32), Ui.P(32));
+            donateButton.SetBounds(Ui.P(904), Ui.P(16), Ui.P(32), Ui.P(32));
             donateButton.Click += delegate { OpenLink("https://www.donationalerts.com/r/arsikfox16"); };
             Controls.Add(donateButton);
 
             cutoutButton = new IconButton(IconKind.Cutout);
-            cutoutButton.SetBounds(Ui.P(904), Ui.P(16), Ui.P(32), Ui.P(32));
+            cutoutButton.SetBounds(Ui.P(760), Ui.P(16), Ui.P(32), Ui.P(32));
             cutoutButton.Click += delegate { OpenCutout(); };
             Controls.Add(cutoutButton);
 
