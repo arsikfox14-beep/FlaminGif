@@ -123,6 +123,34 @@ namespace Video2Gif
                 Check("snake eat",
                     snake.Step() == SnakeStep.Ate && snake.Score == 1 && snake.Snake.Count == 4);
 
+                using (Bitmap cutSource = new Bitmap(60, 60, PixelFormat.Format32bppArgb))
+                {
+                    using (Graphics cutGraphics = Graphics.FromImage(cutSource))
+                    {
+                        cutGraphics.Clear(Color.White);
+                        using (SolidBrush subject = new SolidBrush(
+                            Color.FromArgb(210, 70, 90)))
+                        {
+                            cutGraphics.FillEllipse(subject, 10, 10, 40, 40);
+                        }
+                    }
+                    Color cutKey = CutoutCore.AutoColor(cutSource);
+                    Check("cutout auto color",
+                        cutKey.R > 240 && cutKey.G > 240 && cutKey.B > 240);
+                    using (Bitmap cut = CutoutCore.RemoveBackground(
+                        cutSource, Color.White, 20, 0, true))
+                    {
+                        Check("cutout background",
+                            cut.GetPixel(1, 1).A == 0 && cut.GetPixel(30, 30).A == 255);
+                    }
+                    using (Bitmap cut = CutoutCore.RemoveBackground(
+                        cutSource, Color.White, 20, 5, true))
+                    {
+                        int edge = cut.GetPixel(11, 30).A;
+                        Check("cutout soft edge", edge > 0 && edge < 255);
+                    }
+                }
+
                 bool foodOk = true;
                 for (int i = 0; i < 40; i++)
                 {
@@ -586,6 +614,11 @@ namespace Video2Gif
                         Check("ui social icon buttons",
                             discord != null && discord.Kind == IconKind.Discord &&
                             donate != null && donate.Kind == IconKind.Donate);
+
+                        IconButton cutout = GetField(form, "cutoutButton") as IconButton;
+                        Check("ui cutout icon button",
+                            cutout != null && cutout.Kind == IconKind.Cutout &&
+                            cutout.Left + cutout.Width <= form.ClientSize.Width);
 
                         InfoBadge infoBadge = GetField(form, "infoBadge") as InfoBadge;
                         ToolTip creditsTip = GetField(form, "headerTip") as ToolTip;

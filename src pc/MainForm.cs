@@ -557,6 +557,15 @@ namespace Video2Gif
             }
         }
 
+        private void OpenCutout()
+        {
+            if (busy) return;
+            using (CutoutForm dialog = new CutoutForm())
+            {
+                dialog.ShowDialog(this);
+            }
+        }
+
         private void ShowCredits()
         {
             if (credits != null && !credits.IsDisposed)

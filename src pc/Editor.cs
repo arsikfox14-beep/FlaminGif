@@ -305,6 +305,20 @@ namespace Video2Gif
                 " -q:v 5 -start_number 0 " + Fmt.Quote(pattern));
         }
 
+        /// <summary>
+        /// Собирает GIF из PNG-кадров с прозрачным фоном.
+        /// Палитра резервирует прозрачный индекс, поэтому фон остаётся прозрачным.
+        /// </summary>
+        public static void AssembleTransparentGif(string folder, int fps, string output)
+        {
+            string pattern = Path.Combine(folder, "frame-%04d.png");
+            RunFfmpeg(
+                "-hide_banner -loglevel error -y -framerate " + Math.Max(1, fps) +
+                " -i " + Fmt.Quote(pattern) +
+                " -vf \"split[s0][s1];[s0]palettegen=stats_mode=diff:reserve_transparent=1[p];" +
+                "[s1][p]paletteuse=alpha_threshold=128\" -loop 0 " + Fmt.Quote(output));
+        }
+
         /// <summary>Звук выбранного фрагмента для «Проверить» (WAV, моно).</summary>
         public static void ExtractPreviewAudio(string input, string output,
             double start, double duration)
