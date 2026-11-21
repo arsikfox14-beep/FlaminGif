@@ -6,14 +6,14 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyProduct("FlaminGif")]
 [assembly: System.Reflection.AssemblyVersion("5.3.0.0")]
 [assembly: System.Reflection.AssemblyFileVersion("5.3.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersion("5.3 beta")]
+[assembly: System.Reflection.AssemblyInformationalVersion("5.3")]
 
 namespace Video2Gif
 {
     internal static class Program
     {
         public const string AppName = "FlaminGif";
-        public const string Version = "5.3 beta";
+        public const string Version = "5.3";
 
         /// <summary>Самопроверка: окна не должны лезть в сеть за обновлениями.</summary>
         public static bool SelfTestMode;

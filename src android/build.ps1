@@ -55,7 +55,7 @@ Write-Host '2/6 aapt2 link...'
     --min-sdk-version 24 `
     --target-sdk-version 34 `
     --version-code 5300 `
-    --version-name '5.3 beta' `
+    --version-name '5.3' `
     --replace-version `
     $resZip
 if ($LASTEXITCODE -ne 0) { throw 'aapt2 link failed' }

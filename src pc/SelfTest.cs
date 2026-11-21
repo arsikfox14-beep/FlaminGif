@@ -685,7 +685,7 @@ namespace Video2Gif
                         Check("ui credits info badge",
                             infoBadge != null &&
                             infoBadge.InfoText.IndexOf("Coders") >= 0 &&
-                            infoBadge.InfoText.IndexOf("beta-testers") >= 0 &&
+                            infoBadge.InfoText.IndexOf("testers") >= 0 &&
                             infoBadge.InfoText.IndexOf("donaters") >= 0);
                         Check("ui credits tooltip",
                             creditsTip != null && infoBadge != null &&

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.video2gif.app"
     android:versionCode="1"
-    android:versionName="5.3 beta">
+    android:versionName="5.3">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission

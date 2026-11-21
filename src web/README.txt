@@ -1,4 +1,4 @@
-video2gif — мобильная версия (2.7)
+FlaminGif — мобильная версия (5.3)
 ==================================
 
 Один файл index.html. Работает в Safari на iPhone и в Chrome на Android.
