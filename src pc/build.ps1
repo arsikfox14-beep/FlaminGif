@@ -13,7 +13,7 @@ if (Test-Path (Join-Path $parent "src")) {
     $root = $src
 }
 $build = Join-Path $root "build"
-$out = Join-Path $root $(if ($OutName) { $OutName } else { "Video2Gif.exe" })
+$out = Join-Path $root $(if ($OutName) { $OutName } else { "FlaminGif.exe" })
 $ffmpeg = Join-Path $root "bin\ffmpeg.exe"
 $gz = Join-Path $build "ffmpeg.gz"
 $ico = Join-Path $src "app.ico"

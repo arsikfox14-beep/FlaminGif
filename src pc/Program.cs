@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
 
-[assembly: System.Reflection.AssemblyTitle("video2gif")]
-[assembly: System.Reflection.AssemblyDescription("video2gif — видео и картинки в GIF, скачивание TikTok, YouTube и музыки")]
-[assembly: System.Reflection.AssemblyProduct("video2gif")]
+[assembly: System.Reflection.AssemblyTitle("FlaminGif")]
+[assembly: System.Reflection.AssemblyDescription("FlaminGif — видео и картинки в GIF, скачивание TikTok, YouTube и музыки")]
+[assembly: System.Reflection.AssemblyProduct("FlaminGif")]
 [assembly: System.Reflection.AssemblyVersion("5.3.0.0")]
 [assembly: System.Reflection.AssemblyFileVersion("5.3.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersion("5.3 beta")]
@@ -12,7 +12,7 @@ namespace Video2Gif
 {
     internal static class Program
     {
-        public const string AppName = "video2gif";
+        public const string AppName = "FlaminGif";
         public const string Version = "5.3 beta";
 
         /// <summary>Самопроверка: окна не должны лезть в сеть за обновлениями.</summary>

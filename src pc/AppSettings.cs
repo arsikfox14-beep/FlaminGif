@@ -24,7 +24,7 @@ namespace Video2Gif
             {
                 return Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Video2Gif");
+                    "FlaminGif");
             }
         }
 
@@ -39,6 +39,7 @@ namespace Video2Gif
             {
                 if (loaded) return;
                 loaded = true;
+                MigrateOldFolder();
                 ReadFile();
                 ImportLegacy();
             }
@@ -119,6 +120,42 @@ namespace Video2Gif
             }
         }
 
+        /// <summary>Переносит данные из старой папки Video2Gif в FlaminGif.</summary>
+        private static void MigrateOldFolder()
+        {
+            try
+            {
+                string oldFolder = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Video2Gif");
+                if (!Directory.Exists(oldFolder)) return;
+                if (!Directory.Exists(Folder))
+                {
+                    Directory.Move(oldFolder, Folder);
+                    return;
+                }
+                foreach (string file in Directory.GetFiles(oldFolder))
+                {
+                    string target = Path.Combine(Folder, Path.GetFileName(file));
+                    if (File.Exists(target)) continue;
+                    try { File.Move(file, target); }
+                    catch
+                    {
+                        try { File.Copy(file, target, false); } catch { }
+                    }
+                }
+                try
+                {
+                    if (Directory.GetFiles(oldFolder).Length == 0)
+                        Directory.Delete(oldFolder);
+                }
+                catch { }
+            }
+            catch
+            {
+            }
+        }
+
         private static void ReadFile()
         {
             try
@@ -147,7 +184,7 @@ namespace Video2Gif
                 List<string> keys = new List<string>(Values.Keys);
                 keys.Sort(StringComparer.OrdinalIgnoreCase);
                 StringBuilder text = new StringBuilder();
-                text.AppendLine("# video2gif settings");
+                text.AppendLine("# FlaminGif settings");
                 foreach (string key in keys)
                 {
                     string value = Values[key] ?? "";

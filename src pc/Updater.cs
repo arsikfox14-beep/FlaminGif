@@ -28,7 +28,7 @@ namespace Video2Gif
 
     /// <summary>
     /// Проверка и установка обновлений через GitHub Releases.
-    /// Релиз должен содержать файл Video2Gif.exe.
+    /// Релиз должен содержать файл FlaminGif.exe.
     /// </summary>
     internal static class Updater
     {
@@ -36,7 +36,7 @@ namespace Video2Gif
 
         private const string Api = "https://api.github.com/repos/" + Repo + "/releases";
         private static readonly string UserAgent =
-            "Video2Gif/" + Program.Version.Replace(" ", "-");
+            "FlaminGif/" + Program.Version.Replace(" ", "-");
 
         static Updater()
         {
@@ -97,7 +97,7 @@ namespace Video2Gif
                         {
                             assetUrl = Str(asset, "browser_download_url");
                             size = Long(asset, "size");
-                            if (string.Equals(fileName, "Video2Gif.exe", StringComparison.OrdinalIgnoreCase))
+                            if (string.Equals(fileName, "FlaminGif.exe", StringComparison.OrdinalIgnoreCase))
                                 break;
                         }
                         else if (fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) && zipUrl.Length == 0)
@@ -233,13 +233,13 @@ namespace Video2Gif
         public static string Download(UpdateInfo info, Action<int> report)
         {
             if (info == null || info.AssetUrl.Length == 0)
-                throw new UpdateException("В релизе нет файла Video2Gif.exe.");
+                throw new UpdateException("В релизе нет файла FlaminGif.exe.");
 
-            string folder = Path.Combine(Path.GetTempPath(), "Video2Gif-update");
+            string folder = Path.Combine(Path.GetTempPath(), "FlaminGif-update");
             Directory.CreateDirectory(folder);
             string extension = Path.GetExtension(new Uri(info.AssetUrl).AbsolutePath).ToLowerInvariant();
             if (extension != ".exe" && extension != ".zip") extension = ".exe";
-            string path = Path.Combine(folder, "Video2Gif-" + info.Version + extension);
+            string path = Path.Combine(folder, "FlaminGif-" + info.Version + extension);
             try
             {
                 if (File.Exists(path)) File.Delete(path);
@@ -323,7 +323,7 @@ namespace Video2Gif
         {
             string target = Application.ExecutablePath;
             string script = Path.Combine(Path.GetTempPath(),
-                "video2gif-update-" + Guid.NewGuid().ToString("N").Substring(0, 6) + ".cmd");
+                "flamingif-update-" + Guid.NewGuid().ToString("N").Substring(0, 6) + ".cmd");
 
             string[] lines =
             {
@@ -331,6 +331,7 @@ namespace Video2Gif
                 "setlocal",
                 "set tries=0",
                 "ping 127.0.0.1 -n 2 >nul",
+                "taskkill /f /im \"FlaminGif.exe\" >nul 2>&1",
                 "taskkill /f /im \"Video2Gif.exe\" >nul 2>&1",
                 ":wait",
                 "del /f /q \"" + target + "\" >nul 2>&1",

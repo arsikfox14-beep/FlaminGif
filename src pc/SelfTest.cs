@@ -18,8 +18,8 @@ namespace Video2Gif
 
         public static int Run()
         {
-            string logPath = Path.Combine(Path.GetTempPath(), "video2gif-selftest.log");
-            string work = Path.Combine(Path.GetTempPath(), "video2gif-selftest");
+            string logPath = Path.Combine(Path.GetTempPath(), "flamingif-selftest.log");
+            string work = Path.Combine(Path.GetTempPath(), "flamingif-selftest");
             int code = 0;
 
             try

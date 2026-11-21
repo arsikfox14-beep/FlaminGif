@@ -1,10 +1,10 @@
-# video2gif
+# FlaminGif
 
 Видео и картинки → GIF. Быстро, локально. Плюс скачивание видео и музыки.
 
 **by DeepSeek v4.1 flash & arsikfox14 & dismasdismavich**
 
-Версия **5.2**: одна сборка **Video2Gif.exe** — с TikTok, YouTube,
+Версия **5.2**: одна сборка **FlaminGif.exe** — с TikTok, YouTube,
 Spotify, видеоредактором, GIF-инструментами и другими возможностями.
 
 Установка не нужна: FFmpeg и yt-dlp находятся внутри exe.
@@ -132,7 +132,7 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 
 ## Как запустить
 
-1. Скачать `Video2Gif.exe`.
+1. Скачать `FlaminGif.exe`.
 2. Двойной клик.
 3. Перетащить видео или картинку в окно.
 
@@ -140,7 +140,7 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 Интернет нужен только для скачивания.
 
 При первом запуске FFmpeg и yt-dlp распаковываются в
-`%LOCALAPPDATA%\Video2Gif`. Повторно распаковываться не будут.
+`%LOCALAPPDATA%\FlaminGif`. Повторно распаковываться не будут.
 
 ## Автообновление
 
@@ -149,12 +149,12 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 появляется окно с её номером и описанием: можно скачать и установить сразу
 или отложить.
 
-Обновление скачивается во временную папку, заменяет текущий `Video2Gif.exe`
+Обновление скачивается во временную папку, заменяет текущий `FlaminGif.exe`
 и перезапускает программу. Настройки, темы и скачанные файлы не затрагиваются.
-Счётчик «показать один раз» хранится в `%LOCALAPPDATA%\Video2Gif\update.txt`.
+Счётчик «показать один раз» хранится в `%LOCALAPPDATA%\FlaminGif\update.txt`.
 
 Для работы автообновления релиз на GitHub должен содержать файл
-`Video2Gif.exe` (подойдёт и `Video2Gif-3.x.zip` — программа достанет exe
+`FlaminGif.exe` (подойдёт и `FlaminGif-3.x.zip` — программа достанет exe
 из архива), а тег релиза должен быть новее установленной версии,
 например `v5.2`.
 
@@ -173,7 +173,7 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 powershell -ExecutionPolicy Bypass -File src\build.ps1
 ```
 
-Собирается `Video2Gif.exe` в корне проекта.
+Собирается `FlaminGif.exe` в корне проекта.
 
 Скрипт сжимает FFmpeg и yt-dlp в `build\*.gz`, рисует иконку и собирает exe
 в корне проекта. Файлы `.cs` должны быть в UTF-8 с BOM.
@@ -181,10 +181,10 @@ powershell -ExecutionPolicy Bypass -File src\build.ps1
 Самопроверка без графического интерфейса:
 
 ```powershell
-Video2Gif.exe --selftest
+FlaminGif.exe --selftest
 ```
 
-Результат пишется в `%TEMP%\video2gif-selftest.log`.
+Результат пишется в `%TEMP%\flamingif-selftest.log`.
 
 ## Файлы
 
