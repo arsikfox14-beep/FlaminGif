@@ -1,4 +1,4 @@
-# video2gif для Android
+# FlaminGif для Android
 
 Отдельный проект: тот же `video2gif`, но для телефонов на Android.
 Внутри — та же мобильная страница (видео и картинки → GIF, темы, скачивание
@@ -12,7 +12,7 @@ by DeepSeek v4.1 flash & arsikfox14 & dismasdismavich
 - Начало и длительность, ширина, 1–60 кадров/с, Sierra / Байер / без сглаживания.
 - Режим GIF: «Быстро» (может пропускать кадры) или «Качественно» (все кадры).
 - Бесконечный цикл или один проигрыш, прогресс и отмена.
-- Сохранение GIF, фото и видео в галерею (Pictures/Video2Gif, Movies/Video2Gif),
+- Сохранение GIF, фото и видео в галерею (Pictures/FlaminGif, Movies/FlaminGif),
   системное «Поделиться» и всплывающее подтверждение «Сохранено в галерею».
 - Темы как в Windows-версии: авто по дате, светлая, тёмная, снежная,
   хэллоуин, GTA 6 и Gamesense. Цвет системных панелей подстраивается.
@@ -24,7 +24,7 @@ by DeepSeek v4.1 flash & arsikfox14 & dismasdismavich
 
 ## Чего нет
 
-- YouTube и Spotify остаются только в Windows-версии `Video2Gif.exe`.
+- YouTube и Spotify остаются только в Windows-версии `FlaminGif.exe`.
 - TikTok-API — сторонние сервисы: если они недоступны, видео откроется
   в браузере для сохранения вручную.
 - Нет встроенного FFmpeg: форматы ограничены тем, что умеет WebView
@@ -46,7 +46,7 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 powershell -ExecutionPolicy Bypass -File build.ps1 -Desktop
 ```
 
-Результат: `Video2Gif.apk` в корне проекта (около 85 КБ — внутри нет
+Результат: `FlaminGif.apk` в корне проекта (около 85 КБ — внутри нет
 FFmpeg, только WebView-страница и небольшой Java-слой).
 
 Сборка без Gradle: `aapt2 compile/link` → `javac` → `R8/D8` → `zip` →
@@ -76,7 +76,7 @@ build.ps1                  сборка APK
 на нативный HTTP (поэтому TikTok-API и прокси работают без CORS), перехватывает
 скачивание ссылок и `blob:`-файлов и отдаёт их в Java. Java складывает файлы
 в галерею через MediaStore (Images/Video, Android 10+) или в
-Pictures/Video2Gif и Movies/Video2Gif с MediaScanner (Android 7–9),
+Pictures/FlaminGif и Movies/FlaminGif с MediaScanner (Android 7–9),
 показывает тосты и перекрашивает статус-бар под выбранную тему.
 
 Минимальная версия — Android 7.0 (API 24), целевая — Android 14 (API 34).

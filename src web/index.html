@@ -98,6 +98,21 @@
     --shadow: 0 10px 30px rgba(0,0,0,.5);
     --radius: 6px;
   }
+  html[data-theme="flamingif"] {
+    --bg: #131109;
+    --bg2: #100e07;
+    --card: #1f1b0e;
+    --card2: #26200f;
+    --line: #37301a;
+    --text: #f4edcb;
+    --muted: #c6b88f;
+    --muted2: #928561;
+    --accent: #e8c953;
+    --accent2: #c6a736;
+    --ok: #96c878;
+    --err: #e86e5e;
+    --shadow: 0 12px 40px rgba(0,0,0,.5);
+  }
   html[data-theme="snow"] body {
     background:
       radial-gradient(800px 450px at 80% -10%, rgba(126,200,255,.16), transparent 60%),
@@ -117,6 +132,12 @@
       radial-gradient(700px 420px at -10% 10%, rgba(96,92,240,.18), transparent 60%),
       var(--bg);
   }
+  html[data-theme="flamingif"] body {
+    background:
+      radial-gradient(900px 400px at 50% -8%, rgba(232,201,83,.18), transparent 60%),
+      repeating-linear-gradient(90deg, rgba(232,201,83,.045) 0 1px, transparent 1px 14px),
+      var(--bg);
+  }
   html[data-theme="gamesense"] body {
     background:
       repeating-linear-gradient(45deg, rgba(255,255,255,.018) 0 1px, transparent 1px 6px),
@@ -130,6 +151,10 @@
   html[data-theme="gta6"] body::before {
     display: block;
     background: linear-gradient(90deg,#605cf0,#9630f5,#ff4fa3,#ff7a54,#ff9e42);
+  }
+  html[data-theme="flamingif"] body::before {
+    display: block;
+    background: linear-gradient(90deg, transparent, rgba(232,201,83,.9), transparent);
   }
   html[data-theme="gamesense"] body::before {
     display: block;
@@ -171,6 +196,7 @@
   }
   html[data-theme="snow"] .mark { background: var(--accent); color: #071426; }
   html[data-theme="halloween"] .mark { background: var(--accent); color: #1a0f08; }
+  html[data-theme="flamingif"] .mark { background: var(--accent); color: #1a1508; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body {
@@ -436,6 +462,7 @@
           <option value="halloween">Хэллоуин</option>
           <option value="gta6">GTA 6</option>
           <option value="gamesense">Gamesense</option>
+          <option value="flamingif">FlaminGif</option>
         </select>
       </div>
       <div class="field wide">
@@ -1337,7 +1364,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     download();
   }
 
-  var THEME_KEYS = ["auto", "light", "dark", "snow", "halloween", "gta6", "gamesense"];
+  var THEME_KEYS = ["auto", "light", "dark", "snow", "halloween", "gta6", "gamesense", "flamingif"];
   function themeDate(year, month, day, hour, minute) {
     return new Date(year, month - 1, day, hour || 0, minute || 0, 0, 0);
   }

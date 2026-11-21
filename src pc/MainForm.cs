@@ -114,6 +114,7 @@ namespace Video2Gif
             if (Ui.Holiday) DrawHolidayDecorations(g);
             else if (Ui.Sakura) DrawSakuraDecorations(g);
             else if (Ui.Summer) DrawSummerDecorations(g);
+            else if (Ui.Backrooms) DrawBackroomsDecorations(g);
 
             double alpha = BackgroundSettings.BackgroundOpacity;
             if (backgroundImage != null && alpha > 0.001)
@@ -260,6 +261,31 @@ namespace Video2Gif
                 Color.FromArgb(160, Ui.Accent));
             Ui.DrawWave(g, Ui.P(650), Ui.P(24), Ui.P(34), Ui.P(7),
                 Color.FromArgb(135, Ui.Accent));
+        }
+
+        /// <summary>Backrooms: лампы дневного света и полосы обоев в шапке.</summary>
+        private void DrawBackroomsDecorations(Graphics g)
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+
+            Rectangle wall = new Rectangle(Ui.P(372), 0, Ui.P(300), Ui.P(66));
+            Ui.DrawWallpaper(g, wall, Color.FromArgb(190, Ui.Accent), Math.Max(8, Ui.P(14)));
+
+            Ui.DrawFluorescent(g,
+                new RectangleF(Ui.P(390), Ui.P(16), Ui.P(94), Math.Max(3, Ui.P(5))),
+                Color.FromArgb(210, Ui.Accent));
+            Ui.DrawFluorescent(g,
+                new RectangleF(Ui.P(506), Ui.P(44), Ui.P(64), Math.Max(2, Ui.P(4))),
+                Color.FromArgb(150, Ui.Accent));
+
+            // Тёмный дверной проём — типичная деталь лиминального пространства.
+            Rectangle door = new Rectangle(Ui.P(600), Ui.P(8), Ui.P(30), Ui.P(54));
+            using (SolidBrush dark = new SolidBrush(Color.FromArgb(120, 8, 7, 4)))
+            {
+                g.FillRectangle(dark, door);
+            }
+            Ui.StrokeRound(g, door, Ui.P(2),
+                Color.FromArgb(160, Ui.Accent), Math.Max(1f, Ui.P(1.2)));
         }
 
         /* --------------------------------------------------------------- Тема */

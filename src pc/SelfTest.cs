@@ -301,6 +301,10 @@ namespace Video2Gif
                 Check("theme summer",
                     Ui.Dark && Ui.Summer && Ui.ThemeName == "summer" &&
                     Ui.Accent == Color.FromArgb(255, 154, 74) && !Ui.Holiday);
+                Ui.SetTheme("flamingif");
+                Check("theme flamingif",
+                    Ui.Dark && Ui.Backrooms && Ui.ThemeName == "flamingif" &&
+                    Ui.Accent == Color.FromArgb(232, 201, 83) && !Ui.Holiday);
 
                 Check("theme seasonal sakura",
                     Ui.SeasonalTheme(new DateTime(2026, 3, 1)) == ThemeKind.Sakura &&
@@ -355,7 +359,7 @@ namespace Video2Gif
                     !Updater.IsNewer("3.7", "4.0"));
 
                 bool gridVisible = true;
-                string[] gridThemes = new string[] { "light", "dark", "newyear", "halloween", "gta6" };
+                string[] gridThemes = new string[] { "light", "dark", "newyear", "halloween", "gta6", "flamingif" };
                 for (int i = 0; i < gridThemes.Length; i++)
                 {
                     Ui.SetTheme(gridThemes[i]);

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -32,7 +32,7 @@ namespace Video2Gif
     /// </summary>
     internal static class Updater
     {
-        public const string Repo = "arsikfox14-beep/video2gif";
+        public const string Repo = "arsikfox14-beep/FlaminGif";
 
         private const string Api = "https://api.github.com/repos/" + Repo + "/releases";
         private static readonly string UserAgent =

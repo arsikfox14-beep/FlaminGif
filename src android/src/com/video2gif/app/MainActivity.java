@@ -43,12 +43,12 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * video2gif для Android: вся логика — в assets/index.html,
+ * FlaminGif для Android: вся логика — в assets/index.html,
  * Java отвечает только за выбор файлов, сеть и сохранение в галерею.
  */
 public class MainActivity extends Activity {
 
-    private static final String TAG = "video2gif";
+    private static final String TAG = "FlaminGif";
     private static final int REQ_FILE = 1001;
     private static final int REQ_STORAGE = 1002;
     private static final long MAX_TEXT = 6L * 1024 * 1024;
@@ -338,7 +338,7 @@ public class MainActivity extends Activity {
         if (value.length() > 80) {
             value = value.substring(0, 80).trim();
         }
-        return value.isEmpty() ? "video2gif" : value;
+        return value.isEmpty() ? "FlaminGif" : value;
     }
 
     private static String guessMime(String contentType, String name) {
@@ -376,7 +376,7 @@ public class MainActivity extends Activity {
     }
 
     private static String galleryDir(String mime) {
-        return (isImage(mime) ? "Pictures" : "Movies") + "/Video2Gif";
+        return (isImage(mime) ? "Pictures" : "Movies") + "/FlaminGif";
     }
 
     private static Uri galleryCollection(String mime) {
@@ -412,7 +412,7 @@ public class MainActivity extends Activity {
             return name;
         }
         File dir = new File(Environment.getExternalStoragePublicDirectory(
-                isImage(mime) ? Environment.DIRECTORY_PICTURES : Environment.DIRECTORY_MOVIES), "Video2Gif");
+                isImage(mime) ? Environment.DIRECTORY_PICTURES : Environment.DIRECTORY_MOVIES), "FlaminGif");
         if (!dir.exists() && !dir.mkdirs()) {
             throw new IOException("нет доступа к галерее");
         }
@@ -604,7 +604,7 @@ public class MainActivity extends Activity {
                     } else {
                         File dir = new File(Environment.getExternalStoragePublicDirectory(
                                 isImage(safeMime) ? Environment.DIRECTORY_PICTURES : Environment.DIRECTORY_MOVIES),
-                                "Video2Gif");
+                                "FlaminGif");
                         if (!dir.exists() && !dir.mkdirs()) {
                             throw new IOException("нет доступа к галерее");
                         }

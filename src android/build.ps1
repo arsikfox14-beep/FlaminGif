@@ -1,4 +1,4 @@
-# Собирает Video2Gif.apk без Gradle: aapt2 + javac + d8 + zipalign + apksigner.
+# Собирает FlaminGif.apk без Gradle: aapt2 + javac + d8 + zipalign + apksigner.
 # Требуется JDK 17+ и .sdk (см. setup-sdk.ps1).
 
 param(
@@ -16,7 +16,7 @@ $platformJar = Join-Path $sdk 'platforms\android-34\android.jar'
 $buildTools = Join-Path $sdk 'build-tools\34.0.0'
 $r8Jar = Join-Path $sdk 'tools\r8.jar'
 $build = Join-Path $root 'build'
-$outApk = Join-Path $root 'Video2Gif.apk'
+$outApk = Join-Path $root 'FlaminGif.apk'
 $r8Version = '9.5.32'
 
 if (!(Test-Path $platformJar) -or !(Test-Path (Join-Path $buildTools 'aapt2.exe'))) {
@@ -54,8 +54,8 @@ Write-Host '2/6 aapt2 link...'
     --java (Join-Path $build 'gen') `
     --min-sdk-version 24 `
     --target-sdk-version 34 `
-    --version-code 5210 `
-    --version-name '5.2' `
+    --version-code 5300 `
+    --version-name '5.3 beta' `
     --replace-version `
     $resZip
 if ($LASTEXITCODE -ne 0) { throw 'aapt2 link failed' }
@@ -121,6 +121,6 @@ Write-Host ("Размер: " + [math]::Round((Get-Item $outApk).Length / 1MB, 1)
 
 if ($Desktop) {
     $desk = [Environment]::GetFolderPath('Desktop')
-    Copy-Item $outApk (Join-Path $desk 'Video2Gif.apk') -Force
-    Write-Host ("Скопировано на рабочий стол: " + (Join-Path $desk 'Video2Gif.apk'))
+    Copy-Item $outApk (Join-Path $desk 'FlaminGif.apk') -Force
+    Write-Host ("Скопировано на рабочий стол: " + (Join-Path $desk 'FlaminGif.apk'))
 }

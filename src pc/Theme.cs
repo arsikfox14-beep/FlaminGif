@@ -15,7 +15,8 @@ namespace Video2Gif
         Gta6,
         Gamesense,
         Sakura,
-        Summer
+        Summer,
+        Backrooms
     }
 
     internal static class Ui
@@ -64,6 +65,12 @@ namespace Video2Gif
             get { return Theme == ThemeKind.Summer; }
         }
 
+        /// <summary>Тема FlaminGif в духе Backrooms: тёмная, жёлтый свет.</summary>
+        public static bool Backrooms
+        {
+            get { return Theme == ThemeKind.Backrooms; }
+        }
+
         public static string ThemeName
         {
             get
@@ -76,6 +83,7 @@ namespace Video2Gif
                 if (Theme == ThemeKind.Gamesense) return "gamesense";
                 if (Theme == ThemeKind.Sakura) return "sakura";
                 if (Theme == ThemeKind.Summer) return "summer";
+                if (Theme == ThemeKind.Backrooms) return "flamingif";
                 return "dark";
             }
         }
@@ -235,6 +243,8 @@ namespace Video2Gif
                 kind = ThemeKind.Sakura;
             else if (value == "summer" || value == "leto" || value == "лето")
                 kind = ThemeKind.Summer;
+            else if (value == "flamingif" || value == "backrooms" || value == "backroom")
+                kind = ThemeKind.Backrooms;
             SetTheme(kind);
         }
 
@@ -493,6 +503,27 @@ namespace Video2Gif
                 Good = Color.FromArgb(126, 208, 150);
                 Bad = Color.FromArgb(255, 120, 110);
                 OnAccent = Color.FromArgb(35, 20, 10);
+            }
+            else if (kind == ThemeKind.Backrooms)
+            {
+                // Backrooms: тёмный оливковый сумрак и мертвенно-жёлтый свет ламп.
+                Bg = Color.FromArgb(19, 17, 9);
+                Card = Color.FromArgb(31, 27, 14);
+                Border = Color.FromArgb(55, 48, 25);
+                BorderStrong = Color.FromArgb(88, 76, 38);
+                Text = Color.FromArgb(244, 237, 203);
+                Muted = Color.FromArgb(198, 184, 143);
+                Faint = Color.FromArgb(146, 133, 97);
+                Accent = Color.FromArgb(232, 201, 83);
+                AccentDark = Color.FromArgb(198, 167, 54);
+                AccentInk = Color.FromArgb(245, 217, 112);
+                AccentSoft = Color.FromArgb(51, 44, 20);
+                AccentLine = Color.FromArgb(88, 74, 34);
+                AccentWash = Color.FromArgb(33, 28, 14);
+                Track = Color.FromArgb(43, 37, 19);
+                Good = Color.FromArgb(150, 200, 120);
+                Bad = Color.FromArgb(232, 110, 94);
+                OnAccent = Color.FromArgb(28, 24, 9);
             }
             else
             {
@@ -841,6 +872,46 @@ namespace Video2Gif
                     x + width * 0.52f, y + height,
                     x + width, y - height * 0.15f);
                 g.DrawPath(pen, path);
+            }
+        }
+
+        /// <summary>Лампа дневного света с мягким ореолом для Backrooms.</summary>
+        public static void DrawFluorescent(Graphics g, RectangleF bar, Color color)
+        {
+            float r = Math.Max(2f, bar.Height * 1.8f);
+            using (SolidBrush glow = new SolidBrush(Color.FromArgb(26, color)))
+            {
+                g.FillRectangle(glow, bar.X - r, bar.Y - r,
+                    bar.Width + r * 2f, bar.Height + r * 2f);
+            }
+            using (SolidBrush glow = new SolidBrush(Color.FromArgb(58, color)))
+            {
+                g.FillRectangle(glow, bar.X - r * 0.45f, bar.Y - r * 0.45f,
+                    bar.Width + r * 0.9f, bar.Height + r * 0.9f);
+            }
+            using (SolidBrush core = new SolidBrush(color))
+            {
+                g.FillRectangle(core, bar);
+            }
+            using (SolidBrush cap = new SolidBrush(Color.FromArgb(190, 40, 36, 20)))
+            {
+                float w = Math.Max(1.5f, bar.Height * 0.55f);
+                g.FillRectangle(cap, bar.X - w, bar.Y, w, bar.Height);
+                g.FillRectangle(cap, bar.Right, bar.Y, w, bar.Height);
+            }
+        }
+
+        /// <summary>Вертикальные полосы обоев — лёгкая текстура Backrooms.</summary>
+        public static void DrawWallpaper(Graphics g, Rectangle bounds,
+            Color color, int spacing)
+        {
+            if (spacing < 3) spacing = 3;
+            using (Pen pen = new Pen(Color.FromArgb(20, color), 1f))
+            {
+                for (int x = bounds.Left; x < bounds.Right; x += spacing)
+                {
+                    g.DrawLine(pen, x, bounds.Top, x, bounds.Bottom);
+                }
             }
         }
 
@@ -1497,6 +1568,22 @@ namespace Video2Gif
                 Ui.DrawWave(g, right - Ui.P(78), Height - Ui.P(8),
                     Ui.P(64), Ui.P(6), Color.FromArgb(110, Ui.Accent));
             }
+            else if (Ui.Backrooms)
+            {
+                Ui.DrawWallpaper(g, new Rectangle(0, 0, Width, Height),
+                    Color.FromArgb(80, Ui.Accent), Math.Max(8, Ui.P(16)));
+                Ui.DrawFluorescent(g,
+                    new RectangleF(Width - Ui.P(150), Ui.P(12), Ui.P(104), Math.Max(3, Ui.P(5))),
+                    Color.FromArgb(150, Ui.Accent));
+                Rectangle door = new Rectangle(Width - Ui.P(54), Ui.P(40),
+                    Ui.P(26), Height - Ui.P(50));
+                using (SolidBrush dark = new SolidBrush(Color.FromArgb(72, 8, 7, 4)))
+                {
+                    g.FillRectangle(dark, door);
+                }
+                Ui.StrokeRound(g, door, Ui.P(2),
+                    Color.FromArgb(120, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+            }
 
             int iconSize = Ui.P(42);
             int iconX = Ui.P(20);
@@ -1614,6 +1701,25 @@ namespace Video2Gif
             {
                 Ui.DrawSun(g, Width / 2f, Height / 2f,
                     Math.Min(Width, Height) * 0.21f, Color.FromArgb(255, 248, 238));
+                return;
+            }
+
+            if (Ui.Backrooms)
+            {
+                // Лампа дневного света на жёлтом фоне.
+                Rectangle fixture = new Rectangle(
+                    (int)(Width * 0.17f), (int)(Height * 0.44f),
+                    (int)(Width * 0.66f), (int)(Height * 0.13f));
+                Ui.FillRound(g, fixture, Math.Max(1, Ui.P(2)),
+                    Color.FromArgb(220, 30, 26, 12));
+                Rectangle tube = new Rectangle(
+                    fixture.X + Ui.P(3), fixture.Y + Math.Max(1, Ui.P(1)),
+                    fixture.Width - Ui.P(6), Math.Max(1, fixture.Height / 2));
+                using (SolidBrush light = new SolidBrush(
+                    Color.FromArgb(255, 255, 249, 210)))
+                {
+                    g.FillRectangle(light, tube);
+                }
                 return;
             }
 

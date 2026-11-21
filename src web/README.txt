@@ -53,7 +53,7 @@ iPhone:
 -----------
 - Основное — конвертация в GIF. Скачивание видео, TikTok и картинок по ссылке
   в браузере недоступно — оно есть в Android-приложении и Windows-версии
-  Video2Gif.exe. YouTube и Spotify — только в Windows.
+  FlaminGif.exe. YouTube и Spotify — только в Windows.
 - Видеоформаты зависят от браузера:
     iPhone — обычно MP4/MOV (H.264/HEVC);
     Android — MP4/WebM.

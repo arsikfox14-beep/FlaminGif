@@ -157,6 +157,7 @@ namespace Video2Gif
         private readonly ThemeTile gamesenseTile;
         private readonly ThemeTile sakuraTile;
         private readonly ThemeTile summerTile;
+        private readonly ThemeTile flaminGifTile;
         private PillButton updateButton;
         private Label updateStatus;
         private PillButton customButton;
@@ -267,6 +268,14 @@ namespace Video2Gif
             summerTile.SetBounds(Ui.P(24), Ui.P(190), Ui.P(89), Ui.P(58));
             summerTile.Click += delegate { Choose("summer"); };
             Controls.Add(summerTile);
+
+            flaminGifTile = MakeTile("flamingif", "FlaminGif");
+            flaminGifTile.SwatchBg = Color.FromArgb(19, 17, 9);
+            flaminGifTile.SwatchCard = Color.FromArgb(31, 27, 14);
+            flaminGifTile.SwatchAccent = Color.FromArgb(232, 201, 83);
+            flaminGifTile.SetBounds(Ui.P(121), Ui.P(190), Ui.P(89), Ui.P(58));
+            flaminGifTile.Click += delegate { Choose("flamingif"); };
+            Controls.Add(flaminGifTile);
 
             Controls.Add(Lbl("Свои темы", Ui.Small, Ui.Muted, 24, 260, 220, 18));
 
@@ -500,6 +509,7 @@ namespace Video2Gif
             gamesenseTile.Active = !Ui.AutoTheme && current == "gamesense";
             sakuraTile.Active = !Ui.AutoTheme && current == "sakura";
             summerTile.Active = !Ui.AutoTheme && current == "summer";
+            flaminGifTile.Active = !Ui.AutoTheme && current == "flamingif";
 
             if (customButton != null)
             {

@@ -550,6 +550,22 @@ namespace Video2Gif
                 Ui.DrawWave(g, Width - Ui.P(110), Ui.P(120), Ui.P(70), Ui.P(8),
                     Color.FromArgb(110, Ui.Accent));
             }
+            else if (Ui.Backrooms)
+            {
+                Ui.DrawWallpaper(g, ClientRectangle,
+                    Color.FromArgb(70, Ui.Accent), Math.Max(10, Ui.P(18)));
+                Ui.DrawFluorescent(g,
+                    new RectangleF(Width - Ui.P(104), Ui.P(26), Ui.P(76), Math.Max(3, Ui.P(4))),
+                    Color.FromArgb(130, Ui.Accent));
+                Rectangle door = new Rectangle(Width - Ui.P(44), Ui.P(150),
+                    Ui.P(22), Ui.P(54));
+                using (SolidBrush dark = new SolidBrush(Color.FromArgb(80, 8, 7, 4)))
+                {
+                    g.FillRectangle(dark, door);
+                }
+                Ui.StrokeRound(g, door, Ui.P(2),
+                    Color.FromArgb(110, Ui.Accent), Math.Max(1f, Ui.P(1.1)));
+            }
 
             int cx = Width / 2;
             int top = Ui.P(74);
