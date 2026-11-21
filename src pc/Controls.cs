@@ -12,6 +12,7 @@ namespace Video2Gif
 {
     internal enum IconKind
     {
+        Gamepad,
         Mouse,
         Editor,
         Frames,
@@ -192,7 +193,25 @@ namespace Video2Gif
                 pen.StartCap = LineCap.Round;
                 pen.EndCap = LineCap.Round;
 
-                if (Kind == IconKind.Mouse)
+                if (Kind == IconKind.Gamepad)
+                {
+                    float w = unit * 2.15f;
+                    float h = unit * 1.15f;
+                    Rectangle body = Rectangle.Round(new RectangleF(
+                        cx - w / 2f, cy - h / 2f, w, h));
+                    using (GraphicsPath path = Ui.Round(body,
+                        (int)Math.Max(3, h * 0.42f)))
+                    {
+                        g.DrawPath(pen, path);
+                    }
+                    float dx = cx - unit * 0.55f;
+                    g.DrawLine(pen, dx - unit * 0.20f, cy, dx + unit * 0.20f, cy);
+                    g.DrawLine(pen, dx, cy - unit * 0.20f, dx, cy + unit * 0.20f);
+                    float dot = Math.Max(1.6f, unit * 0.16f);
+                    g.DrawEllipse(pen, cx + unit * 0.28f, cy - unit * 0.24f, dot, dot);
+                    g.DrawEllipse(pen, cx + unit * 0.52f, cy + unit * 0.02f, dot, dot);
+                }
+                else if (Kind == IconKind.Mouse)
                 {
                     float w = unit * 1.02f;
                     float h = unit * 1.58f;

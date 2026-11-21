@@ -185,6 +185,28 @@ namespace Video2Gif
                     }
                 }
 
+                MinesweeperGame mines = new MinesweeperGame();
+                mines.Reveal(4, 4);
+                Check("mines first click safe", !mines.Dead && mines.Opened > 0);
+                for (int y = 0; y < MinesweeperGame.Rows; y++)
+                {
+                    for (int x = 0; x < MinesweeperGame.Cols; x++)
+                    {
+                        if (!mines.IsMine(x, y) && !mines.IsRevealed(x, y))
+                            mines.Reveal(x, y);
+                    }
+                }
+                Check("mines win", mines.Won);
+                mines.Reset();
+                mines.ToggleFlag(0, 0);
+                Check("mines flag", mines.Flags == 1 && mines.IsFlagged(0, 0));
+
+                BlockBlastGame blocks = new BlockBlastGame();
+                int blockScore = blocks.Score;
+                bool placed = blocks.Place(0, 0, 0);
+                Check("block blast place", placed && blocks.Score > blockScore &&
+                    blocks.Pieces[0] == null);
+
                 bool foodOk = true;
                 for (int i = 0; i < 40; i++)
                 {
@@ -626,8 +648,8 @@ namespace Video2Gif
                         IconButton gifTools = GetField(form, "gifToolsButton") as IconButton;
                         IconButton download = GetField(form, "downloadsButton") as IconButton;
                         IconButton settings = GetField(form, "settingsButton") as IconButton;
-                        Check("ui mouse button",
-                            game != null && game.Kind == IconKind.Mouse);
+                        Check("ui gamepad button",
+                            game != null && game.Kind == IconKind.Gamepad);
                         Check("ui editor icon button",
                             editor != null && editor.Kind == IconKind.Editor);
                         Check("ui gif tools icon button",

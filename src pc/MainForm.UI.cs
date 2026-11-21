@@ -104,7 +104,7 @@ namespace Video2Gif
             Controls.Add(Lbl("v" + Program.Version + " · локально", Ui.Tiny, Ui.Faint,
                 480, 24, 168, 18, ContentAlignment.MiddleRight));
 
-            gameButton = new IconButton(IconKind.Mouse);
+            gameButton = new IconButton(IconKind.Gamepad);
             gameButton.SetBounds(Ui.P(652), Ui.P(16), Ui.P(32), Ui.P(32));
             gameButton.Click += delegate { OpenGame(); };
             Controls.Add(gameButton);
@@ -145,7 +145,7 @@ namespace Video2Gif
             Controls.Add(cutoutButton);
 
             headerTip = new ToolTip();
-            headerTip.SetToolTip(gameButton, Loc.T("Играть · Змейка"));
+            headerTip.SetToolTip(gameButton, Loc.T("Игры · Змейка, Сапёр, Блок Бласт"));
             headerTip.SetToolTip(editorButton, Loc.T("Видеоредактор · обрезка видео и фото"));
             headerTip.SetToolTip(gifToolsButton, Loc.T("GIF-инструменты · кадры и сборка"));
             headerTip.SetToolTip(downloadsButton, Loc.T("Скачать видео, музыку или TikTok"));

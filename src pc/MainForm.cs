@@ -559,9 +559,9 @@ namespace Video2Gif
         private void OpenGame()
         {
             if (busy) return;
-            using (SnakeForm game = new SnakeForm())
+            using (GamesForm games = new GamesForm())
             {
-                game.ShowDialog(this);
+                games.ShowDialog(this);
             }
         }
 
