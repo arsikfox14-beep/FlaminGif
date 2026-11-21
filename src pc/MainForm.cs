@@ -78,18 +78,19 @@ namespace FlaminGif
                 Rectangle glow = new Rectangle(0, 0, ClientSize.Width, Ui.P(66));
                 using (LinearGradientBrush brush = new LinearGradientBrush(
                     glow,
-                    Color.FromArgb(0, 255, 79, 163),
-                    Color.FromArgb(28, 255, 79, 163),
+                    Color.Transparent,
+                    Color.Transparent,
                     0f))
                 {
-                    ColorBlend blend = new ColorBlend(3);
+                    ColorBlend blend = new ColorBlend(4);
                     blend.Colors = new Color[]
                     {
                         Color.FromArgb(0, 96, 92, 240),
-                        Color.FromArgb(16, 255, 79, 163),
-                        Color.FromArgb(30, 255, 158, 66)
+                        Color.FromArgb(18, 255, 79, 163),
+                        Color.FromArgb(24, 255, 158, 66),
+                        Color.FromArgb(0, 255, 158, 66)
                     };
-                    blend.Positions = new float[] { 0f, 0.55f, 1f };
+                    blend.Positions = new float[] { 0f, 0.38f, 0.72f, 1f };
                     brush.InterpolationColors = blend;
                     g.FillRectangle(brush, glow);
                 }
@@ -97,6 +98,16 @@ namespace FlaminGif
                 Rectangle line = new Rectangle(0, 0, ClientSize.Width, Math.Max(2, Ui.P(2)));
                 using (LinearGradientBrush brush = Ui.GtaGradient(line, 0f))
                 {
+                    ColorBlend blend = new ColorBlend(4);
+                    blend.Colors = new Color[]
+                    {
+                        Color.FromArgb(0, 96, 92, 240),
+                        Color.FromArgb(255, 255, 79, 163),
+                        Color.FromArgb(255, 255, 158, 66),
+                        Color.FromArgb(0, 255, 158, 66)
+                    };
+                    blend.Positions = new float[] { 0f, 0.22f, 0.78f, 1f };
+                    brush.InterpolationColors = blend;
                     g.FillRectangle(brush, line);
                 }
             }

@@ -1402,6 +1402,25 @@ namespace FlaminGif
                         g.FillRectangle(shade, full);
                     }
 
+                    // Правый край плавно уходит в фон, чтобы угол не обрывался.
+                    using (LinearGradientBrush fade = new LinearGradientBrush(
+                        full,
+                        Color.FromArgb(0, 8, 6, 12),
+                        Color.FromArgb(0, 8, 6, 12),
+                        0f))
+                    {
+                        ColorBlend fadeBlend = new ColorBlend(3);
+                        fadeBlend.Colors = new Color[]
+                        {
+                            Color.FromArgb(0, 8, 6, 12),
+                            Color.FromArgb(0, 8, 6, 12),
+                            Color.FromArgb(160, 8, 6, 12)
+                        };
+                        fadeBlend.Positions = new float[] { 0f, 0.64f, 1f };
+                        fade.InterpolationColors = fadeBlend;
+                        g.FillRectangle(fade, full);
+                    }
+
                     // Пальмы и чайки в стиле Vice City.
                     Ui.DrawPalm(g, Width * 0.52f, Height * 0.99f, Height * 0.94f,
                         Color.FromArgb(140, 18, 6, 28), -0.10f);
@@ -1443,14 +1462,31 @@ namespace FlaminGif
                 g.Restore(texture);
             }
 
-            Color edge = Ui.Gta6
-                ? Color.FromArgb(126, 255, 255, 255)
-                : (Highlight ? Ui.Accent : (hover ? Ui.BorderStrong : Ui.Border));
             using (GraphicsPath path = Ui.Round(r, radius))
-            using (Pen pen = new Pen(edge, 1.2f))
             {
-                pen.DashStyle = DashStyle.Solid;
-                g.DrawPath(pen, path);
+                if (Ui.Gta6)
+                {
+                    // Рамка тоже гаснет к правому краю — без резкой белой линии.
+                    using (LinearGradientBrush edgeBrush = new LinearGradientBrush(
+                        new Rectangle(0, 0, Math.Max(1, Width), Math.Max(1, Height)),
+                        Color.FromArgb(82, 255, 255, 255),
+                        Color.FromArgb(12, 255, 255, 255),
+                        0f))
+                    using (Pen pen = new Pen(edgeBrush, 1f))
+                    {
+                        pen.DashStyle = DashStyle.Solid;
+                        g.DrawPath(pen, path);
+                    }
+                }
+                else
+                {
+                    Color edge = Highlight ? Ui.Accent : (hover ? Ui.BorderStrong : Ui.Border);
+                    using (Pen pen = new Pen(edge, 1.2f))
+                    {
+                        pen.DashStyle = DashStyle.Solid;
+                        g.DrawPath(pen, path);
+                    }
+                }
             }
 
             if (Ui.Holiday)

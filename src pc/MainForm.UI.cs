@@ -101,40 +101,40 @@ namespace FlaminGif
             Controls.Add(Lbl("видео и картинки → GIF",
                 Ui.Small, Ui.Muted, 71, 36, 300, 18));
             Controls.Add(Lbl("v" + Program.Version + " · локально", Ui.Tiny, Ui.Faint,
-                480, 24, 168, 18, ContentAlignment.MiddleRight));
+                516, 24, 168, 18, ContentAlignment.MiddleRight));
 
             gameButton = new IconButton(IconKind.Gamepad);
-            gameButton.SetBounds(Ui.P(652), Ui.P(16), Ui.P(32), Ui.P(32));
+            gameButton.SetBounds(Ui.P(688), Ui.P(16), Ui.P(32), Ui.P(32));
             gameButton.Click += delegate { OpenGame(); };
             Controls.Add(gameButton);
 
             editorButton = new IconButton(IconKind.Editor);
-            editorButton.SetBounds(Ui.P(688), Ui.P(16), Ui.P(32), Ui.P(32));
+            editorButton.SetBounds(Ui.P(724), Ui.P(16), Ui.P(32), Ui.P(32));
             editorButton.Click += delegate { OpenEditor(); };
             Controls.Add(editorButton);
 
             gifToolsButton = new IconButton(IconKind.Frames);
-            gifToolsButton.SetBounds(Ui.P(724), Ui.P(16), Ui.P(32), Ui.P(32));
+            gifToolsButton.SetBounds(Ui.P(760), Ui.P(16), Ui.P(32), Ui.P(32));
             gifToolsButton.Click += delegate { OpenGifTools(); };
             Controls.Add(gifToolsButton);
 
             downloadsButton = new IconButton(IconKind.Download);
-            downloadsButton.SetBounds(Ui.P(760), Ui.P(16), Ui.P(32), Ui.P(32));
+            downloadsButton.SetBounds(Ui.P(796), Ui.P(16), Ui.P(32), Ui.P(32));
             downloadsButton.Click += delegate { ShowDownloadMenu(); };
             Controls.Add(downloadsButton);
 
             settingsButton = new IconButton(IconKind.Settings);
-            settingsButton.SetBounds(Ui.P(796), Ui.P(16), Ui.P(32), Ui.P(32));
+            settingsButton.SetBounds(Ui.P(832), Ui.P(16), Ui.P(32), Ui.P(32));
             settingsButton.Click += delegate { OpenSettings(); };
             Controls.Add(settingsButton);
 
             discordButton = new IconButton(IconKind.Discord);
-            discordButton.SetBounds(Ui.P(832), Ui.P(16), Ui.P(32), Ui.P(32));
+            discordButton.SetBounds(Ui.P(868), Ui.P(16), Ui.P(32), Ui.P(32));
             discordButton.Click += delegate { OpenLink("https://discord.gg/yMaS9HbjHV"); };
             Controls.Add(discordButton);
 
             donateButton = new IconButton(IconKind.Donate);
-            donateButton.SetBounds(Ui.P(868), Ui.P(16), Ui.P(32), Ui.P(32));
+            donateButton.SetBounds(Ui.P(904), Ui.P(16), Ui.P(32), Ui.P(32));
             donateButton.Click += delegate { OpenLink("https://www.donationalerts.com/r/arsikfox16"); };
             Controls.Add(donateButton);
 
