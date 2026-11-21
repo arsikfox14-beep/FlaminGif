@@ -792,13 +792,21 @@ namespace FlaminGif
         {
             public readonly string Format;
             public readonly string ExtractorArgs;
+            public readonly string Browser;
 
-            public Attempt(string format, string extractorArgs)
+            public Attempt(string format, string extractorArgs, string browser = null)
             {
                 Format = format;
                 ExtractorArgs = extractorArgs;
+                Browser = browser;
             }
         }
+
+        // Если YouTube требует вход, yt-dlp умеет взять cookies из браузера.
+        private static readonly string[] CookieBrowsers =
+        {
+            "firefox", "chrome", "edge", "brave", "opera", "vivaldi"
+        };
 
         private void RunOne(string target, bool audio, string audioFormat, string folder,
             string quality, Action<int> percent)
@@ -816,7 +824,12 @@ namespace FlaminGif
             {
                 attempts.Add(new Attempt(null, null));
                 attempts.Add(new Attempt(null, "youtube:player_client=tv_embedded"));
+                attempts.Add(new Attempt(null, "youtube:player_client=web_safari"));
                 attempts.Add(new Attempt(null, "youtube:player_client=android"));
+                foreach (string browser in CookieBrowsers)
+                {
+                    attempts.Add(new Attempt(null, "youtube:player_client=web", browser));
+                }
             }
             else
             {
@@ -826,8 +839,16 @@ namespace FlaminGif
                 // Если первый клиент не отдал звук, пробуем другой —
                 // с тем же ограничением качества.
                 attempts.Add(new Attempt(videoFormat, "youtube:player_client=tv_embedded"));
-                // Последний шанс: готовый файл со звуком, без слияния.
+                attempts.Add(new Attempt(videoFormat, "youtube:player_client=web_safari"));
+                // Последний шанс без cookies: готовый файл со звуком.
                 attempts.Add(new Attempt(QualityCombinedFormat(quality), "youtube:player_client=android"));
+                // YouTube иногда просит войти. Пробуем cookies из браузеров.
+                string combinedFormat = QualityCombinedFormat(quality);
+                foreach (string browser in CookieBrowsers)
+                {
+                    attempts.Add(new Attempt(videoFormat, "youtube:player_client=web", browser));
+                    attempts.Add(new Attempt(combinedFormat, "youtube:player_client=web", browser));
+                }
             }
 
             string lastError = null;
@@ -853,7 +874,7 @@ namespace FlaminGif
                 }
                 catch (ConversionException ex)
                 {
-                    lastError = ex.Message;
+                    lastError = BetterError(lastError, ex.Message);
                     CleanupNew(folder, before, attemptStart);
                     found = null;
                     if (i + 1 < attempts.Count) continue;
@@ -899,6 +920,24 @@ namespace FlaminGif
             }
         }
 
+        private static bool IsYouTubeProblem(string message)
+        {
+            if (string.IsNullOrEmpty(message)) return false;
+            return message.IndexOf("Sign in to confirm", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                message.IndexOf("not a bot", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                message.IndexOf("video is unavailable", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                message.IndexOf("Private video", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                message.IndexOf("members-only", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                message.IndexOf("confirm your age", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static string BetterError(string current, string next)
+        {
+            if (string.IsNullOrEmpty(current)) return next;
+            if (IsYouTubeProblem(next) && !IsYouTubeProblem(current)) return next;
+            return current;
+        }
+
         private List<string> RunAttempt(Attempt attempt, string target, bool audio, string format,
             string folder, string template, string ffmpegDir, string listFile, Action<int> percent)
         {
@@ -916,6 +955,10 @@ namespace FlaminGif
             if (!string.IsNullOrEmpty(attempt.ExtractorArgs))
             {
                 Add(args, "--extractor-args", attempt.ExtractorArgs);
+            }
+            if (!string.IsNullOrEmpty(attempt.Browser))
+            {
+                Add(args, "--cookies-from-browser", attempt.Browser);
             }
             Add(args, "-o", template);
             Add(args, "--print-to-file", "after_move:filepath");
