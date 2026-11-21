@@ -1414,9 +1414,9 @@ namespace FlaminGif
                         {
                             Color.FromArgb(0, 8, 6, 12),
                             Color.FromArgb(0, 8, 6, 12),
-                            Color.FromArgb(160, 8, 6, 12)
+                            Color.FromArgb(120, 8, 6, 12)
                         };
-                        fadeBlend.Positions = new float[] { 0f, 0.64f, 1f };
+                        fadeBlend.Positions = new float[] { 0f, 0.78f, 1f };
                         fade.InterpolationColors = fadeBlend;
                         g.FillRectangle(fade, full);
                     }
@@ -1470,12 +1470,23 @@ namespace FlaminGif
                     using (LinearGradientBrush edgeBrush = new LinearGradientBrush(
                         new Rectangle(0, 0, Math.Max(1, Width), Math.Max(1, Height)),
                         Color.FromArgb(82, 255, 255, 255),
-                        Color.FromArgb(12, 255, 255, 255),
+                        Color.FromArgb(10, 255, 255, 255),
                         0f))
-                    using (Pen pen = new Pen(edgeBrush, 1f))
                     {
-                        pen.DashStyle = DashStyle.Solid;
-                        g.DrawPath(pen, path);
+                        ColorBlend edgeBlend = new ColorBlend(3);
+                        edgeBlend.Colors = new Color[]
+                        {
+                            Color.FromArgb(82, 255, 255, 255),
+                            Color.FromArgb(82, 255, 255, 255),
+                            Color.FromArgb(10, 255, 255, 255)
+                        };
+                        edgeBlend.Positions = new float[] { 0f, 0.78f, 1f };
+                        edgeBrush.InterpolationColors = edgeBlend;
+                        using (Pen pen = new Pen(edgeBrush, 1f))
+                        {
+                            pen.DashStyle = DashStyle.Solid;
+                            g.DrawPath(pen, path);
+                        }
                     }
                 }
                 else

@@ -75,24 +75,35 @@ namespace FlaminGif
 
             if (Ui.Gta6)
             {
-                Rectangle glow = new Rectangle(0, 0, ClientSize.Width, Ui.P(66));
-                using (LinearGradientBrush brush = new LinearGradientBrush(
-                    glow,
-                    Color.Transparent,
-                    Color.Transparent,
-                    0f))
+                // Большое мягкое свечение: гаснет во все стороны, без обрыва
+                // на краях окна и под шапкой.
+                using (GraphicsPath halo = new GraphicsPath())
                 {
-                    ColorBlend blend = new ColorBlend(4);
-                    blend.Colors = new Color[]
+                    halo.AddEllipse(new Rectangle(
+                        -ClientSize.Width / 3, -Ui.P(52),
+                        ClientSize.Width * 4 / 3, Ui.P(172)));
+                    using (PathGradientBrush brush = new PathGradientBrush(halo))
                     {
-                        Color.FromArgb(0, 96, 92, 240),
-                        Color.FromArgb(18, 255, 79, 163),
-                        Color.FromArgb(24, 255, 158, 66),
-                        Color.FromArgb(0, 255, 158, 66)
-                    };
-                    blend.Positions = new float[] { 0f, 0.38f, 0.72f, 1f };
-                    brush.InterpolationColors = blend;
-                    g.FillRectangle(brush, glow);
+                        brush.CenterColor = Color.FromArgb(30, 255, 79, 163);
+                        brush.SurroundColors = new Color[] { Color.Transparent };
+                        brush.CenterPoint = new PointF(
+                            ClientSize.Width * 0.60f, Ui.P(2));
+                        g.FillPath(brush, halo);
+                    }
+                }
+                using (GraphicsPath halo = new GraphicsPath())
+                {
+                    halo.AddEllipse(new Rectangle(
+                        ClientSize.Width / 4, -Ui.P(52),
+                        ClientSize.Width, Ui.P(156)));
+                    using (PathGradientBrush brush = new PathGradientBrush(halo))
+                    {
+                        brush.CenterColor = Color.FromArgb(26, 255, 158, 66);
+                        brush.SurroundColors = new Color[] { Color.Transparent };
+                        brush.CenterPoint = new PointF(
+                            ClientSize.Width * 0.88f, Ui.P(2));
+                        g.FillPath(brush, halo);
+                    }
                 }
 
                 Rectangle line = new Rectangle(0, 0, ClientSize.Width, Math.Max(2, Ui.P(2)));
