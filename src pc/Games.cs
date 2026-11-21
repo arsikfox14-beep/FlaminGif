@@ -173,7 +173,6 @@ namespace Video2Gif
         private readonly int cell;
         private readonly Rectangle board;
         private readonly PillButton restartButton;
-        private readonly PillButton closeButton;
 
         private int elapsed;
         private int best;
@@ -190,7 +189,7 @@ namespace Video2Gif
             Text = "Сапёр — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(board.Right + Ui.P(24), Ui.P(470));
+            ClientSize = new Size(board.Right + Ui.P(24), Ui.P(454));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -206,18 +205,10 @@ namespace Video2Gif
             restartButton.Ghost = true;
             restartButton.Text = "Заново";
             restartButton.Font = Ui.Small;
-            restartButton.SetBounds(Ui.P(24), board.Bottom + Ui.P(16), Ui.P(140), Ui.P(40));
+            restartButton.SetBounds(Ui.P(24), board.Bottom + Ui.P(14),
+                board.Width, Ui.P(38));
             restartButton.Click += delegate { Restart(); };
             Controls.Add(restartButton);
-
-            closeButton = new PillButton();
-            closeButton.Ghost = true;
-            closeButton.Text = "Закрыть";
-            closeButton.Font = Ui.Small;
-            closeButton.SetBounds(board.Right - Ui.P(160), board.Bottom + Ui.P(16),
-                Ui.P(160), Ui.P(40));
-            closeButton.Click += delegate { Close(); };
-            Controls.Add(closeButton);
 
             timer.Interval = 1000;
             timer.Tick += delegate
@@ -261,28 +252,29 @@ namespace Video2Gif
         {
             base.OnMouseMove(e);
             int x, y;
+            int oldX = hoverX;
+            int oldY = hoverY;
             if (CellAt(e.Location, out x, out y))
             {
-                if (x != hoverX || y != hoverY)
-                {
-                    hoverX = x;
-                    hoverY = y;
-                    Invalidate(NewRect(x, y));
-                }
+                hoverX = x;
+                hoverY = y;
             }
-            else if (hoverX >= 0)
+            else
             {
-                Rectangle old = NewRect(hoverX, hoverY);
                 hoverX = -1;
                 hoverY = -1;
-                Invalidate(old);
+            }
+            if (hoverX != oldX || hoverY != oldY)
+            {
+                // Перерисовываем всё поле: иначе за курсором остаётся след.
+                Invalidate(board);
             }
         }
 
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
-            if (hoverX >= 0) Invalidate(NewRect(hoverX, hoverY));
+            if (hoverX >= 0 || hoverY >= 0) Invalidate(board);
             hoverX = -1;
             hoverY = -1;
         }
@@ -652,7 +644,6 @@ namespace Video2Gif
         private readonly Rectangle board;
         private readonly Rectangle[] slots = new Rectangle[3];
         private readonly PillButton restartButton;
-        private readonly PillButton closeButton;
 
         private int selected = -1;
         private int hoverX = -1;
@@ -676,7 +667,7 @@ namespace Video2Gif
             Text = "Блок Бласт — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(board.Right + Ui.P(38), Ui.P(620));
+            ClientSize = new Size(board.Right + Ui.P(38), Ui.P(604));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -692,17 +683,9 @@ namespace Video2Gif
             restartButton.Ghost = true;
             restartButton.Text = "Заново";
             restartButton.Font = Ui.Small;
-            restartButton.SetBounds(Ui.P(38), Ui.P(552), Ui.P(140), Ui.P(40));
+            restartButton.SetBounds(Ui.P(38), Ui.P(552), board.Width, Ui.P(40));
             restartButton.Click += delegate { Restart(); };
             Controls.Add(restartButton);
-
-            closeButton = new PillButton();
-            closeButton.Ghost = true;
-            closeButton.Text = "Закрыть";
-            closeButton.Font = Ui.Small;
-            closeButton.SetBounds(board.Right - Ui.P(160), Ui.P(552), Ui.P(160), Ui.P(40));
-            closeButton.Click += delegate { Close(); };
-            Controls.Add(closeButton);
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -918,7 +901,7 @@ namespace Video2Gif
             Text = "Игры — " + Program.AppName;
             BackColor = Ui.Bg;
             Font = Ui.Base;
-            ClientSize = new Size(Ui.P(380), Ui.P(330));
+            ClientSize = new Size(Ui.P(340), Ui.P(244));
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -928,29 +911,21 @@ namespace Video2Gif
             KeyPreview = true;
             try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
 
-            Controls.Add(Lbl("Игры", Ui.H1, Ui.Text, 24, 16, 300, 30));
-            Controls.Add(Lbl("Выберите игру", Ui.Small, Ui.Muted, 24, 48, 300, 18));
+            Controls.Add(Lbl("Игры", Ui.H1, Ui.Text, 20, 12, 300, 30));
+            Controls.Add(Lbl("Выберите игру", Ui.Small, Ui.Muted, 20, 42, 300, 18));
 
-            AddGame("Змейка", 82, delegate
+            AddGame("Змейка", 72, delegate
             {
                 using (SnakeForm game = new SnakeForm()) ShowGame(game);
             });
-            AddGame("Сапёр", 146, delegate
+            AddGame("Сапёр", 122, delegate
             {
                 using (MinesweeperForm game = new MinesweeperForm()) ShowGame(game);
             });
-            AddGame("Блок Бласт", 210, delegate
+            AddGame("Блок Бласт", 172, delegate
             {
                 using (BlockBlastForm game = new BlockBlastForm()) ShowGame(game);
             });
-
-            PillButton close = new PillButton();
-            close.Ghost = true;
-            close.Text = "Закрыть";
-            close.Font = Ui.Small;
-            close.SetBounds(Ui.P(24), Ui.P(274), Ui.P(332), Ui.P(36));
-            close.Click += delegate { Close(); };
-            Controls.Add(close);
         }
 
         protected override void OnHandleCreated(EventArgs e)
@@ -965,7 +940,7 @@ namespace Video2Gif
             button.Ghost = true;
             button.Text = title;
             button.Font = Ui.Bold;
-            button.SetBounds(Ui.P(24), Ui.P(y), Ui.P(332), Ui.P(52));
+            button.SetBounds(Ui.P(20), Ui.P(y), Ui.P(300), Ui.P(44));
             button.Click += click;
             Controls.Add(button);
         }
