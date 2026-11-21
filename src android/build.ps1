@@ -1,4 +1,4 @@
-# Собирает FlaminGif.apk без Gradle: aapt2 + javac + d8 + zipalign + apksigner.
+﻿# Собирает FlaminGif.apk без Gradle: aapt2 + javac + d8 + zipalign + apksigner.
 # Требуется JDK 17+ и .sdk (см. setup-sdk.ps1).
 
 param(
@@ -54,7 +54,7 @@ Write-Host '2/6 aapt2 link...'
     --java (Join-Path $build 'gen') `
     --min-sdk-version 24 `
     --target-sdk-version 34 `
-    --version-code 5301 `
+    --version-code 5302 `
     --version-name '5.3' `
     --replace-version `
     $resZip

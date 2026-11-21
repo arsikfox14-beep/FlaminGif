@@ -197,6 +197,85 @@
   html[data-theme="snow"] .mark { background: var(--accent); color: #071426; }
   html[data-theme="halloween"] .mark { background: var(--accent); color: #1a0f08; }
   html[data-theme="flamingif"] .mark { background: var(--accent); color: #1a1508; }
+  html[data-theme="sakura"] {
+    --bg: #1a1115;
+    --bg2: #21161b;
+    --card: #271a20;
+    --card2: #2f1f27;
+    --line: #3f2b33;
+    --text: #faeef2;
+    --muted: #cdb2bb;
+    --muted2: #9c8089;
+    --accent: #ee8aa3;
+    --accent2: #d46d89;
+    --ok: #78d2a0;
+    --err: #ff7882;
+    --shadow: 0 12px 40px rgba(0,0,0,.4);
+  }
+  html[data-theme="summer"] {
+    --bg: #1c130f;
+    --bg2: #241811;
+    --card: #291d16;
+    --card2: #332319;
+    --line: #422f24;
+    --text: #fcf1e6;
+    --muted: #ceb6a0;
+    --muted2: #9c846e;
+    --accent: #ff9a4a;
+    --accent2: #e27c30;
+    --ok: #7ed096;
+    --err: #ff786e;
+    --shadow: 0 12px 40px rgba(0,0,0,.42);
+  }
+  html[data-theme="sakura"] body {
+    background:
+      radial-gradient(820px 460px at 85% -10%, rgba(238,138,163,.20), transparent 62%),
+      radial-gradient(620px 380px at -10% 12%, rgba(150,80,110,.12), transparent 60%),
+      repeating-linear-gradient(115deg, rgba(238,138,163,.035) 0 2px, transparent 2px 16px),
+      var(--bg);
+  }
+  html[data-theme="summer"] body {
+    background:
+      radial-gradient(900px 500px at 82% -12%, rgba(255,154,74,.24), transparent 62%),
+      radial-gradient(680px 400px at -10% 14%, rgba(255,90,60,.12), transparent 60%),
+      var(--bg);
+  }
+  html[data-theme="sakura"] body::before {
+    display: block;
+    background: linear-gradient(90deg, transparent, rgba(238,138,163,.95), rgba(255,196,214,.65), transparent);
+  }
+  html[data-theme="summer"] body::before {
+    display: block;
+    background: linear-gradient(90deg, transparent, rgba(255,154,74,.95), rgba(255,210,120,.6), transparent);
+  }
+  html[data-theme="sakura"] .mark {
+    background: linear-gradient(135deg,#f3a2b8,#d46d89); color: #2b1520;
+  }
+  html[data-theme="summer"] .mark {
+    background: linear-gradient(135deg,#ffb15e,#e27c30); color: #2b1708;
+  }
+  html[data-theme="sakura"] button.primary {
+    background: linear-gradient(180deg,#ee8aa3,#d46d89);
+    border-color: transparent; color: #2b1520;
+    box-shadow: 0 8px 22px rgba(238,138,163,.25);
+  }
+  html[data-theme="summer"] button.primary {
+    background: linear-gradient(180deg,#ff9a4a,#e27c30);
+    border-color: transparent; color: #2b1708;
+    box-shadow: 0 8px 22px rgba(255,154,74,.25);
+  }
+  html[data-theme="sakura"] .drop {
+    background:
+      linear-gradient(100deg, rgba(26,17,21,.92) 0%, rgba(39,26,32,.62) 48%, rgba(238,138,163,.22) 100%),
+      linear-gradient(90deg,#3a2029,#7a3b52,#ee8aa3);
+    border-color: rgba(238,138,163,.48);
+  }
+  html[data-theme="summer"] .drop {
+    background:
+      linear-gradient(100deg, rgba(28,19,15,.92) 0%, rgba(41,29,22,.62) 48%, rgba(255,154,74,.24) 100%),
+      linear-gradient(90deg,#4a2a18,#a3541f,#ffb15e);
+    border-color: rgba(255,154,74,.5);
+  }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body {
@@ -401,7 +480,7 @@
         <circle cx="18" cy="13" r=".9" fill="currentColor" stroke="none"/>
       </svg>
     </button>
-    <div class="ver">2.7 · mobile</div>
+    <div class="ver">5.3 · mobile</div>
   </header>
 
   <section class="card drop" id="pickCard" role="button" tabindex="0" aria-label="Выбрать видео или картинку">
@@ -460,6 +539,8 @@
           <option value="dark">Тёмная</option>
           <option value="snow">Снежная</option>
           <option value="halloween">Хэллоуин</option>
+          <option value="sakura">Сакура</option>
+          <option value="summer">Лето</option>
           <option value="gta6">GTA 6</option>
           <option value="gamesense">Gamesense</option>
           <option value="flamingif">FlaminGif</option>
@@ -1364,7 +1445,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     download();
   }
 
-  var THEME_KEYS = ["auto", "light", "dark", "snow", "halloween", "gta6", "gamesense", "flamingif"];
+  var THEME_KEYS = ["auto", "light", "dark", "snow", "halloween", "sakura", "summer", "gta6", "gamesense", "flamingif"];
   function themeDate(year, month, day, hour, minute) {
     return new Date(year, month - 1, day, hour || 0, minute || 0, 0, 0);
   }
@@ -1377,6 +1458,8 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     var d = now.getDate();
     if (m === 9 || (m === 10 && d === 1)) return "halloween";
     if (m === 11 || (m === 0 && d === 1)) return "snow";
+    if (m >= 2 && m <= 4) return "sakura";
+    if (m >= 5 && m <= 7) return "summer";
     return "dark";
   }
   function applyTheme(theme) {
