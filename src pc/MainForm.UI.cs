@@ -79,7 +79,7 @@ namespace Video2Gif
         {
             SuspendLayout();
 
-            Text = Program.AppName + " " + Program.Version + " — видео и картинки в GIF";
+            Text = Program.AppName + " " + Program.Version;
             BackColor = Ui.Bg;
             Font = Ui.Base;
             AutoScaleMode = AutoScaleMode.None;
