@@ -824,6 +824,8 @@ namespace FlaminGif
             {
                 attempts.Add(new Attempt(null, null));
                 attempts.Add(new Attempt(null, "youtube:player_client=tv_embedded"));
+                // android_vr чаще всего проходит проверку «вы не робот».
+                attempts.Add(new Attempt(null, "youtube:player_client=android_vr"));
                 attempts.Add(new Attempt(null, "youtube:player_client=web_safari"));
                 attempts.Add(new Attempt(null, "youtube:player_client=android"));
                 foreach (string browser in CookieBrowsers)
@@ -839,8 +841,12 @@ namespace FlaminGif
                 // Если первый клиент не отдал звук, пробуем другой —
                 // с тем же ограничением качества.
                 attempts.Add(new Attempt(videoFormat, "youtube:player_client=tv_embedded"));
+                // android_vr обходит проверку «вы не робот», но может отдать
+                // только готовый файл 360p — это лучше, чем ошибка.
+                attempts.Add(new Attempt(videoFormat, "youtube:player_client=android_vr"));
                 attempts.Add(new Attempt(videoFormat, "youtube:player_client=web_safari"));
                 // Последний шанс без cookies: готовый файл со звуком.
+                attempts.Add(new Attempt(QualityCombinedFormat(quality), "youtube:player_client=android_vr"));
                 attempts.Add(new Attempt(QualityCombinedFormat(quality), "youtube:player_client=android"));
                 // YouTube иногда просит войти. Пробуем cookies из браузеров.
                 string combinedFormat = QualityCombinedFormat(quality);
