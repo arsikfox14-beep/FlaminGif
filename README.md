@@ -11,21 +11,25 @@ Spotify, видеоредактором, играми и другими возм
 Права администратора не требуются.
 
 Discord: https://discord.gg/yMaS9HbjHV
+
 Donate: https://www.donationalerts.com/r/arsikfox16
 
 ## Скриншоты
 
-**(Версия 5.1)**
+**(V5.3 + кастом темы и просто новые темы, новые игры и т.д.)**
+<img width="1788" height="604" alt="Снимок экрана 2026-11-21 085131" src="https://github.com/user-attachments/assets/30864f48-7019-4b21-bf27-193519dabd7a" />
+
+**(V5.1)**
 <img width="962" height="606" alt="Снимок экрана 2026-11-16 181755" src="https://github.com/user-attachments/assets/398c733b-d248-42a4-9bbe-1e7f23e7fd9a" />
 
-**(Версия 2.7+ mobile)**
+**(V2.7+ mobile)**
 
 <img width="1613" height="656" alt="изображение" src="https://github.com/user-attachments/assets/30e7113c-34a5-4553-a284-8c1e7e0222ec" />
 
 <img width="600" height="800" alt="Screenshot_20261110_112637" src="https://github.com/user-attachments/assets/981a8b8f-5164-4d3b-86d7-7e0894544d79" />
 
 
-**(Версия 2.5 + TikTok + YouTube и другое)**
+**(V2.5 + TikTok + YouTube и другое)**
 <img width="967" height="603" alt="FlaminGif" src="https://github.com/user-attachments/assets/4b65cabc-c135-4d55-973c-a39eda8c2220" />
 
 <img width="990" height="620" alt="FlaminGif" src="https://github.com/user-attachments/assets/1fefafc7-0939-407d-8c49-283a4217252b" />
@@ -33,8 +37,6 @@ Donate: https://www.donationalerts.com/r/arsikfox16
 <img width="950" height="602" alt="FlaminGif" src="https://github.com/user-attachments/assets/7c5fe19e-5b17-486f-802b-321d1ab136b1" />
 
 ## Обновления
-
-Одна лента изменений: всё с 3.7 по 5.3 — в записях 5.1–5.3, версии 3.6 и ниже — отдельно.
 
 - **5.3** — проект переименован в **FlaminGif** (Windows, веб, Android, GitHub): новый exe `FlaminGif.exe`, папка `%LOCALAPPDATA%\FlaminGif`, автоматический перенос старых настроек. Добавлены темы **Сакура**, **Лето** и тёмная **FlaminGif** в духе Backrooms; сетка тем 4+4+2, тёмные палитры стали мягче. Появилось меню игр: **Змейка**, **Сапёр**, **Блок Бласт** (кнопка-геймпад в шапке). В видеоредакторе «Проверить» теперь проигрывает со звуком, MP4 сохраняется со звуковой дорожкой. Все настройки — в одном `settings.txt`; старые файлы переносятся автоматически. Исправлены английские подсказки, тултипы и плейсхолдеры. Настройки и меню игр компактнее. Заголовок окна сокращён до «FlaminGif 5.3». В «Сапёре» убран след от курсора, в играх убрана лишняя кнопка «Закрыть».
 - **5.2** — вставка из буфера (Ctrl+V), копирование готового GIF в буфер, выбор качества видео при скачивании, автосжатие GIF под заданный лимит, окно «GIF-инструменты» (разбить на кадры и собрать обратно), текст и вторая картинка поверх в редакторе.
