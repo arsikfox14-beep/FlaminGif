@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>
     /// Минимальный редактор: обрезка видео по времени и кадрирование фото.
@@ -1091,7 +1091,7 @@ namespace Video2Gif
         {
             if (isImage || info == null || path.Length == 0) return;
             string source = path;
-            string folder = Path.Combine(Path.GetTempPath(), "Video2Gif", "editor-frames");
+            string folder = Path.Combine(Path.GetTempPath(), "FlaminGif", "editor-frames");
             Directory.CreateDirectory(folder);
             string file = Path.Combine(folder,
                 "frame-" + Guid.NewGuid().ToString("N") + ".png");
@@ -1164,7 +1164,7 @@ namespace Video2Gif
             playIndex = 0;
             playFrames.Clear();
             CleanupPlayFrames();
-            playDir = Path.Combine(Path.GetTempPath(), "Video2Gif", "preview",
+            playDir = Path.Combine(Path.GetTempPath(), "FlaminGif", "preview",
                 Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(playDir);
 

@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>Свой фон приложения: цвет или картинка/GIF.</summary>
     internal static class BackgroundSettings

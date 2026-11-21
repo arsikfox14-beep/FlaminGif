@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>Маленькое окно создания своей темы: имя, основа и акцент.</summary>
     internal sealed class CustomThemeForm : ThemedForm

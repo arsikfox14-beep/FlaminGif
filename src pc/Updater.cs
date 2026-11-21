@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     internal sealed class UpdateInfo
     {
@@ -170,7 +170,7 @@ namespace Video2Gif
                     if (clean.EndsWith(".exe"))
                     {
                         if (exe == null ||
-                            clean.EndsWith("/video2gif.exe", StringComparison.Ordinal))
+                            clean.EndsWith("/flamingif.exe", StringComparison.Ordinal))
                         {
                             exe = url;
                         }
@@ -186,7 +186,7 @@ namespace Video2Gif
                 {
                     throw new UpdateException(
                         "На GitHub есть версия " + version +
-                        ", но в релизе нет файла Video2Gif.exe.");
+                        ", но в релизе нет файла FlaminGif.exe.");
                 }
 
                 return new UpdateInfo
@@ -281,10 +281,10 @@ namespace Video2Gif
             return path;
         }
 
-        /// <summary>Достаёт Video2Gif.exe из архива релиза.</summary>
+        /// <summary>Достаёт FlaminGif.exe из архива релиза.</summary>
         private static string ExtractExe(string zipPath)
         {
-            string folder = Path.Combine(Path.GetTempPath(), "Video2Gif-update", "unpacked");
+            string folder = Path.Combine(Path.GetTempPath(), "FlaminGif-update", "unpacked");
             try
             {
                 if (Directory.Exists(folder)) Directory.Delete(folder, true);
@@ -299,7 +299,7 @@ namespace Video2Gif
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
                         if (!entry.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)) continue;
-                        string target = Path.Combine(folder, "Video2Gif.exe");
+                        string target = Path.Combine(folder, "FlaminGif.exe");
                         entry.ExtractToFile(target, true);
 
                         FileInfo extracted = new FileInfo(target);
@@ -315,7 +315,7 @@ namespace Video2Gif
                 throw new UpdateException("Не удалось распаковать архив обновления: " + ex.Message);
             }
 
-            throw new UpdateException("В архиве обновления нет Video2Gif.exe.");
+            throw new UpdateException("В архиве обновления нет FlaminGif.exe.");
         }
 
         /// <summary>Заменяет текущий exe скачанным и перезапускает программу.</summary>
@@ -332,7 +332,7 @@ namespace Video2Gif
                 "set tries=0",
                 "ping 127.0.0.1 -n 2 >nul",
                 "taskkill /f /im \"FlaminGif.exe\" >nul 2>&1",
-                "taskkill /f /im \"Video2Gif.exe\" >nul 2>&1",
+                "taskkill /f /im \"FlaminGif.exe\" >nul 2>&1",
                 ":wait",
                 "del /f /q \"" + target + "\" >nul 2>&1",
                 "if not exist \"" + target + "\" goto swap",
@@ -399,7 +399,7 @@ namespace Video2Gif
                 {
                     throw new UpdateException(
                         "На GitHub пока нет релизов. Автообновление заработает после того, " +
-                        "как вы выложите релиз с файлом Video2Gif.exe.");
+                        "как вы выложите релиз с файлом FlaminGif.exe.");
                 }
                 throw new UpdateException("Не удалось связаться с GitHub. Проверьте интернет.");
             }

@@ -3,7 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>Окно выбора фона: цвет, картинка или GIF.</summary>
     internal sealed class BackgroundForm : ThemedForm

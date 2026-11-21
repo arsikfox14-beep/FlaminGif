@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /* --------------------------------------------------------------- Сапёр */
 
@@ -649,6 +649,7 @@ namespace Video2Gif
         private int hoverX = -1;
         private int hoverY = -1;
         private int best;
+        private bool dragging;
 
         public BlockBlastForm()
         {
@@ -738,6 +739,7 @@ namespace Video2Gif
                 if (slots[i].Contains(e.Location))
                 {
                     selected = selected == i ? -1 : i;
+                    dragging = selected >= 0;
                     Invalidate();
                     return;
                 }
@@ -745,18 +747,41 @@ namespace Video2Gif
 
             if (!board.Contains(e.Location)) return;
             if (game.Over || selected < 0 || game.Pieces[selected] == null) return;
-            int x = (e.Location.X - board.X) / cell;
-            int y = (e.Location.Y - board.Y) / cell;
+            TryPlaceAt(e.Location);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            base.OnMouseUp(e);
+            if (e.Button != MouseButtons.Left || !dragging) return;
+            dragging = false;
+            if (board.Contains(e.Location)) TryPlaceAt(e.Location);
+            else Invalidate();
+        }
+
+        private void TryPlaceAt(Point point)
+        {
+            if (selected < 0 || selected >= game.Pieces.Length) return;
+            BlockPiece piece = game.Pieces[selected];
+            if (piece == null) return;
+
+            int cellX = (point.X - board.X) / cell;
+            int cellY = (point.Y - board.Y) / cell;
+            // Фигура ставится вокруг курсора, а не углом: так понятнее,
+            // куда именно она встанет.
+            int x = cellX - (piece.Width - 1) / 2;
+            int y = cellY - (piece.Height - 1) / 2;
             if (game.Place(selected, x, y))
             {
                 selected = -1;
+                dragging = false;
                 if (game.Score > best)
                 {
                     best = game.Score;
                     AppSettings.Set("blockblast.best", best.ToString());
                 }
-                Invalidate();
             }
+            Invalidate();
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -777,8 +802,8 @@ namespace Video2Gif
 
             Ui.Write(g, "Блок Бласт", Ui.H1,
                 new Rectangle(Ui.P(38), Ui.P(12), Ui.P(300), Ui.P(30)), Ui.Text, Ui.LeftMid);
-            Ui.Write(g, "Выберите фигуру и поставьте её на поле", Ui.Tiny,
-                new Rectangle(Ui.P(38), Ui.P(48), Ui.P(340), Ui.P(18)),
+            Ui.Write(g, "Выберите фигуру и поставьте её на поле · красным — нельзя", Ui.Tiny,
+                new Rectangle(Ui.P(38), Ui.P(48), Ui.P(360), Ui.P(18)),
                 Ui.Faint, Ui.LeftMid);
             TextFormatFlags right = TextFormatFlags.Right | TextFormatFlags.VerticalCenter |
                 TextFormatFlags.NoPadding | TextFormatFlags.SingleLine;
@@ -872,21 +897,49 @@ namespace Video2Gif
             if (selected < 0 || hoverX < 0 || hoverY < 0) return;
             BlockPiece piece = game.Pieces[selected];
             if (piece == null) return;
-            bool valid = game.CanPlace(piece, hoverX, hoverY);
-            if (!valid) return;
+
+            int x0 = hoverX - (piece.Width - 1) / 2;
+            int y0 = hoverY - (piece.Height - 1) / 2;
+            bool valid = game.CanPlace(piece, x0, y0);
             Color color = BlockColors[piece.ColorIndex % BlockColors.Length];
-            using (SolidBrush brush = new SolidBrush(Color.FromArgb(110, color)))
+            Color fill = valid
+                ? Color.FromArgb(178, color)
+                : Color.FromArgb(92, Ui.Bad);
+            Color edge = valid ? Ui.Accent : Ui.Bad;
+
             {
                 foreach (Point p in piece.Cells)
                 {
-                    int x = hoverX + p.X;
-                    int y = hoverY + p.Y;
+                    int x = x0 + p.X;
+                    int y = y0 + p.Y;
                     if (x < 0 || y < 0 || x >= BlockBlastGame.Size || y >= BlockBlastGame.Size)
                         continue;
                     Rectangle r = CellRect(x, y);
                     Rectangle inner = new Rectangle(r.X + 2, r.Y + 2,
                         Math.Max(1, r.Width - 4), Math.Max(1, r.Height - 4));
-                    Ui.FillRound(g, inner, Ui.P(5), brush.Color);
+                    Ui.FillRound(g, inner, Ui.P(5), fill);
+                    Ui.StrokeRound(g, inner, Ui.P(5), edge, Math.Max(1.6f, Ui.P(1.8f)));
+                }
+            }
+
+            // Метка под курсором: видно, вокруг какой клетки ставится фигура.
+            Rectangle cursorCell = CellRect(hoverX, hoverY);
+            int cx = cursorCell.X + cursorCell.Width / 2;
+            int cy = cursorCell.Y + cursorCell.Height / 2;
+            using (Pen marker = new Pen(edge, Math.Max(2f, Ui.P(2f))))
+            {
+                marker.StartCap = LineCap.Round;
+                marker.EndCap = LineCap.Round;
+                if (valid)
+                {
+                    g.DrawEllipse(marker, cx - Ui.P(3), cy - Ui.P(3),
+                        Ui.P(6), Ui.P(6));
+                }
+                else
+                {
+                    int r = Ui.P(6);
+                    g.DrawLine(marker, cx - r, cy - r, cx + r, cy + r);
+                    g.DrawLine(marker, cx - r, cy + r, cx + r, cy - r);
                 }
             }
         }

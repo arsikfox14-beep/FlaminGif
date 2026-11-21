@@ -101,7 +101,7 @@
     while (node && node !== document && node.tagName !== "A") node = node.parentNode;
     if (!node || node.tagName !== "A") return;
     var href = node.getAttribute("href") || "";
-    var name = node.getAttribute("download") || "video2gif";
+    var name = node.getAttribute("download") || "FlaminGif";
     if (/^blob:/i.test(href)) {
       event.preventDefault();
       saveBlobUrl(href, name);

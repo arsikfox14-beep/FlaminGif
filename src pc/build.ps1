@@ -138,7 +138,7 @@ $cscArgs = @(
     "/win32manifest:$(Join-Path $src 'app.manifest')",
     "/resource:$gz,ffmpeg.gz",
     "/resource:$ytgz,yt-dlp.gz",
-    "/resource:$discord,Video2Gif.discord.png",
+    "/resource:$discord,FlaminGif.discord.png",
     "/reference:System.dll",
     "/reference:System.Core.dll",
     "/reference:System.Drawing.dll",

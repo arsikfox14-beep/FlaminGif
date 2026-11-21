@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>Разбор GIF на кадры и сборка GIF из папки с картинками.</summary>
     internal sealed class GifToolsForm : ThemedForm
@@ -308,7 +308,7 @@ namespace Video2Gif
                 string output = dialog.FileName;
                 if (!output.ToLowerInvariant().EndsWith(".gif")) output += ".gif";
                 string source = sourceFolder;
-                string temp = Path.Combine(Path.GetTempPath(), "Video2Gif",
+                string temp = Path.Combine(Path.GetTempPath(), "FlaminGif",
                     "gif-build-" + Guid.NewGuid().ToString("N").Substring(0, 8));
                 int targetWidth = (int)Math.Round(widthValue);
 

@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     internal sealed class MediaTrack
     {
@@ -809,7 +809,7 @@ namespace Video2Gif
                 ? "%(title).200B [%(id)s] (audio).%(ext)s"
                 : "%(title).200B [%(id)s].%(ext)s");
             string listFile = Path.Combine(Path.GetTempPath(),
-                "video2gif-" + Guid.NewGuid().ToString("N") + ".txt");
+                "flamingif-" + Guid.NewGuid().ToString("N") + ".txt");
 
             List<Attempt> attempts = new List<Attempt>();
             if (audio)

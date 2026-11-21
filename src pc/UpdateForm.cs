@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>Маленькое окно обновления: скачивает exe с GitHub и перезапускает программу.</summary>
     internal sealed class UpdateForm : ThemedForm

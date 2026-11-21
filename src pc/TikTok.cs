@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     internal sealed class TikTokException : Exception
     {

@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     internal enum IconKind
     {
@@ -28,7 +28,7 @@ namespace Video2Gif
     /// </summary>
     internal static class DiscordMark
     {
-        private const string ResourceName = "Video2Gif.discord.png";
+        private const string ResourceName = "FlaminGif.discord.png";
 
         private static Bitmap source;
         private static bool sourceLoaded;

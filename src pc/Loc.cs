@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>
     /// Простая локализация: словарь русских строк и авто-перевод текста

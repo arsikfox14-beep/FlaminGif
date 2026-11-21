@@ -8,7 +8,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     internal sealed partial class MainForm : Form
     {
@@ -438,7 +438,7 @@ namespace Video2Gif
                     {
                         if (image == null) return;
                         string dir = Path.Combine(Path.GetTempPath(),
-                            "video2gif-paste-" + Guid.NewGuid().ToString("N").Substring(0, 8));
+                            "flamingif-paste-" + Guid.NewGuid().ToString("N").Substring(0, 8));
                         Directory.CreateDirectory(dir);
                         tempDirs.Add(dir);
                         string file = Path.Combine(dir, "clipboard.png");
@@ -815,7 +815,7 @@ namespace Video2Gif
             long limitBytes = limitMb > 0 ? (long)Math.Round(limitMb * 1024.0 * 1024.0) : 0;
 
             tempRoot = Path.Combine(Path.GetTempPath(),
-                "video2gif-" + Guid.NewGuid().ToString("N").Substring(0, 8));
+                "flamingif-" + Guid.NewGuid().ToString("N").Substring(0, 8));
             try
             {
                 Directory.CreateDirectory(tempRoot);

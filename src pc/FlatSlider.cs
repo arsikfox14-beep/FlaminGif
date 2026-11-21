@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>Плоский ползунок в стиле приложения, без системного серого фона.</summary>
     internal sealed class FlatSlider : UiControl

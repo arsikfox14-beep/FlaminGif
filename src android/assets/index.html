@@ -516,7 +516,7 @@
     <b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются.
     Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM.
     Прямые ссылки на видео и картинки можно скачать здесь; TikTok — в Android‑приложении,
-    YouTube и Spotify — в Windows‑версии <b>Video2Gif.exe</b>.
+    YouTube и Spotify — в Windows‑версии <b>FlaminGif.exe</b>.
   </p>
 
   <footer class="credits">
@@ -1343,7 +1343,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     if (!state.resultBlob || !state.resultUrl) return;
     var a = document.createElement("a");
     a.href = state.resultUrl;
-    a.download = "flamingif.gif";
+    a.download = "FlaminGif.gif";
     document.body.appendChild(a);
     a.click();
     setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 500);
@@ -1353,9 +1353,9 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
     if (!state.resultBlob) return;
     try {
       if (window.File && navigator.canShare) {
-        var f = new File([state.resultBlob], "video2gif.gif", { type: "image/gif" });
+        var f = new File([state.resultBlob], "FlaminGif.gif", { type: "image/gif" });
         if (navigator.canShare({ files: [f] })) {
-          await navigator.share({ files: [f], title: "video2gif", text: "GIF из video2gif" });
+          await navigator.share({ files: [f], title: "FlaminGif", text: "GIF из FlaminGif" });
           return;
         }
       }
@@ -1390,7 +1390,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
       var bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
       if (bg) meta.setAttribute("content", bg);
     }
-    try { localStorage.setItem("video2gif-mobile-theme", theme); } catch (e) {}
+    try { localStorage.setItem("flamingif-mobile-theme", theme); } catch (e) {}
   }
   function initTheme() {
     var q = null;
@@ -1400,7 +1400,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
       return;
     }
     var t = "auto";
-    try { t = localStorage.getItem("video2gif-mobile-theme") || "auto"; } catch (e) {}
+    try { t = localStorage.getItem("flamingif-mobile-theme") || "auto"; } catch (e) {}
     applyTheme(t);
     window.setInterval(function () {
       if (el.themeSelect && el.themeSelect.value === "auto") applyTheme("auto");
@@ -1409,7 +1409,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
 
   function saveSettings() {
     try {
-      localStorage.setItem("video2gif-mobile-settings", JSON.stringify({
+      localStorage.setItem("flamingif-mobile-settings", JSON.stringify({
         width: el.width.value, fps: el.fps.value, dither: el.dither.value,
         mode: el.mode.value, loop: el.loop.checked
       }));
@@ -1417,7 +1417,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
   }
   function loadSettings() {
     try {
-      var s = JSON.parse(localStorage.getItem("video2gif-mobile-settings") || "null");
+      var s = JSON.parse(localStorage.getItem("flamingif-mobile-settings") || "null");
       if (!s) return;
       if (s.width != null) el.width.value = s.width;
       if (s.fps != null) el.fps.value = s.fps;
@@ -1455,7 +1455,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
   if (!androidApp) {
     if (card && card.parentNode) card.parentNode.removeChild(card);
     if (note) {
-      note.innerHTML = "<b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются. Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM. Скачивание видео и картинок — в Android‑приложении и Windows‑версии <b>Video2Gif.exe</b>. YouTube и Spotify — только в Windows.";
+      note.innerHTML = "<b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются. Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM. Скачивание видео и картинок — в Android‑приложении и Windows‑версии <b>FlaminGif.exe</b>. YouTube и Spotify — только в Windows.";
     }
     return;
   }
@@ -1471,7 +1471,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
   input.placeholder = "https://www.tiktok.com/@…/video/…";
   statusEl.textContent = "Вставьте ссылку TikTok, видео или картинки. YouTube и Spotify — в Windows-версии.";
   if (note) {
-    note.innerHTML = "<b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются. Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM. Прямые ссылки и TikTok можно скачать здесь; YouTube и Spotify — в Windows‑версии <b>Video2Gif.exe</b>.";
+    note.innerHTML = "<b>Мобильная версия</b> делает GIF из видео и картинок прямо в браузере — файлы никуда не загружаются. Форматы видео зависят от телефона: на iPhone это обычно MP4/MOV, на Android — MP4/WebM. Прямые ссылки и TikTok можно скачать здесь; YouTube и Spotify — в Windows‑версии <b>FlaminGif.exe</b>.";
   }
 
   function setStatus(text, kind, link) {
@@ -1815,7 +1815,7 @@ var __defProp=Object.defineProperty,__markAsModule=e=>__defProp(e,"__esModule",{
   var pauseBtn = document.getElementById("snakePause");
   var closeBtn = document.getElementById("snakeClose");
   var restartBtn = document.getElementById("snakeRestart");
-  var BEST_KEY = "video2gif-mobile-snake-best";
+  var BEST_KEY = "flamingif-mobile-snake-best";
 
   var snake, dir, nextDir, food, score, best, alive, paused, timer;
   best = 0;

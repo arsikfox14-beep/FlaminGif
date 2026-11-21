@@ -79,5 +79,5 @@ https://github.com/mattdesl/gifenc
 
 ВЕРСИЯ
 ------
-2.7 · mobile. Лежит в репозитории video2gif, папка src web.
+5.3 · mobile. Лежит в репозитории FlaminGif, папка src web.
 Частота кадров по умолчанию — 30.

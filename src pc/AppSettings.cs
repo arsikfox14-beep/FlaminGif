@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>
     /// Все настройки приложения в одном файле settings.txt.
@@ -120,11 +120,12 @@ namespace Video2Gif
             }
         }
 
-        /// <summary>Переносит данные из старой папки Video2Gif в FlaminGif.</summary>
+        /// <summary>Переносит данные из старой папки в FlaminGif.</summary>
         private static void MigrateOldFolder()
         {
             try
             {
+                // Старое имя папки нужно только для переноса настроек.
                 string oldFolder = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "Video2Gif");

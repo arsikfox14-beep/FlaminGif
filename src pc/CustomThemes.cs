@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     internal sealed class CustomTheme
     {

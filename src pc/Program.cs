@@ -8,7 +8,7 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyFileVersion("5.3.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersion("5.3")]
 
-namespace Video2Gif
+namespace FlaminGif
 {
     internal static class Program
     {

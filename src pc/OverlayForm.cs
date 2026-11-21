@@ -3,7 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>Настройки подписи и второй картинки поверх кадра/видео.</summary>
     internal sealed class OverlayForm : ThemedForm

@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Video2Gif
+namespace FlaminGif
 {
     /// <summary>Общий фон для всех окон: цвет или картинка/GIF с прозрачностью.</summary>
     internal static class BackgroundPainter
