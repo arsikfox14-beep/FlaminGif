@@ -123,68 +123,6 @@ namespace Video2Gif
                 Check("snake eat",
                     snake.Step() == SnakeStep.Ate && snake.Score == 1 && snake.Snake.Count == 4);
 
-                using (Bitmap cutSource = new Bitmap(60, 60, PixelFormat.Format32bppArgb))
-                {
-                    using (Graphics cutGraphics = Graphics.FromImage(cutSource))
-                    {
-                        cutGraphics.Clear(Color.White);
-                        using (SolidBrush subject = new SolidBrush(
-                            Color.FromArgb(210, 70, 90)))
-                        {
-                            cutGraphics.FillEllipse(subject, 10, 10, 40, 40);
-                        }
-                    }
-                    Color cutKey = CutoutCore.AutoColor(cutSource);
-                    Check("cutout auto color",
-                        cutKey.R > 240 && cutKey.G > 240 && cutKey.B > 240);
-                    using (Bitmap cut = CutoutCore.RemoveBackground(
-                        cutSource, Color.White, 20, 0, true))
-                    {
-                        Check("cutout background",
-                            cut.GetPixel(1, 1).A == 0 && cut.GetPixel(30, 30).A == 255);
-                    }
-                    using (Bitmap cut = CutoutCore.RemoveBackground(
-                        cutSource, Color.White, 20, 5, true))
-                    {
-                        int edge = cut.GetPixel(11, 30).A;
-                        Check("cutout soft edge", edge > 0 && edge < 255);
-                    }
-                }
-
-                using (Bitmap smartSource = new Bitmap(200, 160,
-                    PixelFormat.Format32bppArgb))
-                {
-                    using (Graphics smartGraphics = Graphics.FromImage(smartSource))
-                    {
-                        smartGraphics.Clear(Color.FromArgb(236, 232, 228));
-                        using (SolidBrush skin = new SolidBrush(
-                            Color.FromArgb(222, 182, 162)))
-                        {
-                            smartGraphics.FillEllipse(skin, 30, 20, 140, 150);
-                        }
-                        using (SolidBrush light = new SolidBrush(
-                            Color.FromArgb(240, 214, 202)))
-                        {
-                            smartGraphics.FillEllipse(light, 75, 35, 34, 24);
-                            smartGraphics.FillEllipse(light, 60, 80, 20, 14);
-                        }
-                    }
-                    Color smartKey = CutoutCore.AutoColor(smartSource);
-                    int smartTolerance = CutoutCore.SuggestTolerance(smartSource, smartKey);
-                    Check("cutout smart key",
-                        smartKey.R > 230 && smartKey.G > 225 && smartKey.B > 220 &&
-                        smartTolerance <= 16);
-                    using (Bitmap cut = CutoutCore.RemoveBackground(smartSource,
-                        smartKey, smartTolerance, 2, true))
-                    {
-                        Check("cutout keeps highlights",
-                            cut.GetPixel(2, 2).A == 0 &&
-                            cut.GetPixel(50, 90).A == 255 &&
-                            cut.GetPixel(90, 45).A == 255 &&
-                            cut.GetPixel(68, 86).A == 255);
-                    }
-                }
-
                 MinesweeperGame mines = new MinesweeperGame();
                 mines.Reveal(4, 4);
                 Check("mines first click safe", !mines.Dead && mines.Opened > 0);
@@ -674,11 +612,6 @@ namespace Video2Gif
                         Check("ui social icon buttons",
                             discord != null && discord.Kind == IconKind.Discord &&
                             donate != null && donate.Kind == IconKind.Donate);
-
-                        IconButton cutout = GetField(form, "cutoutButton") as IconButton;
-                        Check("ui cutout icon button",
-                            cutout != null && cutout.Kind == IconKind.Cutout &&
-                            cutout.Left + cutout.Width <= form.ClientSize.Width);
 
                         InfoBadge infoBadge = GetField(form, "infoBadge") as InfoBadge;
                         ToolTip creditsTip = GetField(form, "headerTip") as ToolTip;

@@ -19,8 +19,7 @@ namespace Video2Gif
         Download,
         Settings,
         Discord,
-        Donate,
-        Cutout
+        Donate
     }
 
     /// <summary>
@@ -292,27 +291,6 @@ namespace Video2Gif
                     DiscordMark.Draw(g,
                         new RectangleF(cx - size / 2f, cy - size / 2f, size, size),
                         mark);
-                }
-                else if (Kind == IconKind.Cutout)
-                {
-                    // Волшебная палочка: диагональ и искры — «убрать фон».
-                    float x1 = cx - unit * 0.80f;
-                    float y1 = cy + unit * 0.80f;
-                    float x2 = cx + unit * 0.38f;
-                    float y2 = cy - unit * 0.38f;
-                    g.DrawLine(pen, x1, y1, x2, y2);
-                    g.DrawLine(pen, x1 - unit * 0.08f, y1 - unit * 0.22f,
-                        x1 + unit * 0.22f, y1 + unit * 0.08f);
-
-                    float sx = cx + unit * 0.58f;
-                    float sy = cy - unit * 0.62f;
-                    float spark = unit * 0.36f;
-                    g.DrawLine(pen, sx - spark, sy, sx + spark, sy);
-                    g.DrawLine(pen, sx, sy - spark, sx, sy + spark);
-                    g.DrawLine(pen, sx - spark * 0.55f, sy - spark * 0.55f,
-                        sx + spark * 0.55f, sy + spark * 0.55f);
-                    g.DrawLine(pen, sx - spark * 0.55f, sy + spark * 0.55f,
-                        sx + spark * 0.55f, sy - spark * 0.55f);
                 }
                 else if (Kind == IconKind.Donate)
                 {
