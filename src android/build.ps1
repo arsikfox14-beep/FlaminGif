@@ -54,7 +54,7 @@ Write-Host '2/6 aapt2 link...'
     --java (Join-Path $build 'gen') `
     --min-sdk-version 24 `
     --target-sdk-version 34 `
-    --version-code 5300 `
+    --version-code 5301 `
     --version-name '5.3' `
     --replace-version `
     $resZip
