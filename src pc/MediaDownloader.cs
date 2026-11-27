@@ -847,6 +847,7 @@ namespace FlaminGif
                 attempts.Add(new Attempt(videoFormat, "youtube:player_client=web_safari"));
                 // Последний шанс без cookies: готовый файл со звуком.
                 attempts.Add(new Attempt(QualityCombinedFormat(quality), "youtube:player_client=android_vr"));
+                attempts.Add(new Attempt("18", "youtube:player_client=android_vr"));
                 attempts.Add(new Attempt(QualityCombinedFormat(quality), "youtube:player_client=android"));
                 // YouTube иногда просит войти. Пробуем cookies из браузеров.
                 string combinedFormat = QualityCombinedFormat(quality);
@@ -954,9 +955,13 @@ namespace FlaminGif
             Add(args, "--newline");
             Add(args, "--no-playlist");
             Add(args, "--force-overwrites");
-            Add(args, "--concurrent-fragments", "4");
-            Add(args, "--retries", "3");
-            Add(args, "--fragment-retries", "5");
+            // Нестабильные сети и googlevideo: меньше соединений, больше повторов.
+            Add(args, "--force-ipv4");
+            Add(args, "--socket-timeout", "30");
+            Add(args, "--http-chunk-size", "1M");
+            Add(args, "--concurrent-fragments", "1");
+            Add(args, "--retries", "10");
+            Add(args, "--fragment-retries", "10");
             Add(args, "--ffmpeg-location", ffmpegDir);
             if (!string.IsNullOrEmpty(attempt.ExtractorArgs))
             {

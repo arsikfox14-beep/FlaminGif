@@ -221,7 +221,7 @@ namespace FlaminGif
         {
             string dir = AppSettings.Folder;
             string exe = System.IO.Path.Combine(dir, "yt-dlp.exe");
-            string wanted = "yt-dlp-2026.10.26";
+            string wanted = "yt-dlp-2026.11.23";
 
             if (File.Exists(exe) && new FileInfo(exe).Length > 15L * 1024L * 1024L &&
                 AppSettings.Get("ytdlp.version", "") == wanted)
